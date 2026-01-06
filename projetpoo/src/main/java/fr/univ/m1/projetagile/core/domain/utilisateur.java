@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "utilisateurs")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class utilisateur {
+public abstract class Utilisateur {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,10 +27,10 @@ public abstract class utilisateur {
   private String role; // ADMIN, CLIENT, etc.
 
   // Constructeur sans argument exigé par JPA
-  protected utilisateur() {
+  protected Utilisateur() {
   }
 
-  public utilisateur(String nom, String prenom, String email, String motDePasse, String role) {
+  public Utilisateur(String nom, String prenom, String email, String motDePasse, String role) {
     this.nom = nom;
     this.prenom = prenom;
     this.email = email;

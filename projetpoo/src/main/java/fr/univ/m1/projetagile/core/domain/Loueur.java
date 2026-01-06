@@ -6,7 +6,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "loueurs")
 @PrimaryKeyJoinColumn(name = "id")
-public class Loueur extends utilisateur {
+public class Loueur extends Utilisateur {
 
 	private String telephone;
 
@@ -17,7 +17,7 @@ public class Loueur extends utilisateur {
 	}
 
 	public Loueur(String nom, String prenom, String email, String motDePasse, String telephone) {
-		super(nom, prenom, email, motDePasse, "LOUEUR");
+		super(nom, prenom, email, motDePasse, "CLIENT");
 		this.telephone = telephone;
 	}
 
