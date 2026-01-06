@@ -23,6 +23,10 @@ public class Vehicule {
 
   private boolean disponible = true;
 
+  @ManyToOne
+  @JoinColumn(name = "proprietaire_id")
+  private Agent proprietaire;
+
   // JPA exige un constructeur sans arguments
   protected Vehicule() {
   }
@@ -61,5 +65,13 @@ public class Vehicule {
 
   public void setDisponible(boolean disponible) {
     this.disponible = disponible;
+  }
+
+  public Agent getProprietaire() {
+    return proprietaire;
+  }
+
+  public void setProprietaire(Agent proprietaire) {
+    this.proprietaire = proprietaire;
   }
 }
