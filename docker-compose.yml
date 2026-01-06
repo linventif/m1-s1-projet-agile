@@ -1,0 +1,25 @@
+services:
+  oracle:
+    image: gvenzl/oracle-free:latest
+    container_name: projet_poo
+    environment:
+      # Oracle Database credentials
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      APP_USER: ${ORACLE_USER}
+      APP_USER_PASSWORD: ${ORACLE_USER_PASSWORD}
+
+      # Optional: charset and tuning
+      ORACLE_CHARACTERSET: AL32UTF8
+
+    ports:
+      - "${ORACLE_PORT}:1521" # Oracle listener port
+      - "5500:5500" # Oracle Enterprise Manager Express
+
+    volumes:
+      - ${DOCKER_VOLUME_NAME}:/opt/oracle/oradata
+
+    restart: always
+
+volumes:
+  brico_plus_data:
+    name: ${DOCKER_VOLUME_NAME}

@@ -25,6 +25,14 @@ replay_pid*
 
 # Maven target directory
 target
+projetpoo/target/
 
-# DB
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# DB - Persistence configuration
 persistence.xml

@@ -1,5 +1,13 @@
 # m1-s1-projet-agile
 
-## Connection a la base de donnees
+## 🔧 Configuration initiale
 
-copier le fichier `projetpoo/src/main/resources/META-INF/persistence.xml.example` dans `projetpoo/src/main/resources/META-INF/persistence.xml` et modifier les parametres de connexion a la base de donnees.
+### 1. Configuration des variables d'environnement
+
+Copiez le fichier `.env.example` en `.env` et `persistence.example.xml` en `persistence.xml`, puis
+modifiez les valeurs selon votre configuration :
+
+```sh
+cp .env.example .env
+cp projetpoo/src/main/resources/META-INF/persistence.example.xml projetpoo/src/main/resources/META-INF/persistence.xml
+```
