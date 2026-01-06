@@ -1,7 +1,9 @@
 package fr.univ.m1.projetagile.core.domain;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "locations")
@@ -102,6 +104,23 @@ public class Location {
 
   public void setLoueur(Loueur loueur) {
     this.loueur = loueur;
+  }
+  
+  public double getPrixLocation() {
+    // Calcul du nombre de jours de location
+    long nombreJours = ChronoUnit.DAYS.between(dateDebut, dateFin);
+    
+    // Prix de base = prix par jour × nombre de jours
+    double prixBase = this.vehicule.getPrixJ() * nombreJours;
+    
+    // Commission de 10% sur le prix de base
+    double commissionProportionnelle = prixBase * 0.1;
+    
+    // Frais fixes de 2€ par jour
+    double fraisFixes = 2.0 * nombreJours;
+    
+    // Prix total = prix de base + commission + frais fixes
+    return prixBase + commissionProportionnelle + fraisFixes;
   }
 
   // Énumération pour le statut
