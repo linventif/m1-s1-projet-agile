@@ -17,7 +17,7 @@ public class Loueur extends Utilisateur {
 	}
 
 	public Loueur(String nom, String prenom, String email, String motDePasse, String telephone) {
-		super(nom, prenom, email, motDePasse, "CLIENT");
+		super(nom, prenom, email, motDePasse);
 		this.telephone = telephone;
 	}
 

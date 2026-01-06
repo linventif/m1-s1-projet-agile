@@ -23,19 +23,15 @@ public abstract class Utilisateur {
   @Column(nullable = false)
   private String motDePasse;
 
-  @Column(nullable = false)
-  private String role; // ADMIN, CLIENT, etc.
-
   // Constructeur sans argument exigé par JPA
   protected Utilisateur() {
   }
 
-  public Utilisateur(String nom, String prenom, String email, String motDePasse, String role) {
+  public Utilisateur(String nom, String prenom, String email, String motDePasse) {
     this.nom = nom;
     this.prenom = prenom;
     this.email = email;
     this.motDePasse = motDePasse;
-    this.role = role;
   }
 
   public Long getId() {
@@ -72,13 +68,5 @@ public abstract class Utilisateur {
 
   public void setMotDePasse(String motDePasse) {
     this.motDePasse = motDePasse;
-  }
-
-  public String getRole() {
-    return role;
-  }
-
-  public void setRole(String role) {
-    this.role = role;
   }
 }
