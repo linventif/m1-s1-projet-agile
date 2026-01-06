@@ -2,6 +2,8 @@ package fr.univ.m1.projetagile.core.domain;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "loueurs")
@@ -17,6 +19,9 @@ public class Loueur extends Utilisateur {
 	private String telephone;
 
 	private LocalDate dateInscription = LocalDate.now();
+
+	@OneToMany(mappedBy = "loueur", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Location> locations = new ArrayList<>();
 
 	protected Loueur() {
 		super();
@@ -55,5 +60,9 @@ public class Loueur extends Utilisateur {
 
 	public LocalDate getDateInscription() {
 		return dateInscription;
+	}
+
+	public List<Location> getLocations() {
+		return locations;
 	}
 }
