@@ -1,12 +1,17 @@
 package fr.univ.m1.projetagile.core.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO.DisponibiliteDTO;
+import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Disponibilite;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
+import fr.univ.m1.projetagile.enums.TypeV;
 
 public class VehiculeService {
 
@@ -28,6 +33,12 @@ public class VehiculeService {
     return vehicules.stream().map(this::convertToDTO).collect(Collectors.toList());
   }
 
+  public Vehicule createVehicule(TypeV type, String marque, String modele, String couleur,
+      String ville, Double prixJ, Agent proprietaire) {
+    Vehicule vehicule = new Vehicule(type, marque, modele, couleur, ville, prixJ, proprietaire);
+    return vehiculeRepository.save(vehicule);
+  }
+
   /**
    * Convertit une entité Vehicule en VehiculeDTO
    *
@@ -38,7 +49,7 @@ public class VehiculeService {
     VehiculeDTO dto = new VehiculeDTO();
 
     // Propriétés de base du véhicule
-    dto.setIdV(vehicule.getIdV());
+    dto.setId(vehicule.getId());
     dto.setType(vehicule.getType());
     dto.setMarque(vehicule.getMarque());
     dto.setModele(vehicule.getModele());
@@ -52,22 +63,81 @@ public class VehiculeService {
     // A FAIRE DANS UN PACKAGE NOTES
     dto.setNoteMoyenne(vehicule.calculerNote());
 
-    // Dates de disponibilités
-    List<DisponibiliteDTO> disponibilites = vehicule.getDatesDispo().stream()
-        .map(this::convertDisponibiliteToDTO).collect(Collectors.toList());
-    dto.setDatesDispo(disponibilites);
+    // Dates de disponibilités filtrées selon les réservations existantes
+    List<DisponibiliteDTO> disponibilitesFiltrees =
+        filtrerDisponibilitesAvecReservations(vehicule.getDatesDispo(), vehicule.getId());
+    dto.setDatesDispo(disponibilitesFiltrees);
 
     return dto;
   }
 
   /**
-   * Convertit une entité Disponibilite en DisponibiliteDTO
+   * Filtre les disponibilités en tenant compte des réservations existantes Coupe les périodes de
+   * disponibilité où il y a déjà des réservations
    *
-   * @param disponibilite L'entité à convertir
-   * @return Le DTO correspondant
+   * @param disponibilitesOriginales Liste des disponibilités brutes du véhicule
+   * @param vehiculeId ID du véhicule pour récupérer les réservations
+   * @return Liste des disponibilités filtrées
    */
-  private DisponibiliteDTO convertDisponibiliteToDTO(Disponibilite disponibilite) {
-    return new DisponibiliteDTO(disponibilite.getId(), disponibilite.getDateDebut(),
-        disponibilite.getDateFin());
+  private List<DisponibiliteDTO> filtrerDisponibilitesAvecReservations(
+      List<Disponibilite> disponibilitesOriginales, Long vehiculeId) {
+
+    // Récupérer les dates de réservations actives
+    List<Object[]> reservations = vehiculeRepository.getDatesLocationsActives(vehiculeId);
+
+    List<DisponibiliteDTO> resultats = new ArrayList<>();
+
+    // Pour chaque disponibilité originale
+    for (Disponibilite dispo : disponibilitesOriginales) {
+      LocalDate dispoDebut = dispo.getDateDebut();
+      LocalDate dispoFin = dispo.getDateFin();
+
+      // Si pas de réservations, garder la disponibilité entière
+      if (reservations.isEmpty()) {
+        resultats.add(new DisponibiliteDTO(dispo.getId(), dispoDebut, dispoFin));
+        continue;
+      }
+
+      // Trier les réservations par date de début pour faciliter le traitement
+      List<Object[]> reservationsTriees =
+          reservations.stream().sorted((r1, r2) -> ((LocalDateTime) r1[0]).toLocalDate()
+              .compareTo(((LocalDateTime) r2[0]).toLocalDate())).collect(Collectors.toList());
+
+      LocalDate currentDebut = dispoDebut;
+
+      for (Object[] reservation : reservationsTriees) {
+        LocalDate reservationDebut = ((LocalDateTime) reservation[0]).toLocalDate();
+        LocalDate reservationFin = ((LocalDateTime) reservation[1]).toLocalDate();
+
+        // Si la réservation commence après la fin de la disponibilité courante, ignorer
+        if (reservationDebut.isAfter(dispoFin) || reservationFin.isBefore(currentDebut)) {
+          continue;
+        }
+
+        // Si il y a une période disponible avant la réservation
+        if (currentDebut.isBefore(reservationDebut)) {
+          resultats.add(
+              new DisponibiliteDTO(dispo.getId(), currentDebut, reservationDebut.minusDays(1)));
+        }
+
+        // Avancer le curseur après la réservation
+        if (reservationFin.plusDays(1).isAfter(currentDebut)) {
+          currentDebut = reservationFin.plusDays(1);
+        }
+
+        // Si on dépasse la fin de la disponibilité, arrêter
+        if (currentDebut.isAfter(dispoFin)) {
+          break;
+        }
+      }
+
+      // Ajouter la période restante après la dernière réservation
+      if (currentDebut.isBefore(dispoFin) || currentDebut.isEqual(dispoFin)) {
+        resultats.add(new DisponibiliteDTO(dispo.getId(), currentDebut, dispoFin));
+      }
+    }
+
+    return resultats;
   }
+
 }
