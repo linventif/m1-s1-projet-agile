@@ -11,6 +11,10 @@ import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 
+/**
+ * Service métier pour la gestion des locations de véhicules. Fournit les opérations CRUD et les
+ * fonctionnalités métier liées aux locations.
+ */
 public class LocationService {
 
   private final LocationRepository locationRepository;
@@ -83,7 +87,14 @@ public class LocationService {
     locationRepository.delete(locationId);
   }
 
-  // Méthodes selon UML
+  /**
+   * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
+   * - Le prix de base (prix par jour × nombre de jours) - Une commission proportionnelle de 10% sur
+   * le prix de base - Des frais fixes de 2€ par jour
+   *
+   * @param location la location pour laquelle calculer le prix
+   * @return le prix total de la location
+   */
   public double getPrixLocation(Location location) {
     if (location == null) {
       throw new IllegalArgumentException("La location ne peut pas être nulle.");
@@ -104,21 +115,44 @@ public class LocationService {
     return prixBase + commissionProportionnelle + fraisFixes;
   }
 
+  /**
+   * Enregistre une note pour un véhicule suite à une location. Permet aux utilisateurs de noter
+   * leur satisfaction concernant le véhicule loué.
+   *
+   * @param note la note du véhicule à enregistrer
+   */
   public void noterVehicule(NoteV note) {
     // Méthode selon UML - à implémenter selon la logique métier
     // TODO: Enregistrer la note pour le véhicule
   }
 
+  /**
+   * Enregistre une note pour un agent suite à une location. Permet aux utilisateurs de noter leur
+   * satisfaction concernant le service fourni par l'agent.
+   *
+   * @param note la note de l'agent à enregistrer
+   */
   public void noterAgent(NoteA note) {
     // Méthode selon UML - à implémenter selon la logique métier
     // TODO: Enregistrer la note pour l'agent
   }
 
+  /**
+   * Génère un document PDF contenant les détails de la location. Le PDF inclut les informations de
+   * la location, du véhicule, du loueur, ainsi que les conditions générales et le contrat de
+   * location.
+   */
   public void genererPDF() {
     // Génère un PDF pour la location
     // TODO: Implémenter la génération de PDF
   }
 
+  /**
+   * Annule une location en cours. Change le statut de la location à ANNULER et la sauvegarde en
+   * base de données.
+   *
+   * @param location la location à annuler
+   */
   public void annuler(Location location) {
     if (location == null) {
       throw new IllegalArgumentException("La location ne peut pas être nulle.");
@@ -127,6 +161,12 @@ public class LocationService {
     locationRepository.save(location);
   }
 
+  /**
+   * Termine une location en cours. Change le statut de la location à TERMINE et la sauvegarde en
+   * base de données.
+   *
+   * @param location la location à terminer
+   */
   public void terminer(Location location) {
     if (location == null) {
       throw new IllegalArgumentException("La location ne peut pas être nulle.");
