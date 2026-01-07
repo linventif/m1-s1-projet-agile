@@ -139,7 +139,8 @@ public class VehiculeRepository {
 
     } catch (Exception e) {
       throw new RuntimeException(
-          "Erreur lors de la récupération des dates de location pour le véhicule " + vehiculeId, e);
+          "Erreur lors de la récupération des dates de locations actives pour le véhicule avec l'ID "
+              + vehiculeId, e);
     } finally {
       em.close();
     }
