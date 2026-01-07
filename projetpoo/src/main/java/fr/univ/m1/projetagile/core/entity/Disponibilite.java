@@ -7,57 +7,56 @@ import java.time.LocalDate;
 @Table(name = "disponibilites")
 public class Disponibilite {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "vehicule_id", nullable = false)
-    private Vehicule vehicule;
+  @ManyToOne
+  @JoinColumn(name = "vehicule_id", nullable = false)
+  private Vehicule vehicule;
 
-    @Column(nullable = false, name = "dateDebut")
-    private LocalDate dateDebut;
+  @Column(nullable = false, name = "dateDebut")
+  private LocalDate dateDebut;
 
-    @Column(nullable = false, name = "dateFin")
-    private LocalDate dateFin;
+  @Column(nullable = false, name = "dateFin")
+  private LocalDate dateFin;
 
-    // Constructeur sans argument pour JPA
-    protected Disponibilite() {
-    }
+  // Constructeur sans argument pour JPA
+  protected Disponibilite() {}
 
-    public Disponibilite(Vehicule vehicule, LocalDate dateDebut, LocalDate dateFin) {
-        this.vehicule = vehicule;
-        this.dateDebut = dateDebut;
-        this.dateFin = dateFin;
-    }
+  public Disponibilite(Vehicule vehicule, LocalDate dateDebut, LocalDate dateFin) {
+    this.vehicule = vehicule;
+    this.dateDebut = dateDebut;
+    this.dateFin = dateFin;
+  }
 
-    // Getters et Setters
-    public Long getId() {
-        return id;
-    }
+  // Getters et Setters
+  public Long getId() {
+    return id;
+  }
 
-    public Vehicule getVehicule() {
-        return vehicule;
-    }
+  public Vehicule getVehicule() {
+    return vehicule;
+  }
 
-    public void setVehicule(Vehicule vehicule) {
-        this.vehicule = vehicule;
-    }
+  public void setVehicule(Vehicule vehicule) {
+    this.vehicule = vehicule;
+  }
 
-    public LocalDate getDateDebut() {
-        return dateDebut;
-    }
+  public LocalDate getDateDebut() {
+    return dateDebut;
+  }
 
-    public void setDateDebut(LocalDate dateDebut) {
-        this.dateDebut = dateDebut;
-    }
+  public void setDateDebut(LocalDate dateDebut) {
+    this.dateDebut = dateDebut;
+  }
 
-    public LocalDate getDateFin() {
-        return dateFin;
-    }
+  public LocalDate getDateFin() {
+    return dateFin;
+  }
 
-    public void setDateFin(LocalDate dateFin) {
-        this.dateFin = dateFin;
-    }
+  public void setDateFin(LocalDate dateFin) {
+    this.dateFin = dateFin;
+  }
 }
 

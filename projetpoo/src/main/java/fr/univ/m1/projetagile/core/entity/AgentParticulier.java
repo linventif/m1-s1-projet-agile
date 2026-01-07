@@ -8,54 +8,55 @@ import fr.univ.m1.projetagile.enums.TypeAgent;
 @PrimaryKeyJoinColumn(name = "idU")
 public class AgentParticulier extends Agent {
 
-    @Column(nullable = false)
-    private String nom;
+  @Column(nullable = false)
+  private String nom;
 
-    @Column(nullable = false)
-    private String prenom;
+  @Column(nullable = false)
+  private String prenom;
 
-    private String telephone;
+  private String telephone;
 
-    // Constructeur sans argument pour JPA
-    protected AgentParticulier() {
-        super();
-    }
+  // Constructeur sans argument pour JPA
+  protected AgentParticulier() {
+    super();
+  }
 
-    public AgentParticulier(String nom, String prenom, String email, String motDePasse, String telephone) {
-        super(email, motDePasse, TypeAgent.PARTICULIER);
-        this.nom = nom;
-        this.prenom = prenom;
-        this.telephone = telephone;
-    }
+  public AgentParticulier(String nom, String prenom, String email, String motDePasse,
+      String telephone) {
+    super(email, motDePasse, TypeAgent.PARTICULIER);
+    this.nom = nom;
+    this.prenom = prenom;
+    this.telephone = telephone;
+  }
 
-    // Getters et Setters
-    public String getNom() {
-        return nom;
-    }
+  // Getters et Setters
+  public String getNom() {
+    return nom;
+  }
 
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
+  public void setNom(String nom) {
+    this.nom = nom;
+  }
 
-    public String getPrenom() {
-        return prenom;
-    }
+  public String getPrenom() {
+    return prenom;
+  }
 
-    public void setPrenom(String prenom) {
-        this.prenom = prenom;
-    }
+  public void setPrenom(String prenom) {
+    this.prenom = prenom;
+  }
 
-    public String getTelephone() {
-        return telephone;
-    }
+  public String getTelephone() {
+    return telephone;
+  }
 
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
-    }
+  public void setTelephone(String telephone) {
+    this.telephone = telephone;
+  }
 
-    @Override
-    public boolean estProfessionnel() {
-        return false;
-    }
+  @Override
+  public boolean estProfessionnel() {
+    return false;
+  }
 }
 
