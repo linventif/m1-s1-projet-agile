@@ -1,0 +1,45 @@
+{
+	"java.configuration.updateBuildConfiguration": "interactive",
+	"editor.formatOnSave": true,
+	"editor.formatOnPaste": true,
+	"editor.insertSpaces": true,
+	"editor.tabSize": 2,
+	"editor.detectIndentation": false,
+	"files.trimTrailingWhitespace": true,
+	"files.insertFinalNewline": true,
+	"files.trimFinalNewlines": true,
+
+	"[java]": {
+		"editor.defaultFormatter": "redhat.java",
+		"editor.tabSize": 2,
+		"editor.insertSpaces": true
+	},
+
+	"[xml]": {
+		"editor.defaultFormatter": "redhat.vscode-xml",
+		"editor.tabSize": 2,
+		"editor.insertSpaces": true
+	},
+
+	"[markdown]": {
+		"editor.defaultFormatter": "yzhang.markdown-all-in-one",
+		"editor.tabSize": 2,
+		"editor.insertSpaces": true
+	},
+
+	"[json]": {
+		"editor.defaultFormatter": "vscode.json-language-features",
+		"editor.tabSize": 2,
+		"editor.insertSpaces": true
+	},
+
+	"java.format.settings.url": ".vscode/eclipse-java-google-style.xml",
+	"java.format.settings.profile": "GoogleStyle",
+	"java.format.enabled": true,
+	"java.format.onType.enabled": true,
+
+	"java.saveActions.organizeImports": true,
+	"editor.codeActionsOnSave": {
+		"source.organizeImports": "explicit"
+	}
+}
