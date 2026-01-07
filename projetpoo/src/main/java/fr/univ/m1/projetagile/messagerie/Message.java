@@ -25,7 +25,7 @@ public class Message {
   private String contenu;
 
   @Column(nullable = false)
-  private LocalDateTime date;
+  private LocalDateTime dateEnvoi;
 
   @ManyToOne
   @JoinColumn(name = "expediteur_agent_id")
@@ -50,7 +50,7 @@ public class Message {
     this.contenu = contenu;
     setExpediteur(expediteur);
     setDestinataire(destinataire);
-    this.date = LocalDateTime.now();
+    this.dateEnvoi = LocalDateTime.now();
   }
 
   // Getters et Setters
@@ -66,12 +66,12 @@ public class Message {
     this.contenu = contenu;
   }
 
-  public LocalDateTime getDate() {
-    return date;
+  public LocalDateTime getDateEnvoi() {
+    return dateEnvoi;
   }
 
-  public void setDate(LocalDateTime date) {
-    this.date = date;
+  public void setDateEnvoi(LocalDateTime dateEnvoi) {
+    this.dateEnvoi = dateEnvoi;
   }
 
   public Utilisateur getExpediteur() {

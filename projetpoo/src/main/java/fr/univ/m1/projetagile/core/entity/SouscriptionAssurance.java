@@ -25,7 +25,7 @@ public class SouscriptionAssurance {
   @ElementCollection
   @CollectionTable(name = "souscription_assurance_options",
       joinColumns = @JoinColumn(name = "souscription_id"))
-  @Column(name = "option")
+  @Column(name = "option_name")
   private List<String> options = new ArrayList<>();
 
   @ManyToOne
