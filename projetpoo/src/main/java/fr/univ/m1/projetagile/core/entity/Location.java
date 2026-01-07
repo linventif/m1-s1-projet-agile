@@ -1,7 +1,7 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import fr.univ.m1.projetagile.enums.StatutLocation;
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -156,16 +156,5 @@ public class Location {
 
   public void setLoueur(Loueur loueur) {
     this.loueur = loueur;
-  }
-
-  // Énumération pour le statut selon UML
-  public enum StatutLocation {
-    EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT,
-    ACCEPTE,
-    TERMINE,
-    ANNULE;
-
-    // Alias pour compatibilité
-    public static StatutLocation EN_ATTENTE = EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT;
   }
 }

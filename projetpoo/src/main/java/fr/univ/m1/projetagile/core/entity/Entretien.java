@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import fr.univ.m1.projetagile.enums.TypeV;
+
 @Entity
 @Table(name = "entretiens")
 public class Entretien {

@@ -1,5 +1,6 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import fr.univ.m1.projetagile.enums.TypeV;
 import jakarta.persistence.*;
 
 @Entity

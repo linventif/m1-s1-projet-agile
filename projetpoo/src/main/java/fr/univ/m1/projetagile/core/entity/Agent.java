@@ -3,6 +3,9 @@ package fr.univ.m1.projetagile.core.entity;
 import jakarta.persistence.*;
 import java.util.*;
 
+import fr.univ.m1.projetagile.enums.StatutLocation;
+import fr.univ.m1.projetagile.enums.TypeAgent;
+
 @Entity
 @Table(name = "agents")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -107,7 +110,7 @@ public abstract class Agent extends Utilisateur {
         // À implémenter selon la logique métier
         // Change le statut de la location à ACCEPTE
         if (location != null) {
-            location.setStatut(Location.StatutLocation.ACCEPTE);
+            location.setStatut(StatutLocation.ACCEPTE);
         }
     }
 
@@ -125,14 +128,14 @@ public abstract class Agent extends Utilisateur {
     public void accepterContratManuel(Location location) {
         // Accepte un contrat de location manuellement
         if (location != null) {
-            location.setStatut(Location.StatutLocation.ACCEPTE);
+            location.setStatut(StatutLocation.ACCEPTE);
         }
     }
 
     public void refuserContratManuel(Location location) {
         // Refuse un contrat de location manuellement
         if (location != null) {
-            location.setStatut(Location.StatutLocation.ANNULE);
+            location.setStatut(StatutLocation.ANNULE);
         }
     }
 

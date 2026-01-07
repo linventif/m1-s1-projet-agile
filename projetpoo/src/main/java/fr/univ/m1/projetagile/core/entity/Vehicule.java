@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import fr.univ.m1.projetagile.enums.TypeV;
+import fr.univ.m1.projetagile.enums.StatutLocation;
 @Entity
 @Table(name = "vehicules")
 public class Vehicule {
@@ -179,8 +181,8 @@ public class Vehicule {
       if (dispo.getDateDebut().isBefore(dateFin) && dispo.getDateFin().isAfter(dateDebut)) {
         // Vérifie s'il n'y a pas de location en conflit
         for (Location loc : locations) {
-          if (loc.getStatut() != Location.StatutLocation.ANNULE && 
-              loc.getStatut() != Location.StatutLocation.TERMINE) {
+          if (loc.getStatut() != StatutLocation.ANNULE && 
+              loc.getStatut() != StatutLocation.TERMINE) {
             java.time.LocalDate locDebut = loc.getDateDebut().toLocalDate();
             java.time.LocalDate locFin = loc.getDateFin().toLocalDate();
             if (locDebut.isBefore(dateFin) && locFin.isAfter(dateDebut)) {
