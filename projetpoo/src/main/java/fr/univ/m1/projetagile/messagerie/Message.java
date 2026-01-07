@@ -1,6 +1,9 @@
-package fr.univ.m1.projetagile.core.entity;
+package fr.univ.m1.projetagile.messagerie;
 
 import java.time.LocalDateTime;
+import fr.univ.m1.projetagile.core.entity.Agent;
+import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,20 +28,28 @@ public class Message {
   private LocalDateTime date;
 
   @ManyToOne
-  @JoinColumn(name = "expediteur_id", nullable = false)
-  private Utilisateur expediteur;
+  @JoinColumn(name = "expediteur_agent_id")
+  private Agent expediteurAgent;
 
   @ManyToOne
-  @JoinColumn(name = "destinataire_id", nullable = false)
-  private Utilisateur destinataire;
+  @JoinColumn(name = "expediteur_loueur_id")
+  private Loueur expediteurLoueur;
+
+  @ManyToOne
+  @JoinColumn(name = "destinataire_agent_id")
+  private Agent destinataireAgent;
+
+  @ManyToOne
+  @JoinColumn(name = "destinataire_loueur_id")
+  private Loueur destinataireLoueur;
 
   // Constructeur sans argument pour JPA
   protected Message() {}
 
   public Message(String contenu, Utilisateur expediteur, Utilisateur destinataire) {
     this.contenu = contenu;
-    this.expediteur = expediteur;
-    this.destinataire = destinataire;
+    setExpediteur(expediteur);
+    setDestinataire(destinataire);
     this.date = LocalDateTime.now();
   }
 
@@ -64,19 +75,41 @@ public class Message {
   }
 
   public Utilisateur getExpediteur() {
-    return expediteur;
+    if (expediteurAgent != null) {
+      return expediteurAgent;
+    }
+    return expediteurLoueur;
   }
 
   public void setExpediteur(Utilisateur expediteur) {
-    this.expediteur = expediteur;
+    if (expediteur instanceof Agent) {
+      this.expediteurAgent = (Agent) expediteur;
+      this.expediteurLoueur = null;
+    } else if (expediteur instanceof Loueur) {
+      this.expediteurLoueur = (Loueur) expediteur;
+      this.expediteurAgent = null;
+    } else {
+      throw new IllegalArgumentException("L'expéditeur doit être un Agent ou un Loueur");
+    }
   }
 
   public Utilisateur getDestinataire() {
-    return destinataire;
+    if (destinataireAgent != null) {
+      return destinataireAgent;
+    }
+    return destinataireLoueur;
   }
 
   public void setDestinataire(Utilisateur destinataire) {
-    this.destinataire = destinataire;
+    if (destinataire instanceof Agent) {
+      this.destinataireAgent = (Agent) destinataire;
+      this.destinataireLoueur = null;
+    } else if (destinataire instanceof Loueur) {
+      this.destinataireLoueur = (Loueur) destinataire;
+      this.destinataireAgent = null;
+    } else {
+      throw new IllegalArgumentException("Le destinataire doit être un Agent ou un Loueur");
+    }
   }
 
   // Méthode selon UML
