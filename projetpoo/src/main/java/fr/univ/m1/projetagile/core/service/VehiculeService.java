@@ -5,13 +5,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.enums.TypeV;
-import jakarta.persistence.EntityManager;
 
 /**
  * Service métier responsable de la gestion des véhicules.
@@ -69,19 +67,6 @@ public class VehiculeService {
     if (prixJ == null || prixJ.doubleValue() <= 0.0) {
       throw new IllegalArgumentException("Le prix journalier doit être strictement positif.");
     }
-    Agent proprietaireExistant = verifierProprietaire(proprietaire);
-    Vehicule vehicule =
-        new Vehicule(type, marque, modele, couleur, ville, prixJ, proprietaireExistant);
-    return vehiculeRepository.save(vehicule);
-  }
-
-  /**
-   * Vérifie que le propriétaire fourni correspond à un Agent existant en base.
-   *
-   * @param proprietaire Agent supposément déjà persisté
-   * @return l'Agent rechargé depuis la base pour garantir son existence
-   */
-  private Agent verifierProprietaire(Agent proprietaire) {
     if (proprietaire == null) {
       throw new IllegalArgumentException("Le propriétaire du véhicule ne peut pas être nul.");
     }
@@ -90,17 +75,8 @@ public class VehiculeService {
           "Le propriétaire doit être déjà enregistré (identifiant manquant).");
     }
 
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
-      Agent proprietaireEnBase = em.find(Agent.class, proprietaire.getIdU());
-      if (proprietaireEnBase == null) {
-        throw new IllegalArgumentException(
-            "Le propriétaire spécifié n'existe pas dans la base de données.");
-      }
-      return proprietaireEnBase;
-    } finally {
-      em.close();
-    }
+    Vehicule vehicule = new Vehicule(type, marque, modele, couleur, ville, prixJ, proprietaire);
+    return vehiculeRepository.save(vehicule);
   }
 
   /**

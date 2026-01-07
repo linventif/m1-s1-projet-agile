@@ -110,7 +110,7 @@ public class VehiculeRepository {
       transaction.commit();
 
     } catch (Exception e) {
-      if (transaction.isActive()) {
+      if (transaction != null && transaction.isActive()) {
         transaction.rollback();
       }
       throw new RuntimeException("Erreur lors de la suppression du véhicule", e);
