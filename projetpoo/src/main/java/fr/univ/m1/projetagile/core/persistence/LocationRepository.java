@@ -8,6 +8,18 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
 
+/**
+ * Repository responsable de la persistance des entités {@link Location}.
+ * <p>
+ * Fournit des opérations de type CRUD autour des locations :
+ * <ul>
+ *   <li>création et mise à jour d'une location via {@link #save(Location)} ;</li>
+ *   <li>récupération des réservations d'un véhicule via
+ *   {@link #findAllReservationsByVehiculeId(Long)}.</li>
+ * </ul>
+ * Les opérations de persistance s'appuient sur un {@link EntityManager} obtenu
+ * via {@link fr.univ.m1.projetagile.core.DatabaseConnection}.
+ */
 public class LocationRepository {
 
   /**
