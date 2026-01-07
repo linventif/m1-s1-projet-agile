@@ -1,4 +1,4 @@
-package fr.univ.m1.projetagile.core.domain;
+package fr.univ.m1.projetagile.core.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ public class Location {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private StatutLocation statut = StatutLocation.EN_ATTENTE;
+  private StatutLocation statut = StatutLocation.EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT;
 
   @ManyToOne
   @JoinColumn(name = "vehicule_id", nullable = false)
@@ -31,6 +31,49 @@ public class Location {
   @ManyToOne
   @JoinColumn(name = "loueur_id", nullable = false)
   private Loueur loueur;
+
+  // Méthodes selon UML
+  public double getPrixLocation() {
+    if (vehicule != null && vehicule.getPrixJ() != null && dateDebut != null && dateFin != null) {
+      long jours = java.time.temporal.ChronoUnit.DAYS.between(dateDebut, dateFin);
+      return vehicule.getPrixJ() * jours;
+    }
+    return 0.0;
+  }
+
+  public void louerVehicule(String lieuDepot, LocalDateTime dateDebut, LocalDateTime dateFin, Assurance assurance) {
+    // Méthode selon UML - à compléter selon la logique métier
+    this.lieuDepot = lieuDepot;
+    this.dateDebut = dateDebut;
+    this.dateFin = dateFin;
+    this.statut = StatutLocation.EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT;
+    // TODO: Gérer la souscription d'assurance si nécessaire
+  }
+
+  public void noterVehicule(NoteV note) {
+    // Méthode selon UML - à implémenter selon la logique métier
+    // TODO: Enregistrer la note pour le véhicule
+  }
+
+  public void noterAgent(NoteA note) {
+    // Méthode selon UML - à implémenter selon la logique métier
+    // TODO: Enregistrer la note pour l'agent
+  }
+
+  public void genererPDF() {
+    // Génère un PDF pour la location
+    // TODO: Implémenter la génération de PDF
+  }
+
+  public void annuler() {
+    // Annule la location
+    this.statut = StatutLocation.ANNULE;
+  }
+
+  public void terminer() {
+    // Termine la location
+    this.statut = StatutLocation.TERMINE;
+  }
 
   // JPA exige un constructeur sans arguments
   protected Location() {
@@ -104,12 +147,14 @@ public class Location {
     this.loueur = loueur;
   }
 
-  // Énumération pour le statut
+  // Énumération pour le statut selon UML
   public enum StatutLocation {
-    EN_ATTENTE,
+    EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT,
     ACCEPTE,
-    EN_COURS,
     TERMINE,
-    ANNULE
+    ANNULE;
+
+    // Alias pour compatibilité
+    public static StatutLocation EN_ATTENTE = EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT;
   }
 }

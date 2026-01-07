@@ -1,10 +1,10 @@
-package fr.univ.m1.projetagile.core.domain;
+package fr.univ.m1.projetagile.core.entity;
 
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "agents_particuliers")
-@PrimaryKeyJoinColumn(name = "id")
+@PrimaryKeyJoinColumn(name = "idU")
 public class AgentParticulier extends Agent {
 
     @Column(nullable = false)

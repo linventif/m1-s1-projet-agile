@@ -1,27 +1,27 @@
-package fr.univ.m1.projetagile.core.domain;
+package fr.univ.m1.projetagile.core.entity;
 
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "agents_professionnels")
-@PrimaryKeyJoinColumn(name = "id")
+@PrimaryKeyJoinColumn(name = "idU")
 public class AgentProfessionnel extends Agent {
 
     @Column(nullable = false)
     private String siret;
 
     @Column(nullable = false)
-    private String entrepriseNom;
+    private String nom;
 
     // Constructeur sans argument pour JPA
     protected AgentProfessionnel() {
         super();
     }
 
-    public AgentProfessionnel(String email, String motDePasse, String siret, String entrepriseNom) {
+    public AgentProfessionnel(String email, String motDePasse, String siret, String nom) {
         super(email, motDePasse);
         this.siret = siret;
-        this.entrepriseNom = entrepriseNom;
+        this.nom = nom;
     }
 
     // Getters et Setters
@@ -33,12 +33,12 @@ public class AgentProfessionnel extends Agent {
         this.siret = siret;
     }
 
-    public String getEntrepriseNom() {
-        return entrepriseNom;
+    public String getNom() {
+        return nom;
     }
 
-    public void setEntrepriseNom(String entrepriseNom) {
-        this.entrepriseNom = entrepriseNom;
+    public void setNom(String nom) {
+        this.nom = nom;
     }
 
     @Override
