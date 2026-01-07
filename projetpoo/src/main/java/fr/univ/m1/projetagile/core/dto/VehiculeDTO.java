@@ -10,7 +10,7 @@ import fr.univ.m1.projetagile.enums.TypeV;
  */
 public class VehiculeDTO {
 
-  private Long idV;
+  private Long id;
   private TypeV type;
   private String marque;
   private String modele;
@@ -25,10 +25,10 @@ public class VehiculeDTO {
     this.datesDispo = new ArrayList<>();
   }
 
-  public VehiculeDTO(Long idV, TypeV type, String marque, String modele, String couleur,
+  public VehiculeDTO(Long id, TypeV type, String marque, String modele, String couleur,
       String ville, Double prixJ, boolean disponible, Double noteMoyenne,
       List<DisponibiliteDTO> datesDispo) {
-    this.idV = idV;
+    this.id = id;
     this.type = type;
     this.marque = marque;
     this.modele = modele;
@@ -41,12 +41,12 @@ public class VehiculeDTO {
   }
 
   // Getters et Setters
-  public Long getIdV() {
-    return idV;
+  public Long getId() {
+    return id;
   }
 
-  public void setIdV(Long idV) {
-    this.idV = idV;
+  public void setId(Long id) {
+    this.id = id;
   }
 
   public TypeV getType() {

@@ -79,12 +79,8 @@ public class Vehicule {
   }
 
   // Getters et Setters
-  public Long getIdV() {
-    return id;
-  }
-
   public Long getId() {
-    return id; // Alias pour compatibilité
+    return id;
   }
 
   public TypeV getType() {
