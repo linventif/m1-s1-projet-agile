@@ -1,6 +1,7 @@
 package fr.univ.m1.projetagile.core.entity;
 
 import jakarta.persistence.*;
+import fr.univ.m1.projetagile.enums.TypeAgent;
 
 @Entity
 @Table(name = "agents_professionnels")
@@ -19,7 +20,7 @@ public class AgentProfessionnel extends Agent {
     }
 
     public AgentProfessionnel(String email, String motDePasse, String siret, String nom) {
-        super(email, motDePasse);
+        super(email, motDePasse, TypeAgent.PROFESSIONNEL);
         this.siret = siret;
         this.nom = nom;
     }

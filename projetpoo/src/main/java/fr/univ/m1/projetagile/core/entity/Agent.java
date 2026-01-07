@@ -31,8 +31,9 @@ public abstract class Agent extends Utilisateur {
     }
 
     // Constructeur pour les sous-classes qui appellent super(email, motDePasse)
-    protected Agent(String email, String motDePasse) {
+    protected Agent(String email, String motDePasse, TypeAgent typeAgent) {
         super(email, motDePasse);
+        this.typeAgent = typeAgent;
     }
 
     public TypeAgent getTypeAgent() {
