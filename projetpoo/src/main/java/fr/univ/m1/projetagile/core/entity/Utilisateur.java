@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public class Utilisateur {
+public abstract class Utilisateur {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +24,7 @@ public class Utilisateur {
   // Constructeur sans argument pour JPA
   protected Utilisateur() {}
 
-  public Utilisateur(String email, String motDePasse) {
+  protected Utilisateur(String email, String motDePasse) {
     this.email = email;
     this.motDePasse = motDePasse;
   }
