@@ -19,7 +19,7 @@ public class VehiculeDTO {
   private Double prixJ;
   private boolean disponible;
   private Double noteMoyenne; // Note moyenne calculée
-  private List<DisponibiliteDTO> datesDispo; // Dates de disponibilités
+  private List<LocalDate[]> datesDispo; // Dates de disponibilités (début/fin)
 
   public VehiculeDTO() {
     this.datesDispo = new ArrayList<>();
@@ -27,7 +27,7 @@ public class VehiculeDTO {
 
   public VehiculeDTO(Long id, TypeV type, String marque, String modele, String couleur,
       String ville, Double prixJ, boolean disponible, Double noteMoyenne,
-      List<DisponibiliteDTO> datesDispo) {
+      List<LocalDate[]> datesDispo) {
     this.id = id;
     this.type = type;
     this.marque = marque;
@@ -113,52 +113,11 @@ public class VehiculeDTO {
     this.noteMoyenne = noteMoyenne;
   }
 
-  public List<DisponibiliteDTO> getDatesDispo() {
+  public List<LocalDate[]> getDatesDispo() {
     return datesDispo;
   }
 
-  public void setDatesDispo(List<DisponibiliteDTO> datesDispo) {
+  public void setDatesDispo(List<LocalDate[]> datesDispo) {
     this.datesDispo = datesDispo;
-  }
-
-  /**
-   * Classe interne pour représenter une disponibilité
-   */
-  public static class DisponibiliteDTO {
-    private Long id;
-    private LocalDate dateDebut;
-    private LocalDate dateFin;
-
-    public DisponibiliteDTO() {}
-
-    public DisponibiliteDTO(Long id, LocalDate dateDebut, LocalDate dateFin) {
-      this.id = id;
-      this.dateDebut = dateDebut;
-      this.dateFin = dateFin;
-    }
-
-    public Long getId() {
-      return id;
-    }
-
-    public void setId(Long id) {
-      this.id = id;
-    }
-
-    public LocalDate getDateDebut() {
-      return dateDebut;
-    }
-
-    public void setDateDebut(LocalDate dateDebut) {
-      this.dateDebut = dateDebut;
-    }
-
-    public LocalDate getDateFin() {
-      return dateFin;
-    }
-
-    public void setDateFin(LocalDate dateFin) {
-      this.dateFin = dateFin;
-    }
   }
 }

@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
-import fr.univ.m1.projetagile.core.dto.VehiculeDTO.DisponibiliteDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
-import fr.univ.m1.projetagile.core.entity.Disponibilite;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.enums.TypeV;
@@ -86,7 +84,7 @@ public class VehiculeService {
     dto.setNoteMoyenne(vehicule.calculerNote());
 
     // Dates de disponibilités filtrées selon les réservations existantes
-    List<DisponibiliteDTO> disponibilitesFiltrees =
+    List<LocalDate[]> disponibilitesFiltrees =
         filtrerDisponibilitesAvecReservations(vehicule.getDatesDispo(), vehicule.getId());
     dto.setDatesDispo(disponibilitesFiltrees);
 
@@ -99,31 +97,35 @@ public class VehiculeService {
    *
    * @param disponibilitesOriginales Liste des disponibilités brutes du véhicule
    * @param vehiculeId ID du véhicule pour récupérer les réservations
-   * @return Liste des disponibilités filtrées
+   * @return Liste des disponibilités filtrées (paires date début / date fin)
    */
-  private List<DisponibiliteDTO> filtrerDisponibilitesAvecReservations(
-      List<Disponibilite> disponibilitesOriginales, Long vehiculeId) {
+  private List<LocalDate[]> filtrerDisponibilitesAvecReservations(
+      List<LocalDate[]> disponibilitesOriginales, Long vehiculeId) {
 
     // Récupérer les dates de réservations actives
     List<Object[]> reservations = vehiculeRepository.getDatesLocationsActives(vehiculeId);
 
-    List<DisponibiliteDTO> resultats = new ArrayList<>();
+    List<LocalDate[]> resultats = new ArrayList<>();
+
+    // Trier les réservations par date de début pour faciliter le traitement
+    List<Object[]> reservationsTriees =
+        reservations.stream().sorted((r1, r2) -> ((LocalDateTime) r1[0]).toLocalDate()
+            .compareTo(((LocalDateTime) r2[0]).toLocalDate())).collect(Collectors.toList());
 
     // Pour chaque disponibilité originale
-    for (Disponibilite dispo : disponibilitesOriginales) {
-      LocalDate dispoDebut = dispo.getDateDebut();
-      LocalDate dispoFin = dispo.getDateFin();
-
-      // Si pas de réservations, garder la disponibilité entière
-      if (reservations.isEmpty()) {
-        resultats.add(new DisponibiliteDTO(dispo.getId(), dispoDebut, dispoFin));
+    for (LocalDate[] dispo : disponibilitesOriginales) {
+      if (dispo == null || dispo.length < 2 || dispo[0] == null || dispo[1] == null) {
         continue;
       }
 
-      // Trier les réservations par date de début pour faciliter le traitement
-      List<Object[]> reservationsTriees =
-          reservations.stream().sorted((r1, r2) -> ((LocalDateTime) r1[0]).toLocalDate()
-              .compareTo(((LocalDateTime) r2[0]).toLocalDate())).collect(Collectors.toList());
+      LocalDate dispoDebut = dispo[0];
+      LocalDate dispoFin = dispo[1];
+
+      // Si pas de réservations, garder la disponibilité entière
+      if (reservations.isEmpty()) {
+        resultats.add(new LocalDate[] {dispoDebut, dispoFin});
+        continue;
+      }
 
       LocalDate currentDebut = dispoDebut;
 
@@ -138,8 +140,7 @@ public class VehiculeService {
 
         // Si il y a une période disponible avant la réservation
         if (currentDebut.isBefore(reservationDebut)) {
-          resultats.add(
-              new DisponibiliteDTO(dispo.getId(), currentDebut, reservationDebut.minusDays(1)));
+          resultats.add(new LocalDate[] {currentDebut, reservationDebut.minusDays(1)});
         }
 
         // Avancer le curseur après la réservation
@@ -155,7 +156,7 @@ public class VehiculeService {
 
       // Ajouter la période restante après la dernière réservation
       if (currentDebut.isBefore(dispoFin) || currentDebut.isEqual(dispoFin)) {
-        resultats.add(new DisponibiliteDTO(dispo.getId(), currentDebut, dispoFin));
+        resultats.add(new LocalDate[] {currentDebut, dispoFin});
       }
     }
 

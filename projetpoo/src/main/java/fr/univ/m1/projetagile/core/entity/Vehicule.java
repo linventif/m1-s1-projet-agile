@@ -1,5 +1,6 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -148,25 +149,22 @@ public class Vehicule {
   }
 
   // Relations selon UML
-  public List<Disponibilite> getDatesDispo() {
-    java.time.LocalDate aujourdhui = java.time.LocalDate.now();
-    List<Disponibilite> disponibilitesFutures = new ArrayList<>();
+  public List<LocalDate[]> getDatesDispo() {
+    LocalDate aujourdhui = LocalDate.now();
+    List<LocalDate[]> disponibilitesFutures = new ArrayList<>();
 
     for (Disponibilite dispo : datesDispo) {
+      LocalDate debut = dispo.getDateDebut();
+      LocalDate fin = dispo.getDateFin();
+
       // Ignorer les disponibilités complètement passées
-      if (dispo.getDateFin().isBefore(aujourdhui)) {
+      if (fin.isBefore(aujourdhui)) {
         continue;
       }
 
-      // Si la disponibilité commence avant aujourd'hui mais se termine après
-      if (dispo.getDateDebut().isBefore(aujourdhui)) {
-        // Ajuster la date de début à aujourd'hui tout en conservant l'identifiant
-        dispo.setDateDebut(aujourdhui);
-        disponibilitesFutures.add(dispo);
-      } else {
-        // La disponibilité commence aujourd'hui ou dans le futur
-        disponibilitesFutures.add(dispo);
-      }
+      // Si la disponibilité commence avant aujourd'hui, on tronque au jour courant
+      LocalDate dateDebutEffective = debut.isBefore(aujourdhui) ? aujourdhui : debut;
+      disponibilitesFutures.add(new LocalDate[] {dateDebutEffective, fin});
     }
 
     return Collections.unmodifiableList(disponibilitesFutures);
