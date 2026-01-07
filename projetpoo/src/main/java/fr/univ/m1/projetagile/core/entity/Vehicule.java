@@ -160,9 +160,9 @@ public class Vehicule {
 
       // Si la disponibilité commence avant aujourd'hui mais se termine après
       if (dispo.getDateDebut().isBefore(aujourdhui)) {
-        // Créer une nouvelle disponibilité ajustée commençant aujourd'hui
-        Disponibilite dispoAjustee = new Disponibilite(this, aujourdhui, dispo.getDateFin());
-        disponibilitesFutures.add(dispoAjustee);
+        // Ajuster la date de début à aujourd'hui tout en conservant l'identifiant
+        dispo.setDateDebut(aujourdhui);
+        disponibilitesFutures.add(dispo);
       } else {
         // La disponibilité commence aujourd'hui ou dans le futur
         disponibilitesFutures.add(dispo);
