@@ -24,7 +24,7 @@ public class Vehicule {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "IdV")
+  @Column(name = "ID")
   private Long idV;
 
   @ManyToOne
