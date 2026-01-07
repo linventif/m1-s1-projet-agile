@@ -8,7 +8,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "agents_professionnels")
-@PrimaryKeyJoinColumn(name = "idU")
+@PrimaryKeyJoinColumn(name = "IDU", referencedColumnName = "ID")
 public class AgentProfessionnel extends Agent {
 
   @Column(nullable = false)

@@ -11,8 +11,10 @@ import jakarta.persistence.MappedSuperclass;
 public abstract class Utilisateur {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "idU")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "utilisateur_id_seq")
+  @jakarta.persistence.SequenceGenerator(name = "utilisateur_id_seq",
+      sequenceName = "UTILISATEUR_ID_SEQ", allocationSize = 1, initialValue = 1)
+  @Column(name = "ID")
   protected Long idU;
 
   @Column(nullable = false, unique = true)
