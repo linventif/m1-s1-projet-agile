@@ -1,7 +1,10 @@
 package fr.univ.m1.projetagile.core.entity;
 
-import jakarta.persistence.*;
 import fr.univ.m1.projetagile.enums.TypeAgent;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PrimaryKeyJoinColumn;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "agents_professionnels")
@@ -47,4 +50,3 @@ public class AgentProfessionnel extends Agent {
     return true;
   }
 }
-

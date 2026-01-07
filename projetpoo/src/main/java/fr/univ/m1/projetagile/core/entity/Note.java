@@ -1,7 +1,8 @@
 package fr.univ.m1.projetagile.core.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
+import jakarta.persistence.Column;
+import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class Note {
@@ -71,4 +72,3 @@ public abstract class Note {
   // Méthode abstraite selon UML
   public abstract void Noter();
 }
-

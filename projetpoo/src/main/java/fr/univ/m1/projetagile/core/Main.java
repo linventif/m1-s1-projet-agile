@@ -1,8 +1,7 @@
 package fr.univ.m1.projetagile.core;
 
-import jakarta.persistence.EntityManager;
-
 import java.util.List;
+import jakarta.persistence.EntityManager;
 
 public class Main {
   public static void main(String[] args) {
