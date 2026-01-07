@@ -35,6 +35,28 @@ public class VehiculeService {
 
   public Vehicule createVehicule(TypeV type, String marque, String modele, String couleur,
       String ville, Double prixJ, Agent proprietaire) {
+
+    if (type == null) {
+      throw new IllegalArgumentException("Le type de véhicule ne peut pas être nul.");
+    }
+    if (marque == null || marque.trim().isEmpty()) {
+      throw new IllegalArgumentException("La marque du véhicule ne peut pas être vide.");
+    }
+    if (modele == null || modele.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le modèle du véhicule ne peut pas être vide.");
+    }
+    if (couleur == null || couleur.trim().isEmpty()) {
+      throw new IllegalArgumentException("La couleur du véhicule ne peut pas être vide.");
+    }
+    if (ville == null || ville.trim().isEmpty()) {
+      throw new IllegalArgumentException("La ville du véhicule ne peut pas être vide.");
+    }
+    if (prixJ == null || prixJ.doubleValue() <= 0.0) {
+      throw new IllegalArgumentException("Le prix journalier doit être strictement positif.");
+    }
+    if (proprietaire == null) {
+      throw new IllegalArgumentException("Le propriétaire du véhicule ne peut pas être nul.");
+    }
     Vehicule vehicule = new Vehicule(type, marque, modele, couleur, ville, prixJ, proprietaire);
     return vehiculeRepository.save(vehicule);
   }
