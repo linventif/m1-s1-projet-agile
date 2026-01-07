@@ -3,6 +3,7 @@ package fr.univ.m1.projetagile.core.persistence;
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
+import fr.univ.m1.projetagile.enums.StatutLocation;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
@@ -27,7 +28,7 @@ public class VehiculeRepository {
       transaction.begin();
 
       // Si le véhicule a déjà un ID, on fait un merge, sinon persist
-      if (vehicule.getIdV() == null) {
+      if (vehicule.getId() == null) {
         em.persist(vehicule);
       } else {
         vehicule = em.merge(vehicule);
@@ -55,7 +56,8 @@ public class VehiculeRepository {
     EntityManager em = DatabaseConnection.getEntityManager();
 
     try {
-      TypedQuery<Vehicule> query = em.createQuery("SELECT v FROM Vehicule v", Vehicule.class);
+      TypedQuery<Vehicule> query =
+          em.createQuery("SELECT v FROM Vehicule v LEFT JOIN FETCH v.datesDispo", Vehicule.class);
       return query.getResultList();
 
     } catch (Exception e) {
@@ -108,6 +110,35 @@ public class VehiculeRepository {
         transaction.rollback();
       }
       throw new RuntimeException("Erreur lors de la suppression du véhicule", e);
+    } finally {
+      em.close();
+    }
+  }
+
+  /**
+   * Récupère les dates de début et de fin des locations actives pour un véhicule (exclut les
+   * locations avec statut TERMINE ou ANNULE)
+   *
+   * @param vehiculeId l'identifiant du véhicule
+   * @return liste de tableaux contenant [dateDebut, dateFin] pour chaque location active
+   */
+  public List<Object[]> getDatesLocationsActives(Long vehiculeId) {
+    EntityManager em = DatabaseConnection.getEntityManager();
+
+    try {
+      TypedQuery<Object[]> query = em.createQuery("SELECT l.dateDebut, l.dateFin FROM Location l "
+          + "WHERE l.vehicule.id = :vehiculeId " + "AND l.statut != :statutTermine "
+          + "AND l.statut != :statutAnnule " + "ORDER BY l.dateDebut ASC", Object[].class);
+
+      query.setParameter("vehiculeId", vehiculeId);
+      query.setParameter("statutTermine", StatutLocation.TERMINE);
+      query.setParameter("statutAnnule", StatutLocation.ANNULE);
+
+      return query.getResultList();
+
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Erreur lors de la récupération des dates de location pour le véhicule " + vehiculeId, e);
     } finally {
       em.close();
     }
