@@ -8,43 +8,43 @@ import fr.univ.m1.projetagile.enums.TypeAgent;
 @PrimaryKeyJoinColumn(name = "idU")
 public class AgentProfessionnel extends Agent {
 
-    @Column(nullable = false)
-    private String siret;
+  @Column(nullable = false)
+  private String siret;
 
-    @Column(nullable = false)
-    private String nom;
+  @Column(nullable = false)
+  private String nom;
 
-    // Constructeur sans argument pour JPA
-    protected AgentProfessionnel() {
-        super();
-    }
+  // Constructeur sans argument pour JPA
+  protected AgentProfessionnel() {
+    super();
+  }
 
-    public AgentProfessionnel(String email, String motDePasse, String siret, String nom) {
-        super(email, motDePasse, TypeAgent.PROFESSIONNEL);
-        this.siret = siret;
-        this.nom = nom;
-    }
+  public AgentProfessionnel(String email, String motDePasse, String siret, String nom) {
+    super(email, motDePasse, TypeAgent.PROFESSIONNEL);
+    this.siret = siret;
+    this.nom = nom;
+  }
 
-    // Getters et Setters
-    public String getSiret() {
-        return siret;
-    }
+  // Getters et Setters
+  public String getSiret() {
+    return siret;
+  }
 
-    public void setSiret(String siret) {
-        this.siret = siret;
-    }
+  public void setSiret(String siret) {
+    this.siret = siret;
+  }
 
-    public String getNom() {
-        return nom;
-    }
+  public String getNom() {
+    return nom;
+  }
 
-    public void setNom(String nom) {
-        this.nom = nom;
-    }
+  public void setNom(String nom) {
+    this.nom = nom;
+  }
 
-    @Override
-    public boolean estProfessionnel() {
-        return true;
-    }
+  @Override
+  public boolean estProfessionnel() {
+    return true;
+  }
 }
 

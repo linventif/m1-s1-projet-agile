@@ -1,0 +1,9 @@
+{
+	"recommendations": [
+		"redhat.java",
+		"vscjava.vscode-java-pack",
+		"vscjava.vscode-maven",
+		"redhat.vscode-xml",
+		"yzhang.markdown-all-in-one"
+	]
+}

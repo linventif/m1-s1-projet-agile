@@ -5,93 +5,92 @@ import java.util.Objects;
 
 @MappedSuperclass
 public abstract class Utilisateur {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idU")
-    protected Long idU;
-    
-    @Column(nullable = false, unique = true)
-    protected String email;
-    
-    @Column(nullable = false, name = "motdePasse")
-    protected String motDePasse;
 
-    // Constructeur sans argument pour JPA
-    protected Utilisateur() {
-    }
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "idU")
+  protected Long idU;
 
-    protected Utilisateur(String email, String motDePasse) {
-        this.email = email;
-        this.motDePasse = motDePasse;
-    }
+  @Column(nullable = false, unique = true)
+  protected String email;
 
-    protected Utilisateur(Long idU, String email, String motDePasse) {
-        this.idU = idU;
-        this.email = email;
-        this.motDePasse = motDePasse;
-    }
+  @Column(nullable = false, name = "motdePasse")
+  protected String motDePasse;
 
-    // Getters
-    public Long getIdU() { 
-        return idU; 
-    }
-    
-    public String getEmail() { 
-        return email; 
-    }
-    
-    public String getMotDePasse() { 
-        return motDePasse; 
-    }
+  // Constructeur sans argument pour JPA
+  protected Utilisateur() {}
 
-    // Setters
-    public void setEmail(String email) { 
-        this.email = email; 
-    }
-    
-    public void setMotDePasse(String motDePasse) { 
-        this.motDePasse = motDePasse; 
-    }
+  protected Utilisateur(String email, String motDePasse) {
+    this.email = email;
+    this.motDePasse = motDePasse;
+  }
 
-    public boolean verifierMotDePasse(String mdp) {
-        return Objects.equals(this.motDePasse, mdp);
-    }
+  protected Utilisateur(Long idU, String email, String motDePasse) {
+    this.idU = idU;
+    this.email = email;
+    this.motDePasse = motDePasse;
+  }
 
-    // Méthodes selon UML
-    public void contacterAgent(Agent agent) {
-        // À implémenter avec le système de messagerie
-        // TODO: implémenter la logique de contact avec un agent
-    }
+  // Getters
+  public Long getIdU() {
+    return idU;
+  }
 
-    public void contacterLoueur(Loueur loueur) {
-        // À implémenter avec le système de messagerie
-        // TODO: implémenter la logique de contact avec un loueur
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public boolean seConnecter(String email, String motDePasse) {
-        // Vérifie les identifiants et connecte l'utilisateur
-        return this.email.equals(email) && verifierMotDePasse(motDePasse);
-    }
+  public String getMotDePasse() {
+    return motDePasse;
+  }
 
-    public void changerMDP(String ancienMDP, String nouveauMDP) {
-        // Change le mot de passe si l'ancien est correct
-        if (verifierMotDePasse(ancienMDP)) {
-            this.motDePasse = nouveauMDP;
-        } else {
-            throw new IllegalArgumentException("Ancien mot de passe incorrect");
-        }
-    }
+  // Setters
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
-    public void changerEmail(String nouveauEmail) {
-        // Change l'email de l'utilisateur
-        if (nouveauEmail != null && !nouveauEmail.trim().isEmpty()) {
-            this.email = nouveauEmail;
-        }
-    }
+  public void setMotDePasse(String motDePasse) {
+    this.motDePasse = motDePasse;
+  }
 
-    @Override
-    public String toString() {
-        return "[" + idU + "] <" + email + ">";
+  public boolean verifierMotDePasse(String mdp) {
+    return Objects.equals(this.motDePasse, mdp);
+  }
+
+  // Méthodes selon UML
+  public void contacterAgent(Agent agent) {
+    // À implémenter avec le système de messagerie
+    // TODO: implémenter la logique de contact avec un agent
+  }
+
+  public void contacterLoueur(Loueur loueur) {
+    // À implémenter avec le système de messagerie
+    // TODO: implémenter la logique de contact avec un loueur
+  }
+
+  public boolean seConnecter(String email, String motDePasse) {
+    // Vérifie les identifiants et connecte l'utilisateur
+    return this.email.equals(email) && verifierMotDePasse(motDePasse);
+  }
+
+  public void changerMDP(String ancienMDP, String nouveauMDP) {
+    // Change le mot de passe si l'ancien est correct
+    if (verifierMotDePasse(ancienMDP)) {
+      this.motDePasse = nouveauMDP;
+    } else {
+      throw new IllegalArgumentException("Ancien mot de passe incorrect");
     }
+  }
+
+  public void changerEmail(String nouveauEmail) {
+    // Change l'email de l'utilisateur
+    if (nouveauEmail != null && !nouveauEmail.trim().isEmpty()) {
+      this.email = nouveauEmail;
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "[" + idU + "] <" + email + ">";
+  }
 }

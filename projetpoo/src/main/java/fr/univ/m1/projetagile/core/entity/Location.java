@@ -38,21 +38,22 @@ public class Location {
   public double getPrixLocation() {
     // Calcul du nombre de jours de location
     long nombreJours = ChronoUnit.DAYS.between(dateDebut, dateFin);
-    
+
     // Prix de base = prix par jour × nombre de jours
     double prixBase = this.vehicule.getPrixJ() * nombreJours;
-    
+
     // Commission de 10% sur le prix de base
     double commissionProportionnelle = prixBase * 0.1;
-    
+
     // Frais fixes de 2€ par jour
     double fraisFixes = 2.0 * nombreJours;
-    
+
     // Prix total = prix de base + commission + frais fixes
     return prixBase + commissionProportionnelle + fraisFixes;
   }
 
-  public void louerVehicule(String lieuDepot, LocalDateTime dateDebut, LocalDateTime dateFin, Assurance assurance) {
+  public void louerVehicule(String lieuDepot, LocalDateTime dateDebut, LocalDateTime dateFin,
+      Assurance assurance) {
     // Méthode selon UML - à compléter selon la logique métier
     this.lieuDepot = lieuDepot;
     this.dateDebut = dateDebut;
@@ -87,17 +88,18 @@ public class Location {
   }
 
   // JPA exige un constructeur sans arguments
-  protected Location() {
-  }
+  protected Location() {}
 
-  public Location(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule, Loueur loueur) {
+  public Location(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule,
+      Loueur loueur) {
     this.dateDebut = dateDebut;
     this.dateFin = dateFin;
     this.vehicule = vehicule;
     this.loueur = loueur;
   }
 
-  public Location(LocalDateTime dateDebut, LocalDateTime dateFin, String lieuDepot, Vehicule vehicule, Loueur loueur) {
+  public Location(LocalDateTime dateDebut, LocalDateTime dateFin, String lieuDepot,
+      Vehicule vehicule, Loueur loueur) {
     this.dateDebut = dateDebut;
     this.dateFin = dateFin;
     this.lieuDepot = lieuDepot;
