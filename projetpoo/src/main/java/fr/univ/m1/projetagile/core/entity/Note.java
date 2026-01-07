@@ -16,7 +16,7 @@ public abstract class Note {
   @Column(nullable = false)
   protected Double note3;
 
-  @Column(nullable = false)
+  @Column(nullable = false, name = "date_note")
   protected LocalDate date;
 
   // Constructeur sans argument pour JPA
