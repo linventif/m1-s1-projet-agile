@@ -36,11 +36,20 @@ public class Location {
 
   // Méthodes selon UML
   public double getPrixLocation() {
-    if (vehicule != null && vehicule.getPrixJ() != null && dateDebut != null && dateFin != null) {
-      long jours = java.time.temporal.ChronoUnit.DAYS.between(dateDebut, dateFin);
-      return vehicule.getPrixJ() * jours;
-    }
-    return 0.0;
+    // Calcul du nombre de jours de location
+    long nombreJours = ChronoUnit.DAYS.between(dateDebut, dateFin);
+    
+    // Prix de base = prix par jour × nombre de jours
+    double prixBase = this.vehicule.getPrixJ() * nombreJours;
+    
+    // Commission de 10% sur le prix de base
+    double commissionProportionnelle = prixBase * 0.1;
+    
+    // Frais fixes de 2€ par jour
+    double fraisFixes = 2.0 * nombreJours;
+    
+    // Prix total = prix de base + commission + frais fixes
+    return prixBase + commissionProportionnelle + fraisFixes;
   }
 
   public void louerVehicule(String lieuDepot, LocalDateTime dateDebut, LocalDateTime dateFin, Assurance assurance) {
@@ -147,23 +156,6 @@ public class Location {
 
   public void setLoueur(Loueur loueur) {
     this.loueur = loueur;
-  }
-  
-  public double getPrixLocation() {
-    // Calcul du nombre de jours de location
-    long nombreJours = ChronoUnit.DAYS.between(dateDebut, dateFin);
-    
-    // Prix de base = prix par jour × nombre de jours
-    double prixBase = this.vehicule.getPrixJ() * nombreJours;
-    
-    // Commission de 10% sur le prix de base
-    double commissionProportionnelle = prixBase * 0.1;
-    
-    // Frais fixes de 2€ par jour
-    double fraisFixes = 2.0 * nombreJours;
-    
-    // Prix total = prix de base + commission + frais fixes
-    return prixBase + commissionProportionnelle + fraisFixes;
   }
 
   // Énumération pour le statut selon UML
