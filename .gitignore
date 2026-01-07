@@ -38,4 +38,4 @@ projetpoo/target/
 persistence.xml
 
 # Visual Paradigm (bak & lck files)
-vpp.*
+*.vpp.*
