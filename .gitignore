@@ -34,7 +34,7 @@ projetpoo/target/
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
-!.vscode/java-formatter.xml
+!.vscode/eclipse-java-google-style.xml
 .idea/
 
 # DB - Persistence configuration
