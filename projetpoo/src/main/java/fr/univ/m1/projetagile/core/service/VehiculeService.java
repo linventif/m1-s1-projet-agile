@@ -11,6 +11,22 @@ import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.enums.TypeV;
 
+/**
+ * Service métier responsable de la gestion des véhicules.
+ * <p>
+ * Cette classe constitue la couche de service autour du {@link VehiculeRepository} et
+ * des entités {@link Vehicule}. Elle fournit des opérations pour :
+ * <ul>
+ *   <li>Créer de nouveaux véhicules à partir des informations fournies par les couches
+ *       supérieures (par exemple contrôleurs ou interface utilisateur) ;</li>
+ *   <li>Récupérer la liste des véhicules et les exposer sous forme de {@link VehiculeDTO}
+ *       enrichis, incluant les propriétés métier, la note moyenne et les disponibilités ;</li>
+ *   <li>Filtrer et transformer les disponibilités pour tenir compte des réservations
+ *       existantes.</li>
+ * </ul>
+ * L'objectif est d'encapsuler la logique métier liée aux véhicules et de séparer les
+ * préoccupations entre la persistance, la logique métier et la présentation.
+ */
 public class VehiculeService {
 
   private VehiculeRepository vehiculeRepository;
