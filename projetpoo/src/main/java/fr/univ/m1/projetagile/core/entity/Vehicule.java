@@ -24,8 +24,8 @@ public class Vehicule {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "IdV")
-  private Long idV;
+  @Column(name = "id")
+  private Long id;
 
   @ManyToOne
   @JoinColumn(name = "proprietaire_id")
@@ -67,7 +67,7 @@ public class Vehicule {
   protected Vehicule() {}
 
   public Vehicule(TypeV type, String marque, String modele, String couleur, String ville,
-      Double prixJ) {
+      Double prixJ, Agent proprietaire) {
     this.type = type;
     this.marque = marque;
     this.modele = modele;
@@ -75,15 +75,16 @@ public class Vehicule {
     this.ville = ville;
     this.prixJ = prixJ;
     this.disponible = true;
+    this.proprietaire = proprietaire;
   }
 
   // Getters et Setters
   public Long getIdV() {
-    return idV;
+    return id;
   }
 
   public Long getId() {
-    return idV; // Alias pour compatibilité
+    return id; // Alias pour compatibilité
   }
 
   public TypeV getType() {
