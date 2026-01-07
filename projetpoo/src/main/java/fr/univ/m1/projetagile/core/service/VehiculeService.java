@@ -5,27 +5,28 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.enums.TypeV;
+import jakarta.persistence.EntityManager;
 
 /**
  * Service métier responsable de la gestion des véhicules.
  * <p>
- * Cette classe constitue la couche de service autour du {@link VehiculeRepository} et
- * des entités {@link Vehicule}. Elle fournit des opérations pour :
+ * Cette classe constitue la couche de service autour du {@link VehiculeRepository} et des entités
+ * {@link Vehicule}. Elle fournit des opérations pour :
  * <ul>
- *   <li>Créer de nouveaux véhicules à partir des informations fournies par les couches
- *       supérieures (par exemple contrôleurs ou interface utilisateur) ;</li>
- *   <li>Récupérer la liste des véhicules et les exposer sous forme de {@link VehiculeDTO}
- *       enrichis, incluant les propriétés métier, la note moyenne et les disponibilités ;</li>
- *   <li>Filtrer et transformer les disponibilités pour tenir compte des réservations
- *       existantes.</li>
+ * <li>Créer de nouveaux véhicules à partir des informations fournies par les couches supérieures
+ * (par exemple contrôleurs ou interface utilisateur) ;</li>
+ * <li>Récupérer la liste des véhicules et les exposer sous forme de {@link VehiculeDTO} enrichis,
+ * incluant les propriétés métier, la note moyenne et les disponibilités ;</li>
+ * <li>Filtrer et transformer les disponibilités pour tenir compte des réservations existantes.</li>
  * </ul>
- * L'objectif est d'encapsuler la logique métier liée aux véhicules et de séparer les
- * préoccupations entre la persistance, la logique métier et la présentation.
+ * L'objectif est d'encapsuler la logique métier liée aux véhicules et de séparer les préoccupations
+ * entre la persistance, la logique métier et la présentation.
  */
 public class VehiculeService {
 
@@ -36,7 +37,7 @@ public class VehiculeService {
   }
 
   /**
-   * Récupère tous les véhicules avec leurs informations enrichies
+   * Récupère tout les véhicules avec leurs informations enrichies
    *
    * @return Liste de VehiculeDTO contenant : - Les propriétés du véhicule - La note moyenne
    *         calculée - Les dates de disponibilités - Le lieu (ville)
@@ -68,11 +69,38 @@ public class VehiculeService {
     if (prixJ == null || prixJ.doubleValue() <= 0.0) {
       throw new IllegalArgumentException("Le prix journalier doit être strictement positif.");
     }
+    Agent proprietaireExistant = verifierProprietaire(proprietaire);
+    Vehicule vehicule =
+        new Vehicule(type, marque, modele, couleur, ville, prixJ, proprietaireExistant);
+    return vehiculeRepository.save(vehicule);
+  }
+
+  /**
+   * Vérifie que le propriétaire fourni correspond à un Agent existant en base.
+   *
+   * @param proprietaire Agent supposément déjà persisté
+   * @return l'Agent rechargé depuis la base pour garantir son existence
+   */
+  private Agent verifierProprietaire(Agent proprietaire) {
     if (proprietaire == null) {
       throw new IllegalArgumentException("Le propriétaire du véhicule ne peut pas être nul.");
     }
-    Vehicule vehicule = new Vehicule(type, marque, modele, couleur, ville, prixJ, proprietaire);
-    return vehiculeRepository.save(vehicule);
+    if (proprietaire.getIdU() == null) {
+      throw new IllegalArgumentException(
+          "Le propriétaire doit être déjà enregistré (identifiant manquant).");
+    }
+
+    EntityManager em = DatabaseConnection.getEntityManager();
+    try {
+      Agent proprietaireEnBase = em.find(Agent.class, proprietaire.getIdU());
+      if (proprietaireEnBase == null) {
+        throw new IllegalArgumentException(
+            "Le propriétaire spécifié n'existe pas dans la base de données.");
+      }
+      return proprietaireEnBase;
+    } finally {
+      em.close();
+    }
   }
 
   /**
