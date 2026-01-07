@@ -2,6 +2,7 @@ package fr.univ.m1.projetagile.core.persistence;
 
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
+import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import jakarta.persistence.EntityManager;
@@ -24,22 +25,35 @@ public class VehiculeRepository {
       EntityTransaction transaction = em.getTransaction();
       transaction.begin();
 
-      try {
-        // Si le véhicule a déjà un ID, on fait un merge, sinon persist
-        if (vehicule.getId() == null) {
-          em.persist(vehicule);
-        } else {
-          vehicule = em.merge(vehicule);
-        }
+      Agent proprietaire = vehicule.getProprietaire();
+      if (proprietaire == null) {
+        throw new IllegalArgumentException("Le véhicule doit avoir un propriétaire existant.");
+      }
+      Long proprietaireId = proprietaire.getIdU();
+      if (proprietaireId == null) {
+        throw new IllegalArgumentException(
+            "Le propriétaire doit déjà être enregistré (identifiant manquant).");
+      }
+      Agent proprietaireManaged = em.find(Agent.class, proprietaireId);
+      if (proprietaireManaged == null) {
+        throw new IllegalArgumentException(
+            "Le propriétaire fourni n'existe pas en base (id=" + proprietaireId + ").");
+      }
+      vehicule.setProprietaire(proprietaireManaged);
 
-        transaction.commit();
-        return vehicule;
+      // Si le véhicule a déjà un ID, on fait un merge, sinon persist
+      if (vehicule.getId() == null) {
+        em.persist(vehicule);
+      } else {
+        vehicule = em.merge(vehicule);
+      }
 
-      } catch (Exception e) {
-        if (transaction.isActive()) {
-          transaction.rollback();
-        }
-        throw new RuntimeException("Erreur lors de l'enregistrement du véhicule", e);
+      transaction.commit();
+      return vehicule;
+
+    } catch (Exception e) {
+      if (transaction != null && transaction.isActive()) {
+        transaction.rollback();
       }
     }
   }
@@ -84,11 +98,11 @@ public class VehiculeRepository {
       EntityTransaction transaction = em.getTransaction();
       transaction.begin();
 
-      try {
-        Vehicule vehicule = em.find(Vehicule.class, id);
-        if (vehicule != null) {
-          em.remove(vehicule);
-        }
+      Vehicule vehicule = em.find(Vehicule.class, id);
+      if (vehicule == null) {
+        throw new IllegalArgumentException("Aucun véhicule trouvé avec l'identifiant " + id);
+      }
+      em.remove(vehicule);
 
         transaction.commit();
 
