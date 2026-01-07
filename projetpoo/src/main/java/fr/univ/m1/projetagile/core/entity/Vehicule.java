@@ -152,7 +152,27 @@ public class Vehicule {
 
   // Relations selon UML
   public List<Disponibilite> getDatesDispo() {
-    return Collections.unmodifiableList(datesDispo);
+    java.time.LocalDate aujourdhui = java.time.LocalDate.now();
+    List<Disponibilite> disponibilitesFutures = new ArrayList<>();
+
+    for (Disponibilite dispo : datesDispo) {
+      // Ignorer les disponibilités complètement passées
+      if (dispo.getDateFin().isBefore(aujourdhui)) {
+        continue;
+      }
+
+      // Si la disponibilité commence avant aujourd'hui mais se termine après
+      if (dispo.getDateDebut().isBefore(aujourdhui)) {
+        // Créer une nouvelle disponibilité ajustée commençant aujourd'hui
+        Disponibilite dispoAjustee = new Disponibilite(this, aujourdhui, dispo.getDateFin());
+        disponibilitesFutures.add(dispoAjustee);
+      } else {
+        // La disponibilité commence aujourd'hui ou dans le futur
+        disponibilitesFutures.add(dispo);
+      }
+    }
+
+    return Collections.unmodifiableList(disponibilitesFutures);
   }
 
   public void ajouterDisponibilite(Disponibilite disponibilite) {
