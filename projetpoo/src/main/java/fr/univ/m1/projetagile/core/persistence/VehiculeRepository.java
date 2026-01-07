@@ -21,8 +21,9 @@ public class VehiculeRepository {
    * @return le véhicule enregistré avec son ID généré
    */
   public Vehicule save(Vehicule vehicule) {
+    EntityTransaction transaction = null;
     try (EntityManager em = DatabaseConnection.getEntityManager()) {
-      EntityTransaction transaction = em.getTransaction();
+      transaction = em.getTransaction();
       transaction.begin();
 
       Agent proprietaire = vehicule.getProprietaire();
@@ -55,6 +56,7 @@ public class VehiculeRepository {
       if (transaction != null && transaction.isActive()) {
         transaction.rollback();
       }
+      throw new RuntimeException("Erreur lors de l'enregistrement du véhicule", e);
     }
   }
 
@@ -94,8 +96,9 @@ public class VehiculeRepository {
    * @param id l'identifiant du véhicule à supprimer
    */
   public void delete(Long id) {
+    EntityTransaction transaction = null;
     try (EntityManager em = DatabaseConnection.getEntityManager()) {
-      EntityTransaction transaction = em.getTransaction();
+      transaction = em.getTransaction();
       transaction.begin();
 
       Vehicule vehicule = em.find(Vehicule.class, id);
@@ -104,14 +107,13 @@ public class VehiculeRepository {
       }
       em.remove(vehicule);
 
-        transaction.commit();
+      transaction.commit();
 
-      } catch (Exception e) {
-        if (transaction.isActive()) {
-          transaction.rollback();
-        }
-        throw new RuntimeException("Erreur lors de la suppression du véhicule", e);
+    } catch (Exception e) {
+      if (transaction.isActive()) {
+        transaction.rollback();
       }
+      throw new RuntimeException("Erreur lors de la suppression du véhicule", e);
     }
   }
 
