@@ -1,10 +1,9 @@
-package fr.univ.m1.projetagile.core.backend.service;
+package fr.univ.m1.projetagile.core.entity;
+
+
 
 import java.time.LocalDateTime;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
-import fr.univ.m1.projetagile.core.entity.Location;
-import fr.univ.m1.projetagile.core.entity.Loueur;
-import fr.univ.m1.projetagile.core.entity.Vehicule;
 import jakarta.persistence.EntityManager;
 
 /**
