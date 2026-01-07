@@ -99,9 +99,10 @@ public class VehiculeRepository {
       transaction.begin();
 
       Vehicule vehicule = em.find(Vehicule.class, id);
-      if (vehicule != null) {
-        em.remove(vehicule);
+      if (vehicule == null) {
+        throw new IllegalArgumentException("Aucun véhicule trouvé avec l'identifiant " + id);
       }
+      em.remove(vehicule);
 
       transaction.commit();
 
