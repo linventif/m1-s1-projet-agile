@@ -63,31 +63,6 @@ public class LocationService {
   }
 
   /**
-   * Enregistre ou met à jour une location.
-   *
-   * @param location la location à sauvegarder
-   * @return la location persistée
-   */
-  public Location sauvegarder(Location location) {
-    if (location == null) {
-      throw new IllegalArgumentException("La location ne peut pas être nulle.");
-    }
-    return locationRepository.save(location);
-  }
-
-  /**
-   * Supprime une location existante par son identifiant.
-   *
-   * @param locationId identifiant de la location
-   */
-  public void supprimer(Long locationId) {
-    if (locationId == null) {
-      throw new IllegalArgumentException("L'identifiant de la location est obligatoire.");
-    }
-    locationRepository.delete(locationId);
-  }
-
-  /**
    * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
    * - Le prix de base (prix par jour × nombre de jours) - Une commission proportionnelle de 10% sur
    * le prix de base - Des frais fixes de 2€ par jour
