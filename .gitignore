@@ -36,3 +36,6 @@ projetpoo/target/
 
 # DB - Persistence configuration
 persistence.xml
+
+# Visual Paradigm (bak & lck files)
+vpp.*
