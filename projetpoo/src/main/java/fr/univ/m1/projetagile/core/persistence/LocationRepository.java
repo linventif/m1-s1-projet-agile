@@ -10,6 +10,17 @@ import jakarta.persistence.TypedQuery;
 
 public class LocationRepository {
 
+  /**
+   * Sauvegarde une entité {@link Location} en base de données. Si la location ne possède pas
+   * encore d'identifiant, elle est créée (persist), sinon elle est mise à jour (merge) dans une
+   * transaction.
+   *
+   * @param location la location à sauvegarder
+   * @return la location persistée ou fusionnée, potentiellement détachée après la fermeture de
+   *         l'EntityManager
+   * @throws RuntimeException si une erreur survient lors de l'enregistrement ou de la gestion de
+   *                          la transaction
+   */
   public Location save(Location location) {
     EntityManager em = DatabaseConnection.getEntityManager();
     EntityTransaction transaction = null;
