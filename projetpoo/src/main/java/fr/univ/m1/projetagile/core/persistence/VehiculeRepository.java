@@ -20,30 +20,27 @@ public class VehiculeRepository {
    * @return le véhicule enregistré avec son ID généré
    */
   public Vehicule save(Vehicule vehicule) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    EntityTransaction transaction = null;
-
-    try {
-      transaction = em.getTransaction();
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      EntityTransaction transaction = em.getTransaction();
       transaction.begin();
 
-      // Si le véhicule a déjà un ID, on fait un merge, sinon persist
-      if (vehicule.getId() == null) {
-        em.persist(vehicule);
-      } else {
-        vehicule = em.merge(vehicule);
-      }
+      try {
+        // Si le véhicule a déjà un ID, on fait un merge, sinon persist
+        if (vehicule.getId() == null) {
+          em.persist(vehicule);
+        } else {
+          vehicule = em.merge(vehicule);
+        }
 
-      transaction.commit();
-      return vehicule;
+        transaction.commit();
+        return vehicule;
 
-    } catch (Exception e) {
-      if (transaction != null && transaction.isActive()) {
-        transaction.rollback();
+      } catch (Exception e) {
+        if (transaction.isActive()) {
+          transaction.rollback();
+        }
+        throw new RuntimeException("Erreur lors de l'enregistrement du véhicule", e);
       }
-      throw new RuntimeException("Erreur lors de l'enregistrement du véhicule", e);
-    } finally {
-      em.close();
     }
   }
 
@@ -53,17 +50,13 @@ public class VehiculeRepository {
    * @return la liste de tous les véhicules
    */
   public List<Vehicule> findAll() {
-    EntityManager em = DatabaseConnection.getEntityManager();
-
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       TypedQuery<Vehicule> query =
           em.createQuery("SELECT v FROM Vehicule v LEFT JOIN FETCH v.datesDispo", Vehicule.class);
       return query.getResultList();
 
     } catch (Exception e) {
       throw new RuntimeException("Erreur lors de la récupération des véhicules", e);
-    } finally {
-      em.close();
     }
   }
 
@@ -74,14 +67,10 @@ public class VehiculeRepository {
    * @return le véhicule trouvé ou null
    */
   public Vehicule findById(Long id) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.find(Vehicule.class, id);
     } catch (Exception e) {
       throw new RuntimeException("Erreur lors de la récupération du véhicule", e);
-    } finally {
-      em.close();
     }
   }
 
@@ -91,27 +80,24 @@ public class VehiculeRepository {
    * @param id l'identifiant du véhicule à supprimer
    */
   public void delete(Long id) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    EntityTransaction transaction = null;
-
-    try {
-      transaction = em.getTransaction();
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      EntityTransaction transaction = em.getTransaction();
       transaction.begin();
 
-      Vehicule vehicule = em.find(Vehicule.class, id);
-      if (vehicule != null) {
-        em.remove(vehicule);
-      }
+      try {
+        Vehicule vehicule = em.find(Vehicule.class, id);
+        if (vehicule != null) {
+          em.remove(vehicule);
+        }
 
-      transaction.commit();
+        transaction.commit();
 
-    } catch (Exception e) {
-      if (transaction != null && transaction.isActive()) {
-        transaction.rollback();
+      } catch (Exception e) {
+        if (transaction.isActive()) {
+          transaction.rollback();
+        }
+        throw new RuntimeException("Erreur lors de la suppression du véhicule", e);
       }
-      throw new RuntimeException("Erreur lors de la suppression du véhicule", e);
-    } finally {
-      em.close();
     }
   }
 
@@ -123,9 +109,7 @@ public class VehiculeRepository {
    * @return liste de tableaux contenant [dateDebut, dateFin] pour chaque location active
    */
   public List<Object[]> getDatesLocationsActives(Long vehiculeId) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       TypedQuery<Object[]> query = em.createQuery("SELECT l.dateDebut, l.dateFin FROM Location l "
           + "WHERE l.vehicule.id = :vehiculeId " + "AND l.statut != :statutTermine "
           + "AND l.statut != :statutAnnule " + "ORDER BY l.dateDebut ASC", Object[].class);
@@ -139,8 +123,6 @@ public class VehiculeRepository {
     } catch (Exception e) {
       throw new RuntimeException(
           "Erreur lors de la récupération des dates de location pour le véhicule " + vehiculeId, e);
-    } finally {
-      em.close();
     }
   }
 }
