@@ -154,6 +154,11 @@ public class LocationService {
     if (location == null) {
       throw new IllegalArgumentException("La location ne peut pas être nulle.");
     }
+    StatutLocation statutActuel = location.getStatut();
+    if (statutActuel != StatutLocation.ACCEPTE) {
+      throw new IllegalStateException(
+          "Terminaison impossible : la location ne peut être terminée que si son statut est ACCEPTE.");
+    }
     location.setStatut(StatutLocation.TERMINE);
     locationRepository.save(location);
   }
