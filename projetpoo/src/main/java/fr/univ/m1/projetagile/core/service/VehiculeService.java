@@ -661,9 +661,13 @@ public class VehiculeService {
           "La date de début doit être antérieure ou égale à la date de fin.");
     }
 
-    // Trouver toutes les disponibilités qui chevauchent la plage à supprimer
-    List<Disponibilite> overlapping =
+    // Trouver toutes les disponibilités candidates (chevauchantes ou adjacentes) puis
+    // filtrer pour ne conserver que les plages qui chevauchent réellement la plage à supprimer
+    List<Disponibilite> candidates =
         disponibiliteRepository.findOverlappingOrAdjacent(vehiculeId, dateDebut, dateFin, null);
+    List<Disponibilite> overlapping = candidates.stream()
+        .filter(d -> !d.getDateFin().isBefore(dateDebut) && !d.getDateDebut().isAfter(dateFin))
+        .collect(Collectors.toList());
 
     if (overlapping.isEmpty()) {
       // Aucune disponibilité à supprimer dans cette plage
@@ -741,7 +745,7 @@ public class VehiculeService {
   }
 
   /**
-   * Valide que les dates de début et de fin sont cohérentes
+   * Valide une plage de dates pour les disponibilités
    *
    * @param dateDebut date de début
    * @param dateFin date de fin
@@ -759,6 +763,10 @@ public class VehiculeService {
           "La date de début doit être antérieure ou égale à la date de fin.");
     }
     LocalDate today = LocalDate.now();
+    if (dateDebut.isBefore(today)) {
+      throw new IllegalArgumentException(
+          "La date de début ne peut pas être dans le passé. Les disponibilités doivent commencer aujourd'hui ou dans le futur.");
+    }
     if (dateFin.isBefore(today)) {
       throw new IllegalArgumentException(
           "La date de fin ne peut pas être dans le passé. Les disponibilités passées ne sont pas utiles.");
