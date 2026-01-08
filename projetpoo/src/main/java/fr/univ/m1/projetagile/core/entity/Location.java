@@ -1,7 +1,6 @@
 package fr.univ.m1.projetagile.core.entity;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import fr.univ.m1.projetagile.notes.NoteA;
 import fr.univ.m1.projetagile.notes.NoteV;
@@ -44,59 +43,6 @@ public class Location {
   @ManyToOne
   @JoinColumn(name = "loueur_id", nullable = false)
   private Loueur loueur;
-
-  // Méthodes selon UML
-  public double getPrixLocation() {
-    // Calcul du nombre de jours de location
-    long nombreJours = ChronoUnit.DAYS.between(dateDebut, dateFin);
-
-    // Prix de base = prix par jour × nombre de jours
-    double prixBase = this.vehicule.getPrixJ() * nombreJours;
-
-    // Commission de 10% sur le prix de base
-    double commissionProportionnelle = prixBase * 0.1;
-
-    // Frais fixes de 2€ par jour
-    double fraisFixes = 2.0 * nombreJours;
-
-    // Prix total = prix de base + commission + frais fixes
-    return prixBase + commissionProportionnelle + fraisFixes;
-  }
-
-  public void louerVehicule(String lieuDepot, LocalDateTime dateDebut, LocalDateTime dateFin,
-      Assurance assurance) {
-    // Méthode selon UML - à compléter selon la logique métier
-    this.lieuDepot = lieuDepot;
-    this.dateDebut = dateDebut;
-    this.dateFin = dateFin;
-    this.statut = StatutLocation.EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT;
-    // TODO: Gérer la souscription d'assurance si nécessaire
-  }
-
-  public void noterVehicule(NoteV note) {
-    // Méthode selon UML - à implémenter selon la logique métier
-    // TODO: Enregistrer la note pour le véhicule
-  }
-
-  public void noterAgent(NoteA note) {
-    // Méthode selon UML - à implémenter selon la logique métier
-    // TODO: Enregistrer la note pour l'agent
-  }
-
-  public void genererPDF() {
-    // Génère un PDF pour la location
-    // TODO: Implémenter la génération de PDF
-  }
-
-  public void annuler() {
-    // Annule la location
-    this.statut = StatutLocation.ANNULE;
-  }
-
-  public void terminer() {
-    // Termine la location
-    this.statut = StatutLocation.TERMINE;
-  }
 
   // JPA exige un constructeur sans arguments
   protected Location() {}
