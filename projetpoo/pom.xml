@@ -56,5 +56,11 @@
       <artifactId>ojdbc11</artifactId>
       <version>23.3.0.23.09</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.nentangso</groupId>
+      <artifactId>nts-saas-helper-option</artifactId>
+      <version>1.1.0</version>
+    </dependency>
   </dependencies>
 </project>
