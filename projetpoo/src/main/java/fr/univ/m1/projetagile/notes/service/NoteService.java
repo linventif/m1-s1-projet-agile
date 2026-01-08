@@ -1,6 +1,9 @@
 package fr.univ.m1.projetagile.notes.service;
 
 import java.util.List;
+import fr.univ.m1.projetagile.core.entity.Agent;
+import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.notes.entity.NoteAgent;
 import fr.univ.m1.projetagile.notes.entity.NoteLoueur;
 import fr.univ.m1.projetagile.notes.entity.NoteVehicule;
@@ -8,148 +11,149 @@ import fr.univ.m1.projetagile.notes.persistence.NoteAgentRepository;
 import fr.univ.m1.projetagile.notes.persistence.NoteLoueurRepository;
 import fr.univ.m1.projetagile.notes.persistence.NoteVehiculeRepository;
 
+/**
+ * Service pour gérer les notes (agents, loueurs, véhicules).
+ *
+ * <p>
+ * Ce service fournit une couche métier pour créer et gérer les notes avec validation automatique et
+ * sauvegarde en base de données.
+ * </p>
+ */
 public class NoteService {
 
-  private NoteAgentRepository noteAgentRepository;
-  private NoteLoueurRepository noteLoueurRepository;
-  private NoteVehiculeRepository noteVehiculeRepository;
+  private final NoteAgentRepository noteAgentRepository;
+  private final NoteLoueurRepository noteLoueurRepository;
+  private final NoteVehiculeRepository noteVehiculeRepository;
 
-  public NoteService(NoteAgentRepository noteAgentRepository,
-      NoteLoueurRepository noteLoueurRepository, NoteVehiculeRepository noteVehiculeRepository) {
-    this.noteAgentRepository = noteAgentRepository;
-    this.noteLoueurRepository = noteLoueurRepository;
-    this.noteVehiculeRepository = noteVehiculeRepository;
+  public NoteService() {
+    this.noteAgentRepository = new NoteAgentRepository();
+    this.noteLoueurRepository = new NoteLoueurRepository();
+    this.noteVehiculeRepository = new NoteVehiculeRepository();
   }
 
-  // ===== NoteAgent Methods =====
+  public NoteService(NoteAgentRepository noteAgentRepo, NoteLoueurRepository noteLoueurRepo,
+      NoteVehiculeRepository noteVehiculeRepo) {
+    this.noteAgentRepository = noteAgentRepo;
+    this.noteLoueurRepository = noteLoueurRepo;
+    this.noteVehiculeRepository = noteVehiculeRepo;
+  }
 
-  public NoteAgent noterAgent(Long agentId, Long loueurId, double note1, double note2,
-      double note3) {
-    if (agentId == null || loueurId == null) {
-      throw new IllegalArgumentException("Agent ID et Loueur ID ne peuvent pas être null");
+  // ==================== NOTES AGENT ====================
+
+  /**
+   * Permet à un loueur de noter un agent.
+   */
+  public NoteAgent noterAgent(Loueur loueur, Agent agent, Double note1, Double note2,
+      Double note3) {
+    if (loueur == null) {
+      throw new IllegalArgumentException("Le loueur ne peut pas être null");
+    }
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être null");
     }
 
-    NoteAgent note = new NoteAgent(agentId, loueurId);
-    note.setNote1(note1);
-    note.setNote2(note2);
-    note.setNote3(note3);
-
+    NoteAgent note = new NoteAgent(agent, loueur, note1, note2, note3);
     return noteAgentRepository.save(note);
   }
 
-  public List<NoteAgent> getNotesAgent(Long agentId) {
-    if (agentId == null) {
-      throw new IllegalArgumentException("Agent ID ne peut pas être null");
+  public List<NoteAgent> getNotesAgent(Agent agent) {
+    if (agent == null || agent.getIdU() == null) {
+      throw new IllegalArgumentException("Agent invalide");
     }
-    return noteAgentRepository.findByAgentId(agentId);
+    return noteAgentRepository.findByAgentId(agent.getIdU());
   }
 
-  public List<NoteAgent> getNotesAgentParLoueur(Long loueurId) {
-    if (loueurId == null) {
-      throw new IllegalArgumentException("Loueur ID ne peut pas être null");
+  public Double getMoyenneAgent(Agent agent) {
+    if (agent == null || agent.getIdU() == null) {
+      throw new IllegalArgumentException("Agent invalide");
     }
-    return noteAgentRepository.findByLoueurId(loueurId);
+    return noteAgentRepository.getMoyenneByAgentId(agent.getIdU());
   }
 
-  public Double getMoyenneAgent(Long agentId) {
-    if (agentId == null) {
-      throw new IllegalArgumentException("Agent ID ne peut pas être null");
+  // ==================== NOTES LOUEUR ====================
+
+  /**
+   * Permet à un agent de noter un loueur.
+   */
+  public NoteLoueur noterLoueur(Agent agent, Loueur loueur, Double note1, Double note2,
+      Double note3) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être null");
     }
-    return noteAgentRepository.getMoyenneByAgentId(agentId);
-  }
-
-  public void supprimerNoteAgent(Long noteId) {
-    if (noteId == null) {
-      throw new IllegalArgumentException("Note ID ne peut pas être null");
-    }
-    noteAgentRepository.delete(noteId);
-  }
-
-  // ===== NoteLoueur Methods =====
-
-  public NoteLoueur noterLoueur(Long loueurId, Long agentId, double note1, double note2,
-      double note3) {
-    if (loueurId == null || agentId == null) {
-      throw new IllegalArgumentException("Loueur ID et Agent ID ne peuvent pas être null");
+    if (loueur == null) {
+      throw new IllegalArgumentException("Le loueur ne peut pas être null");
     }
 
-    NoteLoueur note = new NoteLoueur(loueurId, agentId);
-    note.setNote1(note1);
-    note.setNote2(note2);
-    note.setNote3(note3);
-
+    NoteLoueur note = new NoteLoueur(agent, loueur, note1, note2, note3);
     return noteLoueurRepository.save(note);
   }
 
-  public List<NoteLoueur> getNotesLoueur(Long loueurId) {
-    if (loueurId == null) {
-      throw new IllegalArgumentException("Loueur ID ne peut pas être null");
+  public List<NoteLoueur> getNotesLoueur(Loueur loueur) {
+    if (loueur == null || loueur.getIdU() == null) {
+      throw new IllegalArgumentException("Loueur invalide");
     }
-    return noteLoueurRepository.findByLoueurId(loueurId);
+    return noteLoueurRepository.findByLoueurId(loueur.getIdU());
   }
 
-  public List<NoteLoueur> getNotesLoueurParAgent(Long agentId) {
-    if (agentId == null) {
-      throw new IllegalArgumentException("Agent ID ne peut pas être null");
+  public Double getMoyenneLoueur(Loueur loueur) {
+    if (loueur == null || loueur.getIdU() == null) {
+      throw new IllegalArgumentException("Loueur invalide");
     }
-    return noteLoueurRepository.findByAgentId(agentId);
+    return noteLoueurRepository.getMoyenneByLoueurId(loueur.getIdU());
   }
 
-  public Double getMoyenneLoueur(Long loueurId) {
-    if (loueurId == null) {
-      throw new IllegalArgumentException("Loueur ID ne peut pas être null");
+  // ==================== NOTES VEHICULE ====================
+
+  /**
+   * Permet à un loueur de noter un véhicule.
+   */
+  public NoteVehicule noterVehicule(Loueur loueur, Vehicule vehicule, Double note1, Double note2,
+      Double note3) {
+    if (loueur == null) {
+      throw new IllegalArgumentException("Le loueur ne peut pas être null");
     }
-    return noteLoueurRepository.getMoyenneByLoueurId(loueurId);
-  }
-
-  public void supprimerNoteLoueur(Long noteId) {
-    if (noteId == null) {
-      throw new IllegalArgumentException("Note ID ne peut pas être null");
-    }
-    noteLoueurRepository.delete(noteId);
-  }
-
-  // ===== NoteVehicule Methods =====
-
-  public NoteVehicule noterVehicule(Long vehiculeId, Long loueurId, double note1, double note2,
-      double note3) {
-    if (vehiculeId == null || loueurId == null) {
-      throw new IllegalArgumentException("Vehicule ID et Loueur ID ne peuvent pas être null");
+    if (vehicule == null) {
+      throw new IllegalArgumentException("Le véhicule ne peut pas être null");
     }
 
-    NoteVehicule note = new NoteVehicule(vehiculeId, loueurId);
-    note.setNote1(note1);
-    note.setNote2(note2);
-    note.setNote3(note3);
-
+    NoteVehicule note = new NoteVehicule(vehicule, loueur, note1, note2, note3);
     return noteVehiculeRepository.save(note);
   }
 
-  public List<NoteVehicule> getNotesVehicule(Long vehiculeId) {
-    if (vehiculeId == null) {
-      throw new IllegalArgumentException("Vehicule ID ne peut pas être null");
+  public List<NoteVehicule> getNotesVehicule(Vehicule vehicule) {
+    if (vehicule == null || vehicule.getId() == null) {
+      throw new IllegalArgumentException("Véhicule invalide");
     }
-    return noteVehiculeRepository.findByVehiculeId(vehiculeId);
+    return noteVehiculeRepository.findByVehiculeId(vehicule.getId());
   }
 
-  public List<NoteVehicule> getNotesVehiculeParLoueur(Long loueurId) {
-    if (loueurId == null) {
-      throw new IllegalArgumentException("Loueur ID ne peut pas être null");
+  public Double getMoyenneVehicule(Vehicule vehicule) {
+    if (vehicule == null || vehicule.getId() == null) {
+      throw new IllegalArgumentException("Véhicule invalide");
     }
-    return noteVehiculeRepository.findByLoueurId(loueurId);
+    return noteVehiculeRepository.getMoyenneByVehiculeId(vehicule.getId());
   }
 
-  public Double getMoyenneVehicule(Long vehiculeId) {
-    if (vehiculeId == null) {
-      throw new IllegalArgumentException("Vehicule ID ne peut pas être null");
+  // ==================== SUPPRESSIONS ====================
+
+  public void supprimerNoteAgent(NoteAgent note) {
+    if (note == null || note.getId() == null) {
+      throw new IllegalArgumentException("Note invalide");
     }
-    return noteVehiculeRepository.getMoyenneByVehiculeId(vehiculeId);
+    noteAgentRepository.delete(note.getId());
   }
 
-  public void supprimerNoteVehicule(Long noteId) {
-    if (noteId == null) {
-      throw new IllegalArgumentException("Note ID ne peut pas être null");
+  public void supprimerNoteLoueur(NoteLoueur note) {
+    if (note == null || note.getId() == null) {
+      throw new IllegalArgumentException("Note invalide");
     }
-    noteVehiculeRepository.delete(noteId);
+    noteLoueurRepository.delete(note.getId());
+  }
+
+  public void supprimerNoteVehicule(NoteVehicule note) {
+    if (note == null || note.getId() == null) {
+      throw new IllegalArgumentException("Note invalide");
+    }
+    noteVehiculeRepository.delete(note.getId());
   }
 }

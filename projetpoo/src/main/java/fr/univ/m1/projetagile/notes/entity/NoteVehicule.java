@@ -2,11 +2,12 @@ package fr.univ.m1.projetagile.notes.entity;
 
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 /**
@@ -24,36 +25,26 @@ public class NoteVehicule extends Note {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "vehicule_id", nullable = false)
-  private Long vehiculeId;
+  @ManyToOne
+  @JoinColumn(name = "vehicule_id", nullable = false)
+  private Vehicule vehicule;
 
-  @Column(name = "loueur_id", nullable = false)
-  private Long loueurId;
+  @ManyToOne
+  @JoinColumn(name = "loueur_id", nullable = false)
+  private Loueur loueur;
 
   protected NoteVehicule() {}
 
   public NoteVehicule(Vehicule vehicule, Loueur loueur, Double note1, Double note2, Double note3) {
     super(note1, note2, note3);
-    if (vehicule == null || vehicule.getId() == null) {
-      throw new IllegalArgumentException("Vehicule ne peut pas être null ou sans ID");
+    if (vehicule == null) {
+      throw new IllegalArgumentException("Vehicule ne peut pas être null");
     }
-    if (loueur == null || loueur.getIdU() == null) {
-      throw new IllegalArgumentException("Loueur ne peut pas être null ou sans ID");
+    if (loueur == null) {
+      throw new IllegalArgumentException("Loueur ne peut pas être null");
     }
-    this.vehiculeId = vehicule.getId();
-    this.loueurId = loueur.getIdU();
-  }
-
-  public NoteVehicule(Long vehiculeId, Long loueurId) {
-    super();
-    if (vehiculeId == null) {
-      throw new IllegalArgumentException("Vehicule ID ne peut pas être null");
-    }
-    if (loueurId == null) {
-      throw new IllegalArgumentException("Loueur ID ne peut pas être null");
-    }
-    this.vehiculeId = vehiculeId;
-    this.loueurId = loueurId;
+    this.vehicule = vehicule;
+    this.loueur = loueur;
   }
 
   public Long getId() {
@@ -64,25 +55,26 @@ public class NoteVehicule extends Note {
     this.id = id;
   }
 
-  public Long getVehiculeId() {
-    return vehiculeId;
+  public Vehicule getVehicule() {
+    return vehicule;
   }
 
-  public void setVehiculeId(Long vehiculeId) {
-    this.vehiculeId = vehiculeId;
+  public void setVehicule(Vehicule vehicule) {
+    this.vehicule = vehicule;
   }
 
-  public Long getLoueurId() {
-    return loueurId;
+  public Loueur getLoueur() {
+    return loueur;
   }
 
-  public void setLoueurId(Long loueurId) {
-    this.loueurId = loueurId;
+  public void setLoueur(Loueur loueur) {
+    this.loueur = loueur;
   }
 
   @Override
   public String toString() {
-    return "NoteVehicule [id=" + id + ", vehicule=" + vehiculeId + ", loueur=" + loueurId
-        + ", moyenne=" + getNoteMoyenne() + ", date=" + date + "]";
+    return "NoteVehicule [id=" + id + ", vehicule=" + (vehicule != null ? vehicule.getId() : "null")
+        + ", loueur=" + (loueur != null ? loueur.getIdU() : "null") + ", moyenne="
+        + getNoteMoyenne() + ", date=" + date + "]";
   }
 }

@@ -2,11 +2,12 @@ package fr.univ.m1.projetagile.notes.entity;
 
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Loueur;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 /**
@@ -24,36 +25,26 @@ public class NoteLoueur extends Note {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "agent_id", nullable = false)
-  private Long agentId;
+  @ManyToOne
+  @JoinColumn(name = "agent_id", nullable = false)
+  private Agent agent;
 
-  @Column(name = "loueur_id", nullable = false)
-  private Long loueurId;
+  @ManyToOne
+  @JoinColumn(name = "loueur_id", nullable = false)
+  private Loueur loueur;
 
   protected NoteLoueur() {}
 
   public NoteLoueur(Agent agent, Loueur loueur, Double note1, Double note2, Double note3) {
     super(note1, note2, note3);
-    if (agent == null || agent.getIdU() == null) {
-      throw new IllegalArgumentException("Agent ne peut pas être null ou sans ID");
+    if (agent == null) {
+      throw new IllegalArgumentException("Agent ne peut pas être null");
     }
-    if (loueur == null || loueur.getIdU() == null) {
-      throw new IllegalArgumentException("Loueur ne peut pas être null ou sans ID");
+    if (loueur == null) {
+      throw new IllegalArgumentException("Loueur ne peut pas être null");
     }
-    this.agentId = agent.getIdU();
-    this.loueurId = loueur.getIdU();
-  }
-
-  public NoteLoueur(Long loueurId, Long agentId) {
-    super();
-    if (loueurId == null) {
-      throw new IllegalArgumentException("Loueur ID ne peut pas être null");
-    }
-    if (agentId == null) {
-      throw new IllegalArgumentException("Agent ID ne peut pas être null");
-    }
-    this.loueurId = loueurId;
-    this.agentId = agentId;
+    this.agent = agent;
+    this.loueur = loueur;
   }
 
   public Long getId() {
@@ -64,25 +55,26 @@ public class NoteLoueur extends Note {
     this.id = id;
   }
 
-  public Long getAgentId() {
-    return agentId;
+  public Agent getAgent() {
+    return agent;
   }
 
-  public void setAgentId(Long agentId) {
-    this.agentId = agentId;
+  public void setAgent(Agent agent) {
+    this.agent = agent;
   }
 
-  public Long getLoueurId() {
-    return loueurId;
+  public Loueur getLoueur() {
+    return loueur;
   }
 
-  public void setLoueurId(Long loueurId) {
-    this.loueurId = loueurId;
+  public void setLoueur(Loueur loueur) {
+    this.loueur = loueur;
   }
 
   @Override
   public String toString() {
-    return "NoteLoueur [id=" + id + ", agent=" + agentId + ", loueur=" + loueurId + ", moyenne="
+    return "NoteLoueur [id=" + id + ", agent=" + (agent != null ? agent.getIdU() : "null")
+        + ", loueur=" + (loueur != null ? loueur.getIdU() : "null") + ", moyenne="
         + getNoteMoyenne() + ", date=" + date + "]";
   }
 }

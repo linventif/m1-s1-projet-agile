@@ -18,9 +18,6 @@ import fr.univ.m1.projetagile.messagerie.service.MessagerieService;
 import fr.univ.m1.projetagile.notes.entity.NoteAgent;
 import fr.univ.m1.projetagile.notes.entity.NoteLoueur;
 import fr.univ.m1.projetagile.notes.entity.NoteVehicule;
-import fr.univ.m1.projetagile.notes.persistence.NoteAgentRepository;
-import fr.univ.m1.projetagile.notes.persistence.NoteLoueurRepository;
-import fr.univ.m1.projetagile.notes.persistence.NoteVehiculeRepository;
 import fr.univ.m1.projetagile.notes.service.NoteService;
 
 public class MainDemo {
@@ -40,8 +37,7 @@ public class MainDemo {
       AgentService agentService = new AgentService(new AgentRepository());
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
-      NoteService noteService = new NoteService(new NoteAgentRepository(),
-          new NoteLoueurRepository(), new NoteVehiculeRepository());
+      NoteService noteService = new NoteService();
 
 
       // -- // -- // -- // -- // -- // -- // -- //
@@ -162,58 +158,48 @@ public class MainDemo {
       System.out.println("\n=== Tests de notation ===");
 
       // Loueur 1 note Agent Bob
-      NoteAgent noteAgent1 =
-          noteService.noterAgent(APar_bob.getIdU(), L_john.getIdU(), 8.0, 9.0, 7.5);
+      NoteAgent noteAgent1 = noteService.noterAgent(L_john, APar_bob, 8.5, 9.0, 8.0);
       System.out.println("✓ Note créée: " + noteAgent1);
       System.out.println("  Moyenne: " + noteAgent1.getNoteMoyenne() + "/10");
 
       // Loueur 2 note Agent Alice
-      NoteAgent noteAgent2 =
-          noteService.noterAgent(APar_alice.getIdU(), L_jane.getIdU(), 9.5, 8.0, 9.0);
+      NoteAgent noteAgent2 = noteService.noterAgent(L_jane, APar_alice, 9.0, 9.5, 8.5);
       System.out.println("✓ Note créée: " + noteAgent2);
       System.out.println("  Moyenne: " + noteAgent2.getNoteMoyenne() + "/10");
 
       // Agent Bob note Loueur 1
-      NoteLoueur noteLoueur1 =
-          noteService.noterLoueur(L_john.getIdU(), APar_bob.getIdU(), 9.0, 8.5, 10.0);
+      NoteLoueur noteLoueur1 = noteService.noterLoueur(APar_bob, L_john, 9.0, 8.5, 9.0);
       System.out.println("✓ Note créée: " + noteLoueur1);
       System.out.println("  Moyenne: " + noteLoueur1.getNoteMoyenne() + "/10");
 
       // Agent Alice note Loueur 2
-      NoteLoueur noteLoueur2 =
-          noteService.noterLoueur(L_jane.getIdU(), APar_alice.getIdU(), 7.0, 8.0, 8.5);
+      NoteLoueur noteLoueur2 = noteService.noterLoueur(APar_alice, L_jane, 8.0, 8.5, 7.5);
       System.out.println("✓ Note créée: " + noteLoueur2);
       System.out.println("  Moyenne: " + noteLoueur2.getNoteMoyenne() + "/10");
 
-      // Loueur 1 note Véhicule 1
-      NoteVehicule noteVehicule1 =
-          noteService.noterVehicule(V1.getId(), L_john.getIdU(), 7.0, 8.0, 9.0);
+      // Loueur 1 note Véhicule 3 (Camion)
+      NoteVehicule noteVehicule1 = noteService.noterVehicule(L_john, V3, 8.0, 9.0, 8.5);
       System.out.println("✓ Note créée: " + noteVehicule1);
       System.out.println("  Moyenne: " + noteVehicule1.getNoteMoyenne() + "/10");
 
-      // Loueur 2 note Véhicule 2
-      NoteVehicule noteVehicule2 =
-          noteService.noterVehicule(V2.getId(), L_jane.getIdU(), 10.0, 9.5, 9.0);
+      // Loueur 2 note Véhicule 1 (Peugeot)
+      NoteVehicule noteVehicule2 = noteService.noterVehicule(L_jane, V1, 9.5, 9.0, 9.0);
       System.out.println("✓ Note créée: " + noteVehicule2);
       System.out.println("  Moyenne: " + noteVehicule2.getNoteMoyenne() + "/10");
 
       // Affichage des moyennes générales
-      System.out.println("\n=== Moyennes générales ===");
-      Double moyenneAgent1 = noteService.getMoyenneAgent(APar_bob.getIdU());
-      System.out.println("✓ Moyenne de " + APar_bob.getPrenom() + ": "
-          + (moyenneAgent1 != null ? moyenneAgent1 + "/10" : "Aucune note"));
-
-      Double moyenneLoueur1 = noteService.getMoyenneLoueur(L_john.getIdU());
-      System.out.println("✓ Moyenne de " + L_john.getPrenom() + ": "
-          + (moyenneLoueur1 != null ? moyenneLoueur1 + "/10" : "Aucune note"));
-
-      Double moyenneVehicule1 = noteService.getMoyenneVehicule(V1.getId());
-      System.out.println("✓ Moyenne du véhicule " + V1.getMarque() + " " + V1.getModele() + ": "
-          + (moyenneVehicule1 != null ? moyenneVehicule1 + "/10" : "Aucune note"));
+      System.out.println("\n=== Statistiques des notes ===");
+      System.out.println("Moyenne Agent Bob: " + noteService.getMoyenneAgent(APar_bob) + "/10");
+      System.out.println("Moyenne Agent Alice: " + noteService.getMoyenneAgent(APar_alice) + "/10");
+      System.out.println("Moyenne Loueur John: " + noteService.getMoyenneLoueur(L_john) + "/10");
+      System.out.println("Moyenne Loueur Jane: " + noteService.getMoyenneLoueur(L_jane) + "/10");
+      System.out
+          .println("Moyenne Véhicule Peugeot 308: " + noteService.getMoyenneVehicule(V1) + "/10");
+      System.out.println(
+          "Moyenne Véhicule Renault Master: " + noteService.getMoyenneVehicule(V3) + "/10");
 
 
-
-      System.out.println("\n✓ Tout s'est bien passé!");
+      System.out.println("\n✓ Démonstration complète terminée avec succès!");
     } catch (Exception e) {
       System.err.println("✗ Erreur: " + e.getMessage());
       e.printStackTrace();
