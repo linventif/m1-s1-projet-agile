@@ -71,7 +71,9 @@ public class VehiculeRepository {
   public List<Vehicule> findAll() {
     try (EntityManager em = DatabaseConnection.getEntityManager()) {
       TypedQuery<Vehicule> query =
-          em.createQuery("SELECT v FROM Vehicule v LEFT JOIN FETCH v.datesDispo", Vehicule.class);
+          em.createQuery("SELECT DISTINCT v FROM Vehicule v " +
+              "LEFT JOIN FETCH v.datesDispo " +
+              "LEFT JOIN FETCH v.proprietaire", Vehicule.class);
       return query.getResultList();
 
     } catch (Exception e) {
@@ -83,7 +85,9 @@ public class VehiculeRepository {
       String marque, String modele, String couleur, Double prixMin, Double prixMax, TypeV type) {
     try (EntityManager em = DatabaseConnection.getEntityManager()) {
       StringBuilder jpql = new StringBuilder();
-      jpql.append("SELECT DISTINCT v FROM Vehicule v LEFT JOIN FETCH v.datesDispo");
+      jpql.append("SELECT DISTINCT v FROM Vehicule v " +
+          "LEFT JOIN FETCH v.datesDispo " +
+          "LEFT JOIN FETCH v.proprietaire");
 
       List<String> conditions = new ArrayList<>();
 

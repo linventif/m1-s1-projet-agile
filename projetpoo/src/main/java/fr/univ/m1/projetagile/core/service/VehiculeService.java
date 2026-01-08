@@ -332,27 +332,40 @@ public class VehiculeService {
   private VehiculeDTO convertToDTO(Vehicule vehicule) {
     VehiculeDTO dto = new VehiculeDTO();
 
-    // Propriétés de base du véhicule
-    dto.setId(vehicule.getId());
-    dto.setType(vehicule.getType());
-    dto.setMarque(vehicule.getMarque());
-    dto.setModele(vehicule.getModele());
-    dto.setCouleur(vehicule.getCouleur());
-    dto.setVille(vehicule.getVille()); // Lieu du véhicule
-    dto.setPrixJ(vehicule.getPrixJ());
-    dto.setDisponible(vehicule.isDisponible());
+    try {
+      // Propriétés de base du véhicule
+      dto.setId(vehicule.getId());
+      dto.setType(vehicule.getType());
+      dto.setMarque(vehicule.getMarque());
+      dto.setModele(vehicule.getModele());
+      dto.setCouleur(vehicule.getCouleur());
+      dto.setVille(vehicule.getVille()); // Lieu du véhicule
+      dto.setPrixJ(vehicule.getPrixJ());
+      dto.setDisponible(vehicule.isDisponible());
 
-    // Note moyenne calculée
-    // TODO : Récupérer toutes les NoteV pour ce véhicule et calculer la moyenne
-    // A FAIRE DANS UN PACKAGE NOTES
-    dto.setNoteMoyenne(vehicule.calculerNote());
+      // Note moyenne calculée
+      // TODO : Récupérer toutes les NoteV pour ce véhicule et calculer la moyenne
+      // A FAIRE DANS UN PACKAGE NOTES
+      try {
+        dto.setNoteMoyenne(vehicule.calculerNote());
+      } catch (Exception e) {
+        dto.setNoteMoyenne(0.0); // Default value if calculation fails
+      }
 
-    // Dates de disponibilités filtrées selon les réservations existantes
-    List<LocalDate[]> disponibilitesFiltrees =
-        filtrerDisponibilitesAvecReservations(vehicule.getDatesDispo(), vehicule.getId());
-    dto.setDatesDispo(disponibilitesFiltrees);
+      // Dates de disponibilités filtrées selon les réservations existantes
+      try {
+        List<LocalDate[]> disponibilitesFiltrees =
+            filtrerDisponibilitesAvecReservations(vehicule.getDatesDispo(), vehicule.getId());
+        dto.setDatesDispo(disponibilitesFiltrees);
+      } catch (Exception e) {
+        // If lazy loading fails, set empty list
+        dto.setDatesDispo(new ArrayList<>());
+      }
 
-    return dto;
+      return dto;
+    } catch (Exception e) {
+      throw new RuntimeException("Erreur lors de la conversion du véhicule en DTO: " + e.getMessage(), e);
+    }
   }
 
   /**
