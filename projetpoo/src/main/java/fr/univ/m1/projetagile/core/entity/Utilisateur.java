@@ -74,6 +74,33 @@ public abstract class Utilisateur {
   }
 
   /**
+   * Envoie un message à un autre utilisateur avec validation et sauvegarde automatiques.
+   *
+   * @param destinataire l'utilisateur destinataire
+   * @param contenu le contenu du message
+   * @return le message envoyé et sauvegardé
+   */
+  public fr.univ.m1.projetagile.messagerie.entity.Message envoyerMessage(Utilisateur destinataire,
+      String contenu) {
+    fr.univ.m1.projetagile.messagerie.service.MessagerieService service =
+        new fr.univ.m1.projetagile.messagerie.service.MessagerieService();
+    return service.envoyerMessage(this, destinataire, contenu);
+  }
+
+  /**
+   * Récupère la conversation avec un autre utilisateur.
+   *
+   * @param autreUtilisateur l'autre utilisateur
+   * @return la liste des messages échangés dans l'ordre chronologique
+   */
+  public List<fr.univ.m1.projetagile.messagerie.entity.Message> getConversationAvec(
+      Utilisateur autreUtilisateur) {
+    fr.univ.m1.projetagile.messagerie.service.MessagerieService service =
+        new fr.univ.m1.projetagile.messagerie.service.MessagerieService();
+    return service.getConversation(this, autreUtilisateur);
+  }
+
+  /**
    * Récupère tous les messages de cet utilisateur (envoyés et reçus)
    *
    * @return la liste des messages

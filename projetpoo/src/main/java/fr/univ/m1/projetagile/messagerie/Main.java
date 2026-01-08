@@ -5,7 +5,7 @@ import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.messagerie.entity.Message;
-import fr.univ.m1.projetagile.messagerie.persistence.MessageRepository;
+import fr.univ.m1.projetagile.messagerie.service.MessagerieService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
@@ -56,32 +56,66 @@ public class Main {
 
       em.getTransaction().commit();
 
-      // Utilisation du MessageRepository (utilise le même EntityManager du thread)
-      MessageRepository messageRepository = new MessageRepository();
+      // ======== Utilisation du MessagerieService ========
+      System.out.println("\n=== Démonstration du MessagerieService ===\n");
 
-      // Create messages between them using repository
-      Message messageLoueurToAgent =
-          new Message("Bonjour, je suis intéressé par votre véhicule.", loueur, agent);
-      messageLoueurToAgent = messageRepository.save(messageLoueurToAgent);
-      System.out.println("✓ Message du Loueur vers l'Agent créé via Repository");
+      MessagerieService service = new MessagerieService();
 
-      Message messageAgentToLoueur = new Message(
-          "Bonjour, merci pour votre intérêt. Quand souhaitez-vous louer ?", agent, loueur);
-      messageAgentToLoueur = messageRepository.save(messageAgentToLoueur);
-      System.out.println("✓ Message de l'Agent vers le Loueur créé via Repository");
+      // Envoi de messages via le service (sauvegarde automatique)
+      System.out.println("📧 Envoi de messages...");
+      Message msg1 = service.envoyerMessage(loueur, agent,
+          "Bonjour, je suis intéressé par votre véhicule Peugeot 208.");
+      System.out.println("✓ Message 1 envoyé et sauvegardé (ID: " + msg1.getId() + ")");
 
-      // Récupération des messages via Utilisateur.getMessages()
-      System.out.println("\n=== Messages du Loueur ===");
-      List<Message> messagesLoueur = loueur.getMessages();
+      Message msg2 = service.envoyerMessage(agent, loueur,
+          "Bonjour ! Oui, il est disponible. Quand souhaitez-vous le louer ?");
+      System.out.println("✓ Message 2 envoyé et sauvegardé (ID: " + msg2.getId() + ")");
+
+      Message msg3 =
+          service.envoyerMessage(loueur, agent, "Je souhaiterais le louer du 15 au 20 décembre.");
+      System.out.println("✓ Message 3 envoyé et sauvegardé (ID: " + msg3.getId() + ")");
+
+      Message msg4 = service.envoyerMessage(agent, loueur,
+          "Parfait ! Je vais préparer le contrat de location.");
+      System.out.println("✓ Message 4 envoyé et sauvegardé (ID: " + msg4.getId() + ")");
+
+      // Utilisation via les méthodes de Utilisateur
+      System.out.println("\n📧 Envoi via méthode Utilisateur.envoyerMessage()...");
+      Message msg5 = loueur.envoyerMessage(agent, "Merci beaucoup !");
+      System.out.println("✓ Message 5 envoyé (ID: " + msg5.getId() + ")");
+
+      // Récupération des messages du loueur
+      System.out.println("\n=== Messages du Loueur (via service) ===");
+      List<Message> messagesLoueur = service.getMessagesUtilisateur(loueur);
       for (Message msg : messagesLoueur) {
-        System.out.println("- " + msg.getContenu());
+        String direction = msg.getExpediteurId().equals(loueur.getIdU()) ? "→ Envoyé" : "← Reçu";
+        System.out.println(direction + ": " + msg.getContenu());
       }
 
-      System.out.println("\n=== Messages de l'Agent ===");
-      List<Message> messagesAgent = agent.getMessages();
-      for (Message msg : messagesAgent) {
-        System.out.println("- " + msg.getContenu());
+      // Récupération de la conversation
+      System.out.println("\n=== Conversation complète (via service) ===");
+      List<Message> conversation = service.getConversation(loueur, agent);
+      for (Message msg : conversation) {
+        String expediteur = msg.getExpediteurId().equals(loueur.getIdU()) ? "Loueur" : "Agent";
+        System.out.println("[" + expediteur + "] " + msg.getContenu());
       }
+
+      // Utilisation via méthode de Utilisateur
+      System.out.println("\n=== Conversation via Utilisateur.getConversationAvec() ===");
+      List<Message> conversationViaUtilisateur = loueur.getConversationAvec(agent);
+      System.out.println("Nombre de messages échangés: " + conversationViaUtilisateur.size());
+
+      // Statistiques
+      System.out.println("\n=== Statistiques ===");
+      System.out
+          .println("Messages envoyés par le loueur: " + service.getMessagesEnvoyes(loueur).size());
+      System.out
+          .println("Messages reçus par le loueur: " + service.getMessagesRecus(loueur).size());
+      System.out
+          .println("Total messages du loueur: " + service.getMessagesUtilisateur(loueur).size());
+      System.out.println(
+          "Messages dans la conversation: " + service.compterMessagesConversation(loueur, agent));
+      System.out.println("Ont échangé des messages: " + service.ontEchangeMessages(loueur, agent));
 
       // Récupération de la conversation complète
       System.out.println("\n=== Conversation entre Loueur et Agent ===");
