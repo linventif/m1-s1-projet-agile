@@ -2,6 +2,7 @@ package fr.univ.m1.projetagile.core.entity;
 
 import fr.univ.m1.projetagile.enums.TypeAgent;
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
@@ -9,6 +10,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "agents_professionnels")
 @PrimaryKeyJoinColumn(name = "idU")
+@DiscriminatorValue("PROFESSIONNEL")
 public class AgentProfessionnel extends Agent {
 
   @Column(nullable = false)

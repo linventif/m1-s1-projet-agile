@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <!-- Appender pour la console -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Niveau de log pour Hibernate -->
+  <logger name="org.hibernate" level="ERROR" />
+  <logger name="org.hibernate.SQL" level="ERROR" />
+  <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="ERROR" />
+  <logger name="org.hibernate.engine" level="ERROR" />
+  <logger name="org.hibernate.jpa" level="ERROR" />
+  <logger name="org.hibernate.boot" level="ERROR" />
+  <logger name="org.hibernate.cache" level="ERROR" />
+
+  <!-- Niveau de log pour JPA -->
+  <logger name="jakarta.persistence" level="ERROR" />
+
+  <!-- Niveau de log général -->
+  <root level="WARN">
+    <appender-ref ref="STDOUT" />
+  </root>
+</configuration>

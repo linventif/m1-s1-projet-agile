@@ -29,10 +29,9 @@ public class Assurance {
   @JoinColumn(name = "grille_tarif_id", nullable = false)
   private GrilleTarif grille;
 
-  @OneToMany(mappedBy = "assurance", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "assurance", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<SouscriptionAssurance> souscriptions = new ArrayList<>();
 
-  // Constructeur sans argument pour JPA
   protected Assurance() {}
 
   public Assurance(String nom, GrilleTarif grille) {
@@ -40,7 +39,6 @@ public class Assurance {
     this.grille = grille;
   }
 
-  // Getters et Setters
   public Long getId() {
     return id;
   }
@@ -65,9 +63,15 @@ public class Assurance {
     return Collections.unmodifiableList(souscriptions);
   }
 
-  // Méthode selon UML
+  public void ajouterSouscription(SouscriptionAssurance s) {
+    if (s != null) {
+      souscriptions.add(s);
+      s.setAssurance(this);
+    }
+  }
+
+  // Si vous voulez garder la méthode UML, elle doit rester simple
   public void importerGrille(GrilleTarif nouvelleGrille) {
-    // Importe une nouvelle grille tarifaire
     if (nouvelleGrille != null) {
       this.grille = nouvelleGrille;
     }
