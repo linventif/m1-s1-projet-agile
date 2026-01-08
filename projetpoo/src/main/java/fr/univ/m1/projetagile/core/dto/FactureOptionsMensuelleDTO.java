@@ -35,6 +35,7 @@ public class FactureOptionsMensuelleDTO {
     return mois;
   }
 
+  public void setMois(int mois) {
     this.mois = mois;
   }
 
