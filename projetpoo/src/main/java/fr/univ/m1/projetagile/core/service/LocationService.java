@@ -64,8 +64,9 @@ public class LocationService {
 
   /**
    * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
-   * - Le prix de base (prix par jour × nombre de jours) - Une commission proportionnelle de 10% sur
-   * le prix de base - Des frais fixes de 2€ par jour
+   * - Le prix de base (prix par jour × nombre de jours)
+   * - Une commission proportionnelle de 10% sur le prix de base
+   * - Des frais fixes de 2€ par jour
    *
    * @param location la location pour laquelle calculer le prix
    * @return le prix total de la location
