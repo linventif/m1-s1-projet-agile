@@ -1,5 +1,7 @@
-package fr.univ.m1.projetagile.core.entity;
+package fr.univ.m1.projetagile.notes;
 
+import fr.univ.m1.projetagile.core.entity.Agent;
+import fr.univ.m1.projetagile.core.entity.Loueur;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,6 +29,10 @@ public class NoteA extends Note {
   // Constructeur sans argument pour JPA
   protected NoteA() {
     super();
+  }
+
+  public static NoteA create() {
+    return new NoteA();
   }
 
   public NoteA(Double note1, Double note2, Double note3, Agent agent, Loueur loueur) {
