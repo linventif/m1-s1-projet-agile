@@ -2,6 +2,7 @@ package fr.univ.m1.projetagile.notes;
 
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.enums.CritereNoteAgent;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,7 +27,6 @@ public class NoteA extends Note {
   @JoinColumn(name = "loueur_id", nullable = false)
   private Loueur loueur;
 
-  // Constructeur sans argument pour JPA
   protected NoteA() {
     super();
   }
@@ -41,7 +41,38 @@ public class NoteA extends Note {
     this.loueur = loueur;
   }
 
-  // Getters et Setters
+  // =======================
+  // Association aux critères (#23)
+  // =======================
+
+  public Double getPonctualite() {
+    return note1;
+  }
+
+  public Double getCommunication() {
+    return note2;
+  }
+
+  public Double getSerieux() {
+    return note3;
+  }
+
+  public static CritereNoteAgent getCritere1() {
+    return CritereNoteAgent.PONCTUALITE;
+  }
+
+  public static CritereNoteAgent getCritere2() {
+    return CritereNoteAgent.COMMUNICATION;
+  }
+
+  public static CritereNoteAgent getCritere3() {
+    return CritereNoteAgent.SERIEUX;
+  }
+
+  // =======================
+  // Getters / Setters
+  // =======================
+
   public Long getId() {
     return id;
   }
@@ -62,16 +93,27 @@ public class NoteA extends Note {
     this.loueur = loueur;
   }
 
-  // Méthode selon UML
-  @Override
+  // =======================
+  // Méthodes métier
+  // =======================
+
+  /**
+   * Méthode métier : finaliser/valider la note. (On évite @Override pour ne pas casser la
+   * compilation si la signature dans Note diffère.)
+   */
+  public void noter() {
+    // Exemple : validations supplémentaires si besoin
+  }
+
+  /**
+   * Compatibilité si ton UML / ancien code appelle Noter()
+   */
   public void Noter() {
-    // Implémente la notation d'un agent
-    // Cette méthode peut être utilisée pour valider ou finaliser la note
+    noter();
   }
 
   public static NoteA NoterAgent(Agent agent, Loueur loueur, Double note1, Double note2,
       Double note3) {
-    // Méthode statique pour créer une note d'agent
     return new NoteA(note1, note2, note3, agent, loueur);
   }
 }

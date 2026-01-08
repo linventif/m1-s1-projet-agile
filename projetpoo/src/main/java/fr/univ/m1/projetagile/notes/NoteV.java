@@ -2,6 +2,7 @@ package fr.univ.m1.projetagile.notes;
 
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
+import fr.univ.m1.projetagile.enums.CritereNoteVehicule;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -41,7 +42,42 @@ public class NoteV extends Note {
     this.loueur = loueur;
   }
 
-  // Getters et Setters
+  // =======================
+  // Association aux critères (#23)
+  // =======================
+
+  /** Critère 1 : Propreté */
+  public Double getProprete() {
+    return note1;
+  }
+
+  /** Critère 2 : Confort */
+  public Double getConfort() {
+    return note2;
+  }
+
+  /** Critère 3 : Conformité à l’annonce */
+  public Double getConformiteAnnonce() {
+    return note3;
+  }
+
+  /** Définition explicite des critères */
+  public static CritereNoteVehicule getCritere1() {
+    return CritereNoteVehicule.PROPRETE;
+  }
+
+  public static CritereNoteVehicule getCritere2() {
+    return CritereNoteVehicule.CONFORT;
+  }
+
+  public static CritereNoteVehicule getCritere3() {
+    return CritereNoteVehicule.CONFORMITE_ANNONCE;
+  }
+
+  // =======================
+  // Getters / Setters
+  // =======================
+
   public Long getId() {
     return id;
   }
@@ -62,16 +98,18 @@ public class NoteV extends Note {
     this.loueur = loueur;
   }
 
-  // Méthode selon UML
+  // =======================
+  // Méthodes métier
+  // =======================
+
   @Override
   public void Noter() {
-    // Implémente la notation d'un véhicule
-    // Cette méthode peut être utilisée pour valider ou finaliser la note
+    // Méthode métier : possibilité future de validation,
+    // règles supplémentaires, etc.
   }
 
   public static NoteV NoterVehicule(Vehicule vehicule, Loueur loueur, Double note1, Double note2,
       Double note3) {
-    // Méthode statique pour créer une note de véhicule
     return new NoteV(note1, note2, note3, vehicule, loueur);
   }
 }

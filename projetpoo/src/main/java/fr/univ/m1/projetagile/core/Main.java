@@ -1,10 +1,16 @@
 package fr.univ.m1.projetagile.core;
 
 import java.util.List;
+import fr.univ.m1.projetagile.core.entity.Agent;
+import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.Assurance;
 import fr.univ.m1.projetagile.core.entity.GrilleTarif;
+import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.service.AssuranceService;
 import fr.univ.m1.projetagile.enums.TypeV;
+import fr.univ.m1.projetagile.notes.NoteA;
+import fr.univ.m1.projetagile.notes.NoteV;
 import jakarta.persistence.EntityManager;
 
 public class Main {
@@ -13,7 +19,6 @@ public class Main {
     EntityManager em = null;
 
     try {
-      // Initialize database connection
       DatabaseConnection.init();
       em = DatabaseConnection.getEntityManager();
 
@@ -28,78 +33,68 @@ public class Main {
       @SuppressWarnings("unchecked")
       List<String> tables = em.createNativeQuery(sql).getResultList();
 
-      if (tables.isEmpty()) {
-        System.out.println("  (aucune table trouvée)");
-      } else {
-        for (String tableName : tables) {
-          System.out.println("  - " + tableName);
-        }
+      for (String tableName : tables) {
+        System.out.println("  - " + tableName);
       }
-      System.out.println("\nNombre total de tables: " + tables.size());
 
       // =========================
-      // 2) TEST AssuranceService (persist en DB)
+      // 2) TEST AssuranceService
       // =========================
-      System.out.println("\n=== TEST AssuranceService (persist) ===");
+      System.out.println("\n=== TEST AssuranceService ===");
 
       AssuranceService assuranceService = new AssuranceService();
 
-      // Important : transaction obligatoire pour persist
       em.getTransaction().begin();
 
-      // Créer grille
       GrilleTarif grille = assuranceService.creerGrille();
-      em.persist(grille); // persist d'abord la grille (parent)
+      em.persist(grille);
 
-      // Ajouter tarifs (ils seront persist grâce à cascade depuis GrilleTarif)
       assuranceService.ajouterTarifVehicule(grille, TypeV.voiture, "Clio", 10);
       assuranceService.ajouterTarifVehicule(grille, TypeV.voiture, "208", 12);
       assuranceService.ajouterTarifOption(grille, "GPS", "Navigation", 2);
       assuranceService.ajouterTarifOption(grille, "SiegeBebe", "Siège bébé", 3);
 
-      // Créer assurance liée à la grille
       Assurance assurance = assuranceService.creerAssurance("AZA", grille);
-      // Optionnel : si tu utilises grille.ajouterAssurance(assurance)
       grille.ajouterAssurance(assurance);
-
-      // Persist assurance (cascade peut le faire aussi, mais là c'est clair)
       em.persist(assurance);
 
       em.getTransaction().commit();
 
-      System.out.println("✓ Grille sauvegardée (id=" + grille.getId() + ")");
-      System.out.println(
-          "✓ Assurance sauvegardée (id=" + assurance.getId() + ", nom=" + assurance.getNom() + ")");
-      System.out.println("✓ Tarifs véhicules enregistrés: " + grille.getTarifVehi().size());
-      System.out.println("✓ Tarifs options enregistrés: " + grille.getTarifOptions().size());
+      System.out.println("✓ Assurance OK");
 
       // =========================
-      // 3) Vérification lecture (JPQL simple)
+      // 3) TEST #23 - NOTATION
       // =========================
-      System.out.println("\n=== Vérification lecture ===");
+      System.out.println("\n=== TEST #23 - NOTATION ===");
 
-      Long nbAssurances =
-          em.createQuery("SELECT COUNT(a) FROM Assurance a", Long.class).getSingleResult();
-      Long nbGrilles =
-          em.createQuery("SELECT COUNT(g) FROM GrilleTarif g", Long.class).getSingleResult();
+      Agent agent = new AgentParticulier("Dupont", "Jean", "agent@test.com", "pass", "0600000000");
 
-      System.out.println("Assurances en DB: " + nbAssurances);
-      System.out.println("Grilles en DB: " + nbGrilles);
+      Loueur loueur = new Loueur("Martin", "Paul", "loueur@test.com", "pass");
+
+      Vehicule vehicule =
+          new Vehicule(TypeV.voiture, "Peugeot", "208", "Rouge", "Toulouse", 45.0, agent);
+
+      NoteA noteAgent = NoteA.NoterAgent(agent, loueur, 4.0, 5.0, 3.0);
+      System.out.println("NOTE AGENT");
+      System.out.println(NoteA.getCritere1() + " = " + noteAgent.getPonctualite());
+      System.out.println(NoteA.getCritere2() + " = " + noteAgent.getCommunication());
+      System.out.println(NoteA.getCritere3() + " = " + noteAgent.getSerieux());
+      System.out.println("Moyenne = " + noteAgent.getNoteMoyenne());
+
+      NoteV noteVehicule = NoteV.NoterVehicule(vehicule, loueur, 5.0, 4.0, 4.0);
+      System.out.println("\nNOTE VEHICULE");
+      System.out.println(NoteV.getCritere1() + " = " + noteVehicule.getProprete());
+      System.out.println(NoteV.getCritere2() + " = " + noteVehicule.getConfort());
+      System.out.println(NoteV.getCritere3() + " = " + noteVehicule.getConformiteAnnonce());
+      System.out.println("Moyenne = " + noteVehicule.getNoteMoyenne());
+
+      System.out.println("\n✓ TEST #23 OK");
 
     } catch (Exception e) {
-      System.err.println("✗ Erreur: " + e.getMessage());
       e.printStackTrace();
-
-      // rollback si une transaction est ouverte
-      try {
-        if (em != null && em.getTransaction().isActive()) {
-          em.getTransaction().rollback();
-          System.out.println("↩ Transaction rollback");
-        }
-      } catch (Exception ex) {
-        System.err.println("✗ Erreur rollback: " + ex.getMessage());
+      if (em != null && em.getTransaction().isActive()) {
+        em.getTransaction().rollback();
       }
-
     } finally {
       if (em != null && em.isOpen()) {
         em.close();
