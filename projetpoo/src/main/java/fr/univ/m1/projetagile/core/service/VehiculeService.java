@@ -106,28 +106,8 @@ public class VehiculeService {
    * @throws IllegalArgumentException si le véhicule n'existe pas ou n'appartient pas à l'agent
    */
   public void deleteVehiculeForAgent(Agent agent, Long vehiculeId) {
-    if (agent == null) {
-      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
-    }
-    if (agent.getIdU() == null) {
-      throw new IllegalArgumentException("L'agent doit être déjà enregistré.");
-    }
-    if (vehiculeId == null) {
-      throw new IllegalArgumentException("L'identifiant du véhicule ne peut pas être nul.");
-    }
-
-    // Récupérer le véhicule pour vérifier qu'il existe
-    Vehicule vehicule = vehiculeRepository.findById(vehiculeId);
-    if (vehicule == null) {
-      throw new IllegalArgumentException("Aucun véhicule trouvé avec l'identifiant " + vehiculeId);
-    }
-
-    // Vérifier que le véhicule appartient bien à l'agent
-    if (vehicule.getProprietaire() == null
-        || !vehicule.getProprietaire().getIdU().equals(agent.getIdU())) {
-      throw new IllegalArgumentException(
-          "Ce véhicule n'appartient pas à l'agent spécifié. Seul le propriétaire peut supprimer un véhicule.");
-    }
+    // Utiliser la méthode utilitaire pour vérifier la propriété et récupérer le véhicule
+    Vehicule vehicule = verifyOwnershipAndGetVehicule(agent, vehiculeId);
 
     // Vérifier qu'aucune location active (non annulée/terminée) n'existe pour ce véhicule
     List<Object[]> locationsActives = vehiculeRepository.getDatesLocationsActives(vehiculeId);

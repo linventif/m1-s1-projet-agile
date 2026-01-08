@@ -57,20 +57,37 @@ public abstract class UtilisateurService<T extends Utilisateur, R extends Utilis
   }
 
   /**
+   * Valide le format d'un email
+   *
+   * @param email l'email à valider
+   * @throws IllegalArgumentException si l'email est invalide
+   */
+  protected void validateEmail(String email) {
+    if (email == null || email.trim().isEmpty()) {
+      throw new IllegalArgumentException("L'email ne peut pas être vide.");
+    }
+    
+    // Regex pour valider le format email
+    // Format accepté: utilisateur@domaine.extension
+    String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+    
+    if (!email.matches(emailRegex)) {
+      throw new IllegalArgumentException(
+          "Le format de l'email est invalide. Format attendu: utilisateur@domaine.extension");
+    }
+  }
+
+  /**
    * Valide les informations communes à tous les utilisateurs
    *
    * @param email l'email de l'utilisateur
    * @param motDePasse le mot de passe de l'utilisateur
    */
   protected void validateCommonFields(String email, String motDePasse) {
-    if (email == null || email.trim().isEmpty()) {
-      throw new IllegalArgumentException("L'email ne peut pas être vide.");
-    }
+    validateEmail(email);
+    
     if (motDePasse == null || motDePasse.trim().isEmpty()) {
       throw new IllegalArgumentException("Le mot de passe ne peut pas être vide.");
-    }
-    if (!email.contains("@")) {
-      throw new IllegalArgumentException("L'email doit être valide.");
     }
   }
 
@@ -138,12 +155,8 @@ public abstract class UtilisateurService<T extends Utilisateur, R extends Utilis
     if (utilisateur == null) {
       throw new IllegalArgumentException("L'utilisateur ne peut pas être nul.");
     }
-    if (nouvelEmail == null || nouvelEmail.trim().isEmpty()) {
-      throw new IllegalArgumentException("Le nouvel email ne peut pas être vide.");
-    }
-    if (!nouvelEmail.contains("@")) {
-      throw new IllegalArgumentException("L'email doit être valide.");
-    }
+    
+    validateEmail(nouvelEmail);
 
     // Vérifier que le nouvel email n'est pas déjà utilisé par un autre utilisateur
     T existingUser = repository.findByEmail(nouvelEmail);

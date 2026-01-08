@@ -27,6 +27,31 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   }
 
   /**
+   * Valide le format d'un numéro de téléphone
+   * Le format attendu est: 11 chiffres commençant par un code pays (ex: 33638472527)
+   *
+   * @param telephone le numéro de téléphone à valider
+   * @throws IllegalArgumentException si le format est invalide
+   */
+  private void validateTelephone(String telephone) {
+    if (telephone == null || telephone.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le numéro de téléphone ne peut pas être vide.");
+    }
+    
+    // Vérifier que le numéro ne contient que des chiffres
+    if (!telephone.matches("\\d+")) {
+      throw new IllegalArgumentException(
+          "Le numéro de téléphone ne doit contenir que des chiffres.");
+    }
+    
+    // Vérifier que le numéro a exactement 11 chiffres
+    if (telephone.length() != 11) {
+      throw new IllegalArgumentException(
+          "Le numéro de téléphone doit contenir exactement 11 chiffres (ex: 33638472527).");
+    }
+  }
+
+  /**
    * Crée un nouvel agent particulier
    *
    * @param nom le nom de l'agent
@@ -40,6 +65,7 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
       String motDePasse, String telephone) {
 
     validateCommonFields(email, motDePasse);
+    validateTelephone(telephone);
 
     if (nom == null || nom.trim().isEmpty()) {
       throw new IllegalArgumentException("Le nom ne peut pas être vide.");
@@ -184,6 +210,8 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     if (agent == null) {
       throw new IllegalArgumentException("L'agent ne peut pas être nul.");
     }
+    
+    validateTelephone(nouveauTelephone);
 
     agent.setTelephone(nouveauTelephone);
     return (AgentParticulier) repository.save(agent);
