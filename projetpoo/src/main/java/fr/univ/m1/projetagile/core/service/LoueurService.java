@@ -154,7 +154,6 @@ public class LoueurService extends UtilisateurService<Loueur, LoueurRepository> 
     dto.setDateFin(location.getDateFin());
     dto.setLieuDepot(location.getLieuDepot());
     dto.setStatut(location.getStatut());
-    dto.setPrixTotal(location.getPrixLocation());
 
     // Convertir le véhicule en VehiculeDTO
     if (location.getVehicule() != null) {
