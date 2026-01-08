@@ -160,6 +160,6 @@ public abstract class Utilisateur {
 
   @Override
   public String toString() {
-    return "[" + idU + "] <" + email + ">";
+    return this.getClass().getSimpleName() + " [id=" + idU + ", email=" + email + "]";
   }
 }
