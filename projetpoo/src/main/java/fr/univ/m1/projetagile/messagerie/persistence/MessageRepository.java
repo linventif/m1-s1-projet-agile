@@ -1,8 +1,9 @@
-package fr.univ.m1.projetagile.messagerie;
+package fr.univ.m1.projetagile.messagerie.persistence;
 
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
+import fr.univ.m1.projetagile.messagerie.entity.Message;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;

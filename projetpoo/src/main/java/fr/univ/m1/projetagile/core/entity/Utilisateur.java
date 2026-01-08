@@ -78,9 +78,9 @@ public abstract class Utilisateur {
    *
    * @return la liste des messages
    */
-  public List<fr.univ.m1.projetagile.messagerie.Message> getMessages() {
-    fr.univ.m1.projetagile.messagerie.MessageRepository messageRepository =
-        new fr.univ.m1.projetagile.messagerie.MessageRepository();
+  public List<fr.univ.m1.projetagile.messagerie.entity.Message> getMessages() {
+    fr.univ.m1.projetagile.messagerie.persistence.MessageRepository messageRepository =
+        new fr.univ.m1.projetagile.messagerie.persistence.MessageRepository();
     return messageRepository.findAllMessagesByUser(this);
   }
 
@@ -89,9 +89,9 @@ public abstract class Utilisateur {
    *
    * @return la liste des messages envoyés
    */
-  public List<fr.univ.m1.projetagile.messagerie.Message> getMessagesSent() {
-    fr.univ.m1.projetagile.messagerie.MessageRepository messageRepository =
-        new fr.univ.m1.projetagile.messagerie.MessageRepository();
+  public List<fr.univ.m1.projetagile.messagerie.entity.Message> getMessagesSent() {
+    fr.univ.m1.projetagile.messagerie.persistence.MessageRepository messageRepository =
+        new fr.univ.m1.projetagile.messagerie.persistence.MessageRepository();
     return messageRepository.findMessagesSentBy(this);
   }
 
@@ -100,9 +100,9 @@ public abstract class Utilisateur {
    *
    * @return la liste des messages reçus
    */
-  public List<fr.univ.m1.projetagile.messagerie.Message> getMessagesReceived() {
-    fr.univ.m1.projetagile.messagerie.MessageRepository messageRepository =
-        new fr.univ.m1.projetagile.messagerie.MessageRepository();
+  public List<fr.univ.m1.projetagile.messagerie.entity.Message> getMessagesReceived() {
+    fr.univ.m1.projetagile.messagerie.persistence.MessageRepository messageRepository =
+        new fr.univ.m1.projetagile.messagerie.persistence.MessageRepository();
     return messageRepository.findMessagesReceivedBy(this);
   }
 

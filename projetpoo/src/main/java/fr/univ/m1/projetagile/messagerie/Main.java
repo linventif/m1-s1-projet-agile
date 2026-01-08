@@ -4,6 +4,8 @@ import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.messagerie.entity.Message;
+import fr.univ.m1.projetagile.messagerie.persistence.MessageRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 

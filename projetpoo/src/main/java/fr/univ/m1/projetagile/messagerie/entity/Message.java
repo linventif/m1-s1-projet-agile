@@ -1,4 +1,4 @@
-package fr.univ.m1.projetagile.messagerie;
+package fr.univ.m1.projetagile.messagerie.entity;
 
 import java.time.LocalDateTime;
 import fr.univ.m1.projetagile.core.entity.Agent;
