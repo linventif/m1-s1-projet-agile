@@ -1,4 +1,4 @@
-package fr.univ.m1.projetagile._example;
+package fr.univ.m1.projetagile._demo;
 
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
@@ -16,7 +16,7 @@ import fr.univ.m1.projetagile.messagerie.entity.Message;
 import fr.univ.m1.projetagile.messagerie.persistence.MessageRepository;
 import fr.univ.m1.projetagile.messagerie.service.MessagerieService;
 
-public class Main {
+public class MainDemo {
   public static void main(String[] args) {
     try {
       // -- // -- // -- // -- // -- // -- // -- //

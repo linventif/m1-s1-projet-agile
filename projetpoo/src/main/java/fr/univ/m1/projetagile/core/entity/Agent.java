@@ -2,23 +2,18 @@ package fr.univ.m1.projetagile.core.entity;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import fr.univ.m1.projetagile.enums.TypeAgent;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
@@ -35,11 +30,8 @@ public abstract class Agent extends Utilisateur {
   @OneToMany(mappedBy = "proprietaire", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Vehicule> vehicules = new ArrayList<>();
 
-  @ElementCollection
-  @CollectionTable(name = "agent_options", joinColumns = @JoinColumn(name = "agent_id"))
-  @Enumerated(EnumType.STRING)
-  @Column(name = "option_payante")
-  private Set<OptionPayante> optionsActives = new HashSet<>();
+  @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<SouscriptionOption> souscriptionOptions = new ArrayList<>();
 
   // Constructeur sans argument pour JPA
   protected Agent() {
@@ -96,31 +88,37 @@ public abstract class Agent extends Utilisateur {
     deleteVehicule(v);
   }
 
-  public void contracterOption(OptionPayante option) {
-    if (option != null) {
-      optionsActives.add(option);
+  public void contracterOption(SouscriptionOption souscriptionOption) {
+    if (souscriptionOption != null) {
+      souscriptionOptions.add(souscriptionOption);
+      souscriptionOption.setAgent(this);
     }
   }
 
-  public void annulerOption(OptionPayante option) {
-    optionsActives.remove(option);
+  public void annulerOption(SouscriptionOption souscriptionOption) {
+    if (souscriptionOption != null && souscriptionOptions.remove(souscriptionOption)) {
+      souscriptionOption.setAgent(null);
+    }
   }
 
   // Alias pour compatibilité
-  public void activerOption(OptionPayante option) {
-    contracterOption(option);
+  public void activerOption(SouscriptionOption souscriptionOption) {
+    contracterOption(souscriptionOption);
   }
 
-  public void desactiverOption(OptionPayante option) {
-    annulerOption(option);
+  public void desactiverOption(SouscriptionOption souscriptionOption) {
+    annulerOption(souscriptionOption);
   }
 
-  public boolean aOption(OptionPayante option) {
-    return optionsActives.contains(option);
+  public boolean aOption(Options option) {
+    if (option == null) {
+      return false;
+    }
+    return souscriptionOptions.stream().anyMatch(so -> option.equals(so.getOption()));
   }
 
-  public Set<OptionPayante> getOptionsActives() {
-    return Collections.unmodifiableSet(optionsActives);
+  public List<SouscriptionOption> getOptionsActives() {
+    return Collections.unmodifiableList(souscriptionOptions);
   }
 
   public void accepterLocation(Location location) {
