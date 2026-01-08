@@ -129,6 +129,13 @@ public class VehiculeService {
           "Ce véhicule n'appartient pas à l'agent spécifié. Seul le propriétaire peut supprimer un véhicule.");
     }
 
+    // Vérifier qu'aucune location active (non annulée/terminée) n'existe pour ce véhicule
+    List<Object[]> locationsActives = vehiculeRepository.getDatesLocationsActives(vehiculeId);
+    if (locationsActives != null && !locationsActives.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Impossible de supprimer ce véhicule : des locations sont encore en cours ou planifiées.");
+    }
+
     // Supprimer le véhicule
     vehiculeRepository.delete(vehiculeId);
   }
