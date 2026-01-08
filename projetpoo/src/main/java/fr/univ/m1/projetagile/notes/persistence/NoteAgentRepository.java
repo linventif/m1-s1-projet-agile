@@ -43,9 +43,9 @@ public class NoteAgentRepository {
 
   public List<NoteAgent> findByAgentId(Long agentId) {
     EntityManager em = DatabaseConnection.getEntityManager();
-    TypedQuery<NoteAgent> query =
-        em.createQuery("SELECT n FROM NoteAgent n WHERE n.agentId = :agentId ORDER BY n.date DESC",
-            NoteAgent.class);
+    TypedQuery<NoteAgent> query = em.createQuery(
+        "SELECT n FROM NoteAgent n WHERE n.agent.idU = :agentId ORDER BY n.date DESC",
+        NoteAgent.class);
     query.setParameter("agentId", agentId);
     return query.getResultList();
   }
@@ -53,7 +53,7 @@ public class NoteAgentRepository {
   public List<NoteAgent> findByLoueurId(Long loueurId) {
     EntityManager em = DatabaseConnection.getEntityManager();
     TypedQuery<NoteAgent> query = em.createQuery(
-        "SELECT n FROM NoteAgent n WHERE n.loueurId = :loueurId ORDER BY n.date DESC",
+        "SELECT n FROM NoteAgent n WHERE n.loueur.idU = :loueurId ORDER BY n.date DESC",
         NoteAgent.class);
     query.setParameter("loueurId", loueurId);
     return query.getResultList();
@@ -62,7 +62,7 @@ public class NoteAgentRepository {
   public Double getMoyenneByAgentId(Long agentId) {
     EntityManager em = DatabaseConnection.getEntityManager();
     TypedQuery<Double> query = em.createQuery(
-        "SELECT AVG((n.note1 + n.note2 + n.note3) / 3.0) FROM NoteAgent n WHERE n.agentId = :agentId",
+        "SELECT AVG((n.note1 + n.note2 + n.note3) / 3.0) FROM NoteAgent n WHERE n.agent.idU = :agentId",
         Double.class);
     query.setParameter("agentId", agentId);
     Double result = query.getSingleResult();
