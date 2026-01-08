@@ -1,5 +1,6 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import java.util.List;
 import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -70,6 +71,39 @@ public abstract class Utilisateur {
   public void contacterLoueur(Loueur loueur) {
     // À implémenter avec le système de messagerie
     // TODO: implémenter la logique de contact avec un loueur
+  }
+
+  /**
+   * Récupère tous les messages de cet utilisateur (envoyés et reçus)
+   *
+   * @return la liste des messages
+   */
+  public List<fr.univ.m1.projetagile.messagerie.Message> getMessages() {
+    fr.univ.m1.projetagile.messagerie.MessageRepository messageRepository =
+        new fr.univ.m1.projetagile.messagerie.MessageRepository();
+    return messageRepository.findAllMessagesByUser(this);
+  }
+
+  /**
+   * Récupère les messages envoyés par cet utilisateur
+   *
+   * @return la liste des messages envoyés
+   */
+  public List<fr.univ.m1.projetagile.messagerie.Message> getMessagesSent() {
+    fr.univ.m1.projetagile.messagerie.MessageRepository messageRepository =
+        new fr.univ.m1.projetagile.messagerie.MessageRepository();
+    return messageRepository.findMessagesSentBy(this);
+  }
+
+  /**
+   * Récupère les messages reçus par cet utilisateur
+   *
+   * @return la liste des messages reçus
+   */
+  public List<fr.univ.m1.projetagile.messagerie.Message> getMessagesReceived() {
+    fr.univ.m1.projetagile.messagerie.MessageRepository messageRepository =
+        new fr.univ.m1.projetagile.messagerie.MessageRepository();
+    return messageRepository.findMessagesReceivedBy(this);
   }
 
   public boolean seConnecter(String email, String motDePasse) {

@@ -1,5 +1,6 @@
 package fr.univ.m1.projetagile.messagerie;
 
+import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.Loueur;
@@ -49,18 +50,42 @@ public class Main {
         System.out.println("✓ Agent existant trouvé avec l'ID: " + agent.getIdU());
       }
 
-      // Create messages between them
+      em.getTransaction().commit();
+
+      // Utilisation du MessageRepository
+      MessageRepository messageRepository = new MessageRepository();
+
+      // Create messages between them using repository
       Message messageLoueurToAgent =
           new Message("Bonjour, je suis intéressé par votre véhicule.", loueur, agent);
-      em.persist(messageLoueurToAgent);
-      System.out.println("✓ Message du Loueur vers l'Agent créé");
+      messageLoueurToAgent = messageRepository.save(messageLoueurToAgent);
+      System.out.println("✓ Message du Loueur vers l'Agent créé via Repository");
 
       Message messageAgentToLoueur = new Message(
           "Bonjour, merci pour votre intérêt. Quand souhaitez-vous louer ?", agent, loueur);
-      em.persist(messageAgentToLoueur);
-      System.out.println("✓ Message de l'Agent vers le Loueur créé");
+      messageAgentToLoueur = messageRepository.save(messageAgentToLoueur);
+      System.out.println("✓ Message de l'Agent vers le Loueur créé via Repository");
 
-      em.getTransaction().commit();
+      // Récupération des messages via Utilisateur.getMessages()
+      System.out.println("\n=== Messages du Loueur ===");
+      List<Message> messagesLoueur = loueur.getMessages();
+      for (Message msg : messagesLoueur) {
+        System.out.println("- " + msg.getContenu());
+      }
+
+      System.out.println("\n=== Messages de l'Agent ===");
+      List<Message> messagesAgent = agent.getMessages();
+      for (Message msg : messagesAgent) {
+        System.out.println("- " + msg.getContenu());
+      }
+
+      // Récupération de la conversation complète
+      System.out.println("\n=== Conversation entre Loueur et Agent ===");
+      List<Message> conversation = messageRepository.findConversationBetween(loueur, agent);
+      for (Message msg : conversation) {
+        System.out.println("[" + msg.getDateEnvoi() + "] " + msg.getContenu());
+      }
+
       System.out.println("\n✓ Tous les éléments ont été sauvegardés avec succès!");
 
     } catch (Exception e) {
