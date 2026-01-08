@@ -2,8 +2,6 @@ package fr.univ.m1.projetagile.core.entity;
 
 import java.time.LocalDateTime;
 import fr.univ.m1.projetagile.enums.StatutLocation;
-import fr.univ.m1.projetagile.notes.NoteA;
-import fr.univ.m1.projetagile.notes.NoteV;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

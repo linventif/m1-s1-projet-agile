@@ -5,11 +5,11 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
-import fr.univ.m1.projetagile.core.entity.NoteA;
-import fr.univ.m1.projetagile.core.entity.NoteV;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.enums.StatutLocation;
+import fr.univ.m1.projetagile.notes.NoteA;
+import fr.univ.m1.projetagile.notes.NoteV;
 
 /**
  * Service métier pour la gestion des locations de véhicules. Fournit les opérations CRUD et les
@@ -64,9 +64,8 @@ public class LocationService {
 
   /**
    * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
-   * - Le prix de base (prix par jour × nombre de jours)
-   * - Une commission proportionnelle de 10% sur le prix de base
-   * - Des frais fixes de 2€ par jour
+   * - Le prix de base (prix par jour × nombre de jours) - Une commission proportionnelle de 10% sur
+   * le prix de base - Des frais fixes de 2€ par jour
    *
    * @param location la location pour laquelle calculer le prix
    * @return le prix total de la location
