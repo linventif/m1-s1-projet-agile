@@ -1,11 +1,11 @@
-package fr.univ.m1.projetagile.core.Service;
+package fr.univ.m1.projetagile.notes.service;
 
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Loueur;
-import fr.univ.m1.projetagile.core.entity.NoteA;
-import fr.univ.m1.projetagile.core.entity.NoteL;
-import fr.univ.m1.projetagile.core.entity.NoteV;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
+import fr.univ.m1.projetagile.notes.NoteA;
+import fr.univ.m1.projetagile.notes.NoteL;
+import fr.univ.m1.projetagile.notes.NoteV;
 import jakarta.persistence.EntityManager;
 
 public class NoteService {

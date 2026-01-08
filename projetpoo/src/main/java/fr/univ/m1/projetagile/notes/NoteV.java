@@ -1,5 +1,7 @@
-package fr.univ.m1.projetagile.core.entity;
+package fr.univ.m1.projetagile.notes;
 
+import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.core.entity.Vehicule;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,33 +11,33 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "notes_agents")
-public class NoteA extends Note {
+@Table(name = "notes_vehicules")
+public class NoteV extends Note {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "agent_id", nullable = false)
-  private Agent agent;
+  @JoinColumn(name = "vehicule_id", nullable = false)
+  private Vehicule vehicule;
 
   @ManyToOne
   @JoinColumn(name = "loueur_id", nullable = false)
   private Loueur loueur;
 
   // Constructeur sans argument pour JPA
-  protected NoteA() {
+  protected NoteV() {
     super();
   }
 
-  public static NoteA create() {
-    return new NoteA();
+  public static NoteV create() {
+    return new NoteV();
   }
 
-  public NoteA(Double note1, Double note2, Double note3, Agent agent, Loueur loueur) {
+  public NoteV(Double note1, Double note2, Double note3, Vehicule vehicule, Loueur loueur) {
     super(note1, note2, note3);
-    this.agent = agent;
+    this.vehicule = vehicule;
     this.loueur = loueur;
   }
 
@@ -44,12 +46,12 @@ public class NoteA extends Note {
     return id;
   }
 
-  public Agent getAgent() {
-    return agent;
+  public Vehicule getVehicule() {
+    return vehicule;
   }
 
-  public void setAgent(Agent agent) {
-    this.agent = agent;
+  public void setVehicule(Vehicule vehicule) {
+    this.vehicule = vehicule;
   }
 
   public Loueur getLoueur() {
@@ -63,13 +65,13 @@ public class NoteA extends Note {
   // Méthode selon UML
   @Override
   public void Noter() {
-    // Implémente la notation d'un agent
+    // Implémente la notation d'un véhicule
     // Cette méthode peut être utilisée pour valider ou finaliser la note
   }
 
-  public static NoteA NoterAgent(Agent agent, Loueur loueur, Double note1, Double note2,
+  public static NoteV NoterVehicule(Vehicule vehicule, Loueur loueur, Double note1, Double note2,
       Double note3) {
-    // Méthode statique pour créer une note d'agent
-    return new NoteA(note1, note2, note3, agent, loueur);
+    // Méthode statique pour créer une note de véhicule
+    return new NoteV(note1, note2, note3, vehicule, loueur);
   }
 }
