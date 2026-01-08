@@ -1,14 +1,17 @@
-package fr.univ.m1.projetagile.notes;
+package fr.univ.m1.projetagile._demo;
 
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.enums.TypeV;
+import fr.univ.m1.projetagile.notes.NoteA;
+import fr.univ.m1.projetagile.notes.NoteL;
+import fr.univ.m1.projetagile.notes.NoteV;
 import fr.univ.m1.projetagile.notes.service.NoteService;
 import jakarta.persistence.EntityManager;
 
-public class Main {
+public class NoteDemo {
 
   public static void main(String[] args) {
 
