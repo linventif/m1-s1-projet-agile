@@ -21,18 +21,19 @@ public class SouscriptionOption {
   private Options option;
 
   @ManyToOne
-  @JoinColumn(name = "vehicule_id", nullable = false)
-  private Vehicule vehicule;
+  @JoinColumn(name = "location_id", nullable = false)
+  private Location location;
 
   // Constructeur sans argument pour JPA
   protected SouscriptionOption() {}
 
-  public SouscriptionOption(Options option, Vehicule vehicule) {
+  // >>> constructeur utilisé dans ton service <<<
+  public SouscriptionOption(Options option, Location location) {
     this.option = option;
-    this.vehicule = vehicule;
+    this.location = location;
   }
 
-  // Getters et Setters
+  // Getters / Setters
   public Long getId() {
     return id;
   }
@@ -45,19 +46,16 @@ public class SouscriptionOption {
     this.option = option;
   }
 
-  public Vehicule getVehicule() {
-    return vehicule;
+  public Location getLocation() {
+    return location;
   }
 
-  public void setVehicule(Vehicule vehicule) {
-    this.vehicule = vehicule;
+  public void setLocation(Location location) {
+    this.location = location;
   }
 
   // Méthode selon UML
   public void annulerOption() {
-    // Annule la souscription d'option
-    // La suppression sera gérée par le service/repository qui appellera cette méthode
-    // Cette méthode marque simplement l'intention d'annulation
-    // TODO: Implémenter la logique de suppression si nécessaire
+    // À implémenter si tu veux une logique métier spécifique
   }
 }
