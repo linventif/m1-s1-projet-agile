@@ -119,8 +119,8 @@ public class Main {
 
       // Récupération de la conversation complète
       System.out.println("\n=== Conversation entre Loueur et Agent ===");
-      List<Message> conversation = messageRepository.findConversationBetween(loueur, agent);
-      for (Message msg : conversation) {
+      List<Message> conversationComplete = service.getConversation(loueur, agent);
+      for (Message msg : conversationComplete) {
         System.out.println("[" + msg.getDateEnvoi() + "] " + msg.getContenu());
       }
 
