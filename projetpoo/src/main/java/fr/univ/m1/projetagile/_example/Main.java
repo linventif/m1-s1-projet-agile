@@ -19,7 +19,7 @@ public class Main {
       // Initialize database connection
       // -- // -- // -- // -- // -- // -- // -- //
       DatabaseConnection.init();
-      System.out.println("✓ DB connectée\n");
+      System.out.println("✓ DB connectée");
 
 
       // -- // -- // -- // -- // -- // -- // -- //
@@ -33,7 +33,7 @@ public class Main {
       // -- // -- // -- // -- // -- // -- // -- //
       // Initialize Utilisateurs
       // -- // -- // -- // -- // -- // -- // -- //
-
+      System.out.println("\n=== Initialisation des Utilisateurs ===");
       // Particulier
       AgentParticulier APar_bob =
           (AgentParticulier) agentService.findByEmail("bob.maurise@gmail.com");
@@ -96,7 +96,7 @@ public class Main {
       // -- // -- // -- // -- // -- // -- // -- //
       // Messaging tests
       // -- // -- // -- // -- // -- // -- // -- //
-
+      System.out.println("\n=== Tests de messagerie ===");
       // Loueur1 -> Agent Pro
       Message msg1 = messagerieService.envoyerMessage(L_john, APro_locasmart,
           "Bonjour, je suis intéressé par vos services");
