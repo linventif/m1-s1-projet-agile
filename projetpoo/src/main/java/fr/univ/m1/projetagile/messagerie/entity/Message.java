@@ -1,25 +1,22 @@
 package fr.univ.m1.projetagile.messagerie.entity;
 
 import java.time.LocalDateTime;
-import fr.univ.m1.projetagile.core.entity.Agent;
-import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 /**
  * Représente un message échangé entre deux utilisateurs de la plateforme.
  *
  * <p>
- * Un message peut être envoyé par un Agent ou un Loueur, et peut être destiné à un Agent ou un
- * Loueur. La classe utilise des relations polymorphes pour gérer les différents types d'expéditeurs
- * et de destinataires.
+ * Un message peut être envoyé par n'importe quel type d'utilisateur (Agent ou Loueur) vers
+ * n'importe quel autre utilisateur. La classe stocke uniquement les IDs des utilisateurs pour
+ * simplifier le modèle et exploiter le polymorphisme.
  * </p>
  *
  * <h2>Contraintes</h2>
@@ -46,11 +43,9 @@ import jakarta.persistence.Table;
  * }</pre>
  *
  * @see fr.univ.m1.projetagile.core.entity.Utilisateur
- * @see fr.univ.m1.projetagile.core.entity.Agent
- * @see fr.univ.m1.projetagile.core.entity.Loueur
  *
  * @author Projet Agile M1
- * @version 1.0
+ * @version 2.0
  * @since 1.0
  */
 @Entity
@@ -77,36 +72,16 @@ public class Message {
   private LocalDateTime dateEnvoi;
 
   /**
-   * Expéditeur du message s'il s'agit d'un Agent. Mutuellement exclusif avec
-   * {@link #expediteurLoueur}.
+   * ID de l'utilisateur expéditeur du message.
    */
-  @ManyToOne
-  @JoinColumn(name = "expediteur_agent_id")
-  private Agent expediteurAgent;
+  @Column(name = "expediteur_id", nullable = false)
+  private Long expediteurId;
 
   /**
-   * Expéditeur du message s'il s'agit d'un Loueur. Mutuellement exclusif avec
-   * {@link #expediteurAgent}.
+   * ID de l'utilisateur destinataire du message.
    */
-  @ManyToOne
-  @JoinColumn(name = "expediteur_loueur_id")
-  private Loueur expediteurLoueur;
-
-  /**
-   * Destinataire du message s'il s'agit d'un Agent. Mutuellement exclusif avec
-   * {@link #destinataireLoueur}.
-   */
-  @ManyToOne
-  @JoinColumn(name = "destinataire_agent_id")
-  private Agent destinataireAgent;
-
-  /**
-   * Destinataire du message s'il s'agit d'un Loueur. Mutuellement exclusif avec
-   * {@link #destinataireAgent}.
-   */
-  @ManyToOne
-  @JoinColumn(name = "destinataire_loueur_id")
-  private Loueur destinataireLoueur;
+  @Column(name = "destinataire_id", nullable = false)
+  private Long destinataireId;
 
   /**
    * Constructeur sans argument pour JPA. Ne pas utiliser directement.
@@ -120,13 +95,11 @@ public class Message {
    * @param contenu le texte du message (max 1000 caractères)
    * @param expediteur l'utilisateur qui envoie le message (Agent ou Loueur)
    * @param destinataire l'utilisateur qui reçoit le message (Agent ou Loueur)
-   * @throws IllegalArgumentException si l'expéditeur ou le destinataire n'est ni un Agent ni un
-   *         Loueur
    */
   public Message(String contenu, Utilisateur expediteur, Utilisateur destinataire) {
     this.contenu = contenu;
-    setExpediteur(expediteur);
-    setDestinataire(destinataire);
+    this.expediteurId = expediteur.getIdU();
+    this.destinataireId = destinataire.getIdU();
     this.dateEnvoi = LocalDateTime.now();
   }
 
@@ -176,65 +149,81 @@ public class Message {
   }
 
   /**
-   * Retourne l'expéditeur du message (Agent ou Loueur).
+   * Retourne l'ID de l'utilisateur expéditeur.
    *
-   * @return l'utilisateur expéditeur
+   * @return l'ID de l'expéditeur
+   */
+  public Long getExpediteurId() {
+    return expediteurId;
+  }
+
+  /**
+   * Définit l'ID de l'utilisateur expéditeur.
+   *
+   * @param expediteurId l'ID de l'expéditeur
+   */
+  public void setExpediteurId(Long expediteurId) {
+    this.expediteurId = expediteurId;
+  }
+
+  /**
+   * Retourne l'ID de l'utilisateur destinataire.
+   *
+   * @return l'ID du destinataire
+   */
+  public Long getDestinataireId() {
+    return destinataireId;
+  }
+
+  /**
+   * Définit l'ID de l'utilisateur destinataire.
+   *
+   * @param destinataireId l'ID du destinataire
+   */
+  public void setDestinataireId(Long destinataireId) {
+    this.destinataireId = destinataireId;
+  }
+
+  /**
+   * Retourne l'utilisateur expéditeur du message. Charge l'utilisateur depuis la base de données.
+   *
+   * @return l'utilisateur expéditeur, ou null si non trouvé
    */
   public Utilisateur getExpediteur() {
-    if (expediteurAgent != null) {
-      return expediteurAgent;
+    if (expediteurId == null) {
+      return null;
     }
-    return expediteurLoueur;
+    return DatabaseConnection.getEntityManager().find(Utilisateur.class, expediteurId);
   }
 
   /**
-   * Définit l'expéditeur du message. Configure automatiquement soit {@link #expediteurAgent} soit
-   * {@link #expediteurLoueur} en fonction du type d'utilisateur.
+   * Définit l'expéditeur du message.
    *
-   * @param expediteur l'utilisateur expéditeur (Agent ou Loueur)
-   * @throws IllegalArgumentException si l'expéditeur n'est ni un Agent ni un Loueur
+   * @param expediteur l'utilisateur expéditeur
    */
   public void setExpediteur(Utilisateur expediteur) {
-    if (expediteur instanceof Agent) {
-      this.expediteurAgent = (Agent) expediteur;
-      this.expediteurLoueur = null;
-    } else if (expediteur instanceof Loueur) {
-      this.expediteurLoueur = (Loueur) expediteur;
-      this.expediteurAgent = null;
-    } else {
-      throw new IllegalArgumentException("L'expéditeur doit être un Agent ou un Loueur");
-    }
+    this.expediteurId = expediteur != null ? expediteur.getIdU() : null;
   }
 
   /**
-   * Retourne le destinataire du message (Agent ou Loueur).
+   * Retourne l'utilisateur destinataire du message. Charge l'utilisateur depuis la base de données.
    *
-   * @return l'utilisateur destinataire
+   * @return l'utilisateur destinataire, ou null si non trouvé
    */
   public Utilisateur getDestinataire() {
-    if (destinataireAgent != null) {
-      return destinataireAgent;
+    if (destinataireId == null) {
+      return null;
     }
-    return destinataireLoueur;
+    return DatabaseConnection.getEntityManager().find(Utilisateur.class, destinataireId);
   }
 
   /**
-   * Définit le destinataire du message. Configure automatiquement soit {@link #destinataireAgent}
-   * soit {@link #destinataireLoueur} en fonction du type d'utilisateur.
+   * Définit le destinataire du message.
    *
-   * @param destinataire l'utilisateur destinataire (Agent ou Loueur)
-   * @throws IllegalArgumentException si le destinataire n'est ni un Agent ni un Loueur
+   * @param destinataire l'utilisateur destinataire
    */
   public void setDestinataire(Utilisateur destinataire) {
-    if (destinataire instanceof Agent) {
-      this.destinataireAgent = (Agent) destinataire;
-      this.destinataireLoueur = null;
-    } else if (destinataire instanceof Loueur) {
-      this.destinataireLoueur = (Loueur) destinataire;
-      this.destinataireAgent = null;
-    } else {
-      throw new IllegalArgumentException("Le destinataire doit être un Agent ou un Loueur");
-    }
+    this.destinataireId = destinataire != null ? destinataire.getIdU() : null;
   }
 
   /**

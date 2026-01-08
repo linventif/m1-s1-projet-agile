@@ -33,7 +33,7 @@ import jakarta.persistence.TypedQuery;
  * </p>
  *
  * <h2>Exemple d'utilisation</h2>
- * 
+ *
  * <pre>{@code
  * MessageRepository repo = new MessageRepository();
  *
@@ -105,8 +105,7 @@ public class MessageRepository {
    * Récupère tous les messages envoyés par un utilisateur donné.
    *
    * <p>
-   * Cette méthode recherche les messages où l'utilisateur est soit l'expediteurAgent soit
-   * l'expediteurLoueur, selon son type.
+   * Cette méthode recherche les messages où l'utilisateur est l'expéditeur.
    * </p>
    *
    * @param utilisateur l'utilisateur expéditeur (Agent ou Loueur)
@@ -116,8 +115,7 @@ public class MessageRepository {
   public List<Message> findMessagesSentBy(Utilisateur utilisateur) {
     EntityManager em = DatabaseConnection.getEntityManager();
     try {
-      String jpql = "SELECT m FROM Message m WHERE "
-          + "(m.expediteurAgent.idU = :userId OR m.expediteurLoueur.idU = :userId)";
+      String jpql = "SELECT m FROM Message m WHERE m.expediteurId = :userId";
 
       TypedQuery<Message> query = em.createQuery(jpql, Message.class);
       query.setParameter("userId", utilisateur.getIdU());
@@ -133,8 +131,7 @@ public class MessageRepository {
    * Récupère tous les messages reçus par un utilisateur donné.
    *
    * <p>
-   * Cette méthode recherche les messages où l'utilisateur est soit le destinataireAgent soit le
-   * destinataireLoueur, selon son type.
+   * Cette méthode recherche les messages où l'utilisateur est le destinataire.
    * </p>
    *
    * @param utilisateur l'utilisateur destinataire (Agent ou Loueur)
@@ -144,8 +141,7 @@ public class MessageRepository {
   public List<Message> findMessagesReceivedBy(Utilisateur utilisateur) {
     EntityManager em = DatabaseConnection.getEntityManager();
     try {
-      String jpql = "SELECT m FROM Message m WHERE "
-          + "(m.destinataireAgent.idU = :userId OR m.destinataireLoueur.idU = :userId)";
+      String jpql = "SELECT m FROM Message m WHERE m.destinataireId = :userId";
 
       TypedQuery<Message> query = em.createQuery(jpql, Message.class);
       query.setParameter("userId", utilisateur.getIdU());
@@ -173,8 +169,7 @@ public class MessageRepository {
     EntityManager em = DatabaseConnection.getEntityManager();
     try {
       String jpql = "SELECT m FROM Message m WHERE "
-          + "(m.expediteurAgent.idU = :userId OR m.expediteurLoueur.idU = :userId OR "
-          + "m.destinataireAgent.idU = :userId OR m.destinataireLoueur.idU = :userId) "
+          + "(m.expediteurId = :userId OR m.destinataireId = :userId) "
           + "ORDER BY m.dateEnvoi DESC";
 
       TypedQuery<Message> query = em.createQuery(jpql, Message.class);
@@ -205,10 +200,8 @@ public class MessageRepository {
     EntityManager em = DatabaseConnection.getEntityManager();
     try {
       String jpql = "SELECT m FROM Message m WHERE "
-          + "((m.expediteurAgent.idU = :user1Id OR m.expediteurLoueur.idU = :user1Id) AND "
-          + "(m.destinataireAgent.idU = :user2Id OR m.destinataireLoueur.idU = :user2Id)) OR "
-          + "((m.expediteurAgent.idU = :user2Id OR m.expediteurLoueur.idU = :user2Id) AND "
-          + "(m.destinataireAgent.idU = :user1Id OR m.destinataireLoueur.idU = :user1Id)) "
+          + "((m.expediteurId = :user1Id AND m.destinataireId = :user2Id) OR "
+          + "(m.expediteurId = :user2Id AND m.destinataireId = :user1Id)) "
           + "ORDER BY m.dateEnvoi ASC";
 
       TypedQuery<Message> query = em.createQuery(jpql, Message.class);
