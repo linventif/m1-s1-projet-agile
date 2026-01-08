@@ -50,6 +50,10 @@ public abstract class Utilisateur {
   }
 
   // Setters
+  public void setIdU(Long idU) {
+    this.idU = idU;
+  }
+
   public void setEmail(String email) {
     this.email = email;
   }

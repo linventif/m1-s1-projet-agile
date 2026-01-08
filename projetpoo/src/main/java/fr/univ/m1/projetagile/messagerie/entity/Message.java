@@ -113,6 +113,15 @@ public class Message {
   }
 
   /**
+   * Définit l'identifiant unique du message.
+   *
+   * @param id l'ID du message
+   */
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  /**
    * Retourne le contenu textuel du message.
    *
    * @return le contenu du message
@@ -250,5 +259,11 @@ public class Message {
     }
     // Autres validations possibles (mots interdits, etc.)
     return true;
+  }
+
+  @Override
+  public String toString() {
+    return "Message{" + "id=" + id + ", contenu='" + contenu + '\'' + ", dateEnvoi=" + dateEnvoi
+        + ", expediteurId=" + expediteurId + ", destinataireId=" + destinataireId + '}';
   }
 }
