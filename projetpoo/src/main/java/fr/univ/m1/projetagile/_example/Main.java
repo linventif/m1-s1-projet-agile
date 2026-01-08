@@ -4,10 +4,14 @@ import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
 import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
 import fr.univ.m1.projetagile.core.persistence.LoueurRepository;
+import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.core.service.AgentService;
 import fr.univ.m1.projetagile.core.service.LoueurService;
+import fr.univ.m1.projetagile.core.service.VehiculeService;
+import fr.univ.m1.projetagile.enums.TypeV;
 import fr.univ.m1.projetagile.messagerie.entity.Message;
 import fr.univ.m1.projetagile.messagerie.persistence.MessageRepository;
 import fr.univ.m1.projetagile.messagerie.service.MessagerieService;
@@ -28,6 +32,7 @@ public class Main {
       MessagerieService messagerieService = new MessagerieService(new MessageRepository());
       AgentService agentService = new AgentService(new AgentRepository());
       LoueurService loueurService = new LoueurService(new LoueurRepository());
+      VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
 
 
       // -- // -- // -- // -- // -- // -- // -- //
@@ -92,6 +97,31 @@ public class Main {
       } else {
         System.out.println("✓ Loueur existant récupéré: " + L_jane);
       }
+
+      // -- // -- // -- // -- // -- // -- // -- //
+      // Initialize Vehicules
+      // -- // -- // -- // -- // -- // -- // -- //
+      System.out.println("\n=== Initialisation des Véhicules ===");
+
+      // Véhicule 1 - Voiture de Bob
+      Vehicule V1 = vehiculeService.createVehicule(TypeV.voiture, "Peugeot", "308", "Blanc",
+          "Paris", 45.0, APar_bob);
+      System.out.println("✓ Véhicule créé: " + V1);
+
+      // Véhicule 2 - Moto d'Alice
+      Vehicule V2 = vehiculeService.createVehicule(TypeV.moto, "Yamaha", "MT-07", "Noir", "Lyon",
+          35.0, APar_alice);
+      System.out.println("✓ Véhicule créé: " + V2);
+
+      // Véhicule 3 - Camion de LocaSmart
+      Vehicule V3 = vehiculeService.createVehicule(TypeV.camion, "Renault", "Master", "Blanc",
+          "Marseille", 80.0, APro_locasmart);
+      System.out.println("✓ Véhicule créé: " + V3);
+
+      // Véhicule 4 - Voiture de HabitatPlus
+      Vehicule V4 = vehiculeService.createVehicule(TypeV.voiture, "Mercedes", "Classe A", "Noir",
+          "Toulouse", 65.0, APro_habitatplus);
+      System.out.println("✓ Véhicule créé: " + V4);
 
       // -- // -- // -- // -- // -- // -- // -- //
       // Messaging tests
