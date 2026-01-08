@@ -9,15 +9,17 @@ import jakarta.persistence.TypedQuery;
 
 public class Main {
   public static void main(String[] args) {
-    EntityManager em = null;
-
     try {
       // Initialize database connection
       DatabaseConnection.init();
-      em = DatabaseConnection.getEntityManager();
 
       System.out.println("✓ DB connectée\n");
 
+      // Correction des valeurs type_agent dans la base si nécessaire
+      corrigerTypeAgent();
+
+      // Utiliser un seul EntityManager réutilisé par thread
+      EntityManager em = DatabaseConnection.getEntityManager();
       em.getTransaction().begin();
 
       // Get or create Loueur
@@ -52,7 +54,7 @@ public class Main {
 
       em.getTransaction().commit();
 
-      // Utilisation du MessageRepository
+      // Utilisation du MessageRepository (utilise le même EntityManager du thread)
       MessageRepository messageRepository = new MessageRepository();
 
       // Create messages between them using repository
@@ -92,11 +94,54 @@ public class Main {
       System.err.println("✗ Erreur: " + e.getMessage());
       e.printStackTrace();
 
-    } finally {
-      if (em != null && em.isOpen()) {
-        em.close();
+      // Rollback si transaction active
+      try {
+        EntityManager em = DatabaseConnection.getEntityManager();
+        if (em.getTransaction().isActive()) {
+          em.getTransaction().rollback();
+        }
+      } catch (Exception rollbackEx) {
+        System.err.println("Erreur lors du rollback: " + rollbackEx.getMessage());
       }
+
+    } finally {
+      // Ferme l'EntityManager du thread et l'EntityManagerFactory
       DatabaseConnection.close();
+    }
+  }
+
+  /**
+   * Corrige les valeurs type_agent dans la base pour correspondre à l'enum TypeAgent Change
+   * "AgentParticulier" en "PARTICULIER" et "AgentProfessionnel" en "PROFESSIONNEL"
+   */
+  private static void corrigerTypeAgent() {
+    EntityManager em = DatabaseConnection.getEntityManager();
+    try {
+      em.getTransaction().begin();
+
+      // Correction pour AgentParticulier -> PARTICULIER
+      int updated1 = em
+          .createNativeQuery(
+              "UPDATE agents SET type_agent = 'PARTICULIER' WHERE type_agent = 'AgentParticulier'")
+          .executeUpdate();
+
+      // Correction pour AgentProfessionnel -> PROFESSIONNEL
+      int updated2 = em.createNativeQuery(
+          "UPDATE agents SET type_agent = 'PROFESSIONNEL' WHERE type_agent = 'AgentProfessionnel'")
+          .executeUpdate();
+
+      em.getTransaction().commit();
+
+      if (updated1 > 0 || updated2 > 0) {
+        System.out.println("✓ Correction des type_agent: " + updated1 + " particuliers, " + updated2
+            + " professionnels\n");
+      }
+
+    } catch (Exception e) {
+      if (em.getTransaction().isActive()) {
+        em.getTransaction().rollback();
+      }
+      // Ignorer silencieusement si déjà corrigé ou si erreur
     }
   }
 }

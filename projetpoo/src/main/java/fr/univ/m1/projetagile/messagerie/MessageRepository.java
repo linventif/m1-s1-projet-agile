@@ -19,8 +19,9 @@ public class MessageRepository {
    * @return le message enregistré avec son ID généré
    */
   public Message save(Message message) {
+    EntityManager em = DatabaseConnection.getEntityManager();
     EntityTransaction transaction = null;
-    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+    try {
       transaction = em.getTransaction();
       transaction.begin();
 
@@ -48,7 +49,8 @@ public class MessageRepository {
    * @return la liste des messages envoyés
    */
   public List<Message> findMessagesSentBy(Utilisateur utilisateur) {
-    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+    EntityManager em = DatabaseConnection.getEntityManager();
+    try {
       String jpql = "SELECT m FROM Message m WHERE "
           + "(m.expediteurAgent.idU = :userId OR m.expediteurLoueur.idU = :userId)";
 
@@ -69,7 +71,8 @@ public class MessageRepository {
    * @return la liste des messages reçus
    */
   public List<Message> findMessagesReceivedBy(Utilisateur utilisateur) {
-    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+    EntityManager em = DatabaseConnection.getEntityManager();
+    try {
       String jpql = "SELECT m FROM Message m WHERE "
           + "(m.destinataireAgent.idU = :userId OR m.destinataireLoueur.idU = :userId)";
 
@@ -90,7 +93,8 @@ public class MessageRepository {
    * @return la liste de tous ses messages
    */
   public List<Message> findAllMessagesByUser(Utilisateur utilisateur) {
-    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+    EntityManager em = DatabaseConnection.getEntityManager();
+    try {
       String jpql = "SELECT m FROM Message m WHERE "
           + "(m.expediteurAgent.idU = :userId OR m.expediteurLoueur.idU = :userId OR "
           + "m.destinataireAgent.idU = :userId OR m.destinataireLoueur.idU = :userId) "
@@ -114,7 +118,8 @@ public class MessageRepository {
    * @return la liste des messages échangés entre ces deux utilisateurs
    */
   public List<Message> findConversationBetween(Utilisateur user1, Utilisateur user2) {
-    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+    EntityManager em = DatabaseConnection.getEntityManager();
+    try {
       String jpql = "SELECT m FROM Message m WHERE "
           + "((m.expediteurAgent.idU = :user1Id OR m.expediteurLoueur.idU = :user1Id) AND "
           + "(m.destinataireAgent.idU = :user2Id OR m.destinataireLoueur.idU = :user2Id)) OR "
@@ -140,7 +145,8 @@ public class MessageRepository {
    * @return le message trouvé ou null
    */
   public Message findById(Long id) {
-    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+    EntityManager em = DatabaseConnection.getEntityManager();
+    try {
       return em.find(Message.class, id);
     } catch (Exception e) {
       throw new RuntimeException("Erreur lors de la récupération du message", e);
@@ -153,8 +159,9 @@ public class MessageRepository {
    * @param id l'identifiant du message à supprimer
    */
   public void delete(Long id) {
+    EntityManager em = DatabaseConnection.getEntityManager();
     EntityTransaction transaction = null;
-    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+    try {
       transaction = em.getTransaction();
       transaction.begin();
 
