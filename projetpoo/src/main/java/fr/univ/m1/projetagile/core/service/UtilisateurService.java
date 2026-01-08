@@ -73,4 +73,88 @@ public abstract class UtilisateurService<T extends Utilisateur, R extends Utilis
       throw new IllegalArgumentException("L'email doit être valide.");
     }
   }
+
+  /**
+   * Connecte un utilisateur en vérifiant ses identifiants
+   *
+   * @param email l'email de l'utilisateur
+   * @param motDePasse le mot de passe de l'utilisateur
+   * @return l'utilisateur connecté (Agent ou Loueur selon le service)
+   * @throws IllegalArgumentException si les identifiants sont invalides ou incorrects
+   */
+  public T connect(String email, String motDePasse) {
+    if (email == null || email.trim().isEmpty()) {
+      throw new IllegalArgumentException("L'email ne peut pas être vide.");
+    }
+    if (motDePasse == null || motDePasse.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le mot de passe ne peut pas être vide.");
+    }
+
+    if (!repository.verifyPassword(email, motDePasse)) {
+      throw new IllegalArgumentException("Email ou mot de passe incorrect.");
+    }
+
+    return repository.findByEmail(email);
+  }
+
+  /**
+   * Change le mot de passe d'un utilisateur
+   *
+   * @param utilisateur l'utilisateur dont on veut changer le mot de passe
+   * @param ancienMotDePasse l'ancien mot de passe pour vérification
+   * @param nouveauMotDePasse le nouveau mot de passe
+   * @return l'utilisateur avec le mot de passe modifié
+   * @throws IllegalArgumentException si les paramètres sont invalides ou si l'ancien mot de passe
+   *         est incorrect
+   */
+  public T changePassword(T utilisateur, String ancienMotDePasse, String nouveauMotDePasse) {
+    if (utilisateur == null) {
+      throw new IllegalArgumentException("L'utilisateur ne peut pas être nul.");
+    }
+    if (ancienMotDePasse == null || ancienMotDePasse.trim().isEmpty()) {
+      throw new IllegalArgumentException("L'ancien mot de passe ne peut pas être vide.");
+    }
+    if (nouveauMotDePasse == null || nouveauMotDePasse.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le nouveau mot de passe ne peut pas être vide.");
+    }
+
+    // Utilise la méthode changerMDP de la classe Utilisateur qui vérifie l'ancien mot de passe
+    utilisateur.changerMDP(ancienMotDePasse, nouveauMotDePasse);
+
+    // Sauvegarde les modifications en base de données
+    return repository.save(utilisateur);
+  }
+
+  /**
+   * Change l'email d'un utilisateur
+   *
+   * @param utilisateur l'utilisateur dont on veut changer l'email
+   * @param nouvelEmail le nouvel email
+   * @return l'utilisateur avec l'email modifié
+   * @throws IllegalArgumentException si les paramètres sont invalides ou si l'email est déjà
+   *         utilisé
+   */
+  public T changeEmail(T utilisateur, String nouvelEmail) {
+    if (utilisateur == null) {
+      throw new IllegalArgumentException("L'utilisateur ne peut pas être nul.");
+    }
+    if (nouvelEmail == null || nouvelEmail.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le nouvel email ne peut pas être vide.");
+    }
+    if (!nouvelEmail.contains("@")) {
+      throw new IllegalArgumentException("L'email doit être valide.");
+    }
+
+    // Vérifier que le nouvel email n'est pas déjà utilisé par un autre utilisateur
+    T existingUser = repository.findByEmail(nouvelEmail);
+    if (existingUser != null && !existingUser.getIdU().equals(utilisateur.getIdU())) {
+      throw new IllegalArgumentException("Cet email est déjà utilisé par un autre utilisateur.");
+    }
+
+    // Utilise la méthode changerEmail de la classe Utilisateur
+    utilisateur.changerEmail(nouvelEmail);
+
+    // Sauvegarde les modifications en base de données
+    return repository.save(utilisateur);
+  }
 }
