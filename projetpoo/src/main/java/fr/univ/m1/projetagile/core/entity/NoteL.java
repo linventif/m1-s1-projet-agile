@@ -29,6 +29,10 @@ public class NoteL extends Note {
     super();
   }
 
+  public static NoteL create() {
+    return new NoteL();
+  }
+
   public NoteL(Double note1, Double note2, Double note3, Agent agent, Loueur loueur) {
     super(note1, note2, note3);
     this.agent = agent;

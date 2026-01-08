@@ -29,6 +29,10 @@ public class NoteV extends Note {
     super();
   }
 
+  public static NoteV create() {
+    return new NoteV();
+  }
+
   public NoteV(Double note1, Double note2, Double note3, Vehicule vehicule, Loueur loueur) {
     super(note1, note2, note3);
     this.vehicule = vehicule;

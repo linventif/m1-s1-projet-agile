@@ -1,4 +1,4 @@
-package fr.univ.m1.projetagile.core.service;
+package fr.univ.m1.projetagile.core.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
