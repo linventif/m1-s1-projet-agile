@@ -133,6 +133,13 @@ public class LocationService {
     if (location == null) {
       throw new IllegalArgumentException("La location ne peut pas être nulle.");
     }
+    StatutLocation statutActuel = location.getStatut();
+    if (statutActuel != StatutLocation.EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT
+        && statutActuel != StatutLocation.ACCEPTE) {
+      throw new IllegalStateException(
+          "Annulation impossible : la location ne peut être annulée que si son statut est "
+              + "EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT ou ACCEPTE.");
+    }
     location.setStatut(StatutLocation.ANNULE);
     locationRepository.save(location);
   }
