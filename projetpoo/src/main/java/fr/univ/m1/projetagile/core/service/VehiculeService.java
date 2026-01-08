@@ -46,6 +46,25 @@ public class VehiculeService {
     return vehicules.stream().map(this::convertToDTO).collect(Collectors.toList());
   }
 
+  /**
+   * Récupère tous les véhicules appartenant à un agent spécifique
+   *
+   * @param agent l'agent propriétaire des véhicules
+   * @return Liste de VehiculeDTO des véhicules de cet agent avec leurs informations enrichies
+   */
+  public List<VehiculeDTO> getVehiculesByAgent(Agent agent) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (agent.getIdU() == null) {
+      throw new IllegalArgumentException("L'agent doit avoir un identifiant.");
+    }
+
+    List<Vehicule> vehicules = vehiculeRepository.findByAgentId(agent.getIdU());
+
+    return vehicules.stream().map(this::convertToDTO).collect(Collectors.toList());
+  }
+
   public Vehicule createVehicule(TypeV type, String marque, String modele, String couleur,
       String ville, Double prixJ, Agent proprietaire) {
 

@@ -141,4 +141,24 @@ public class VehiculeRepository {
           "Erreur lors de la récupération des dates de location pour le véhicule " + vehiculeId, e);
     }
   }
+
+  /**
+   * Récupère tous les véhicules appartenant à un agent spécifique
+   *
+   * @param agentId l'identifiant de l'agent propriétaire
+   * @return la liste des véhicules de cet agent
+   */
+  public List<Vehicule> findByAgentId(Long agentId) {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      TypedQuery<Vehicule> query = em.createQuery(
+          "SELECT v FROM Vehicule v LEFT JOIN FETCH v.datesDispo WHERE v.proprietaire.idU = :agentId",
+          Vehicule.class);
+      query.setParameter("agentId", agentId);
+      return query.getResultList();
+
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Erreur lors de la récupération des véhicules de l'agent " + agentId, e);
+    }
+  }
 }

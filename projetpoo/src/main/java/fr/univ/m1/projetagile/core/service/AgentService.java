@@ -1,5 +1,9 @@
 package fr.univ.m1.projetagile.core.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import fr.univ.m1.projetagile.core.dto.AgentDTO;
+import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
@@ -11,8 +15,15 @@ import fr.univ.m1.projetagile.core.persistence.AgentRepository;
  */
 public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
+  private VehiculeService vehiculeService;
+
   public AgentService(AgentRepository agentRepository) {
     super(agentRepository);
+  }
+
+  public AgentService(AgentRepository agentRepository, VehiculeService vehiculeService) {
+    super(agentRepository);
+    this.vehiculeService = vehiculeService;
   }
 
   /**
@@ -75,5 +86,50 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
     AgentProfessionnel agent = new AgentProfessionnel(email, motDePasse, siret, nom);
     return (AgentProfessionnel) repository.save(agent);
+  }
+
+  /**
+   * Récupère le profil complet d'un agent sous forme de DTO
+   *
+   * @param agent l'agent dont on veut récupérer le profil
+   * @return AgentDTO contenant toutes les informations du profil et les véhicules disponibles
+   */
+  public AgentDTO getAgentProfile(Agent agent) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (vehiculeService == null) {
+      throw new IllegalStateException(
+          "VehiculeService n'est pas initialisé. Utilisez le constructeur avec VehiculeService.");
+    }
+
+    AgentDTO dto = new AgentDTO();
+
+    // Informations communes
+    dto.setIdU(agent.getIdU());
+    dto.setEmail(agent.getEmail());
+    dto.setTypeAgent(agent.getTypeAgent());
+    dto.setNoteMoyenne(agent.calculerNote());
+
+    // Informations spécifiques selon le type d'agent
+    if (agent instanceof AgentParticulier) {
+      AgentParticulier particulier = (AgentParticulier) agent;
+      dto.setNom(particulier.getNom());
+      dto.setPrenom(particulier.getPrenom());
+      dto.setTelephone(particulier.getTelephone());
+    } else if (agent instanceof AgentProfessionnel) {
+      AgentProfessionnel professionnel = (AgentProfessionnel) agent;
+      dto.setNom(professionnel.getNom());
+      dto.setSiret(professionnel.getSiret());
+    }
+
+    // Récupérer les véhicules de l'agent et filtrer uniquement ceux qui sont disponibles
+    List<VehiculeDTO> tousLesVehicules = vehiculeService.getVehiculesByAgent(agent);
+    List<VehiculeDTO> vehiculesDisponibles =
+        tousLesVehicules.stream().filter(VehiculeDTO::isDisponible).collect(Collectors.toList());
+
+    dto.setVehicules(vehiculesDisponibles);
+
+    return dto;
   }
 }
