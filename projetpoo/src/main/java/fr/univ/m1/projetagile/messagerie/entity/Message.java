@@ -263,7 +263,9 @@ public class Message {
 
   @Override
   public String toString() {
-    return "Message{" + "id=" + id + ", contenu='" + contenu + '\'' + ", dateEnvoi=" + dateEnvoi
-        + ", expediteurId=" + expediteurId + ", destinataireId=" + destinataireId + '}';
+    return "Message [id=" + id + ", expediteur=" + expediteurId + ", destinataire=" + destinataireId
+        + ", date=" + dateEnvoi + ", contenu="
+        + (contenu != null && contenu.length() > 50 ? contenu.substring(0, 47) + "..." : contenu)
+        + "]";
   }
 }
