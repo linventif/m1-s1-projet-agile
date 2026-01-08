@@ -1,5 +1,6 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import java.util.Objects;
 import fr.univ.m1.projetagile.enums.TypeV;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,13 +39,24 @@ public class TarifVehicule {
   protected TarifVehicule() {}
 
   public TarifVehicule(TypeV typeVehi, String modeleVehi, Double prix, GrilleTarif grilleTarif) {
+    if (typeVehi == null) {
+      throw new IllegalArgumentException("typeVehi ne peut pas être null");
+    }
+    if (modeleVehi == null || modeleVehi.isBlank()) {
+      throw new IllegalArgumentException("modeleVehi ne peut pas être vide");
+    }
+    if (prix == null || prix < 0) {
+      throw new IllegalArgumentException("prix doit être >= 0");
+    }
+    if (grilleTarif == null) {
+      throw new IllegalArgumentException("grilleTarif ne peut pas être null");
+    }
     this.typeVehi = typeVehi;
     this.modeleVehi = modeleVehi;
     this.prix = prix;
     this.grilleTarif = grilleTarif;
   }
 
-  // Getters et Setters
   public Long getId() {
     return id;
   }
@@ -54,6 +66,8 @@ public class TarifVehicule {
   }
 
   public void setTypeVehi(TypeV typeVehi) {
+    if (typeVehi == null)
+      throw new IllegalArgumentException("typeVehi ne peut pas être null");
     this.typeVehi = typeVehi;
   }
 
@@ -62,6 +76,9 @@ public class TarifVehicule {
   }
 
   public void setModeleVehi(String modeleVehi) {
+    if (modeleVehi == null || modeleVehi.isBlank()) {
+      throw new IllegalArgumentException("modeleVehi ne peut pas être vide");
+    }
     this.modeleVehi = modeleVehi;
   }
 
@@ -70,6 +87,8 @@ public class TarifVehicule {
   }
 
   public void setPrix(Double prix) {
+    if (prix == null || prix < 0)
+      throw new IllegalArgumentException("prix doit être >= 0");
     this.prix = prix;
   }
 
@@ -78,6 +97,40 @@ public class TarifVehicule {
   }
 
   public void setGrilleTarif(GrilleTarif grilleTarif) {
+    if (grilleTarif == null)
+      throw new IllegalArgumentException("grilleTarif ne peut pas être null");
     this.grilleTarif = grilleTarif;
+  }
+
+  @Override
+  public String toString() {
+    return "TarifVehicule{" + "id=" + id + ", typeVehi=" + typeVehi + ", modeleVehi='" + modeleVehi
+        + '\'' + ", prix=" + prix + '}';
+  }
+
+  /**
+   * Important pour contains()/remove() sur List : - si l'id est non null, on compare par id
+   * (entités persistées) - sinon, fallback sur (type, modele, prix) (avant persistance)
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (!(o instanceof TarifVehicule))
+      return false;
+    TarifVehicule that = (TarifVehicule) o;
+
+    if (this.id != null && that.id != null) {
+      return Objects.equals(this.id, that.id);
+    }
+    return typeVehi == that.typeVehi && Objects.equals(modeleVehi, that.modeleVehi)
+        && Objects.equals(prix, that.prix);
+  }
+
+  @Override
+  public int hashCode() {
+    if (id != null)
+      return Objects.hash(id);
+    return Objects.hash(typeVehi, modeleVehi, prix);
   }
 }
