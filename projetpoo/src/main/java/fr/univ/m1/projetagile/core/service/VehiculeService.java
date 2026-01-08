@@ -109,6 +109,10 @@ public class VehiculeService {
     // Utiliser la méthode utilitaire pour vérifier la propriété et récupérer le véhicule
     Vehicule vehicule = verifyOwnershipAndGetVehicule(agent, vehiculeId);
 
+    if (vehicule == null) {
+      throw new IllegalArgumentException("Aucun véhicule trouvé avec l'identifiant " + vehiculeId);
+    }
+
     // Vérifier qu'aucune location active (non annulée/terminée) n'existe pour ce véhicule
     List<Object[]> locationsActives = vehiculeRepository.getDatesLocationsActives(vehiculeId);
     if (locationsActives != null && !locationsActives.isEmpty()) {
