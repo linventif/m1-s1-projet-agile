@@ -8,8 +8,6 @@ import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.enums.StatutLocation;
-import fr.univ.m1.projetagile.notes.NoteA;
-import fr.univ.m1.projetagile.notes.NoteV;
 
 /**
  * Service métier pour la gestion des locations de véhicules. Fournit les opérations CRUD et les
@@ -88,38 +86,6 @@ public class LocationService {
 
     // Prix total = prix de base + commission + frais fixes
     return prixBase + commissionProportionnelle + fraisFixes;
-  }
-
-  /**
-   * Enregistre une note pour un véhicule suite à une location. Permet aux utilisateurs de noter
-   * leur satisfaction concernant le véhicule loué.
-   *
-   * @param note la note du véhicule à enregistrer
-   */
-  public void noterVehicule(NoteV note) {
-    // Méthode selon UML - à implémenter selon la logique métier
-    // TODO: Enregistrer la note pour le véhicule
-  }
-
-  /**
-   * Enregistre une note pour un agent suite à une location. Permet aux utilisateurs de noter leur
-   * satisfaction concernant le service fourni par l'agent.
-   *
-   * @param note la note de l'agent à enregistrer
-   */
-  public void noterAgent(NoteA note) {
-    // Méthode selon UML - à implémenter selon la logique métier
-    // TODO: Enregistrer la note pour l'agent
-  }
-
-  /**
-   * Génère un document PDF contenant les détails de la location. Le PDF inclut les informations de
-   * la location, du véhicule, du loueur, ainsi que les conditions générales et le contrat de
-   * location.
-   */
-  public void genererPDF() {
-    // Génère un PDF pour la location
-    // TODO: Implémenter la génération de PDF
   }
 
   /**
