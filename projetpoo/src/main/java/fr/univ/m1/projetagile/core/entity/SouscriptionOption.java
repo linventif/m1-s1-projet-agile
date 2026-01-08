@@ -24,12 +24,17 @@ public class SouscriptionOption {
   @JoinColumn(name = "vehicule_id", nullable = false)
   private Vehicule vehicule;
 
+  @ManyToOne
+  @JoinColumn(name = "agent_id", nullable = false)
+  private Agent agent;
+
   // Constructeur sans argument pour JPA
   protected SouscriptionOption() {}
 
-  public SouscriptionOption(Options option, Vehicule vehicule) {
+  public SouscriptionOption(Options option, Vehicule vehicule, Agent agent) {
     this.option = option;
     this.vehicule = vehicule;
+    this.agent = agent;
   }
 
   // Getters et Setters
@@ -51,6 +56,14 @@ public class SouscriptionOption {
 
   public void setVehicule(Vehicule vehicule) {
     this.vehicule = vehicule;
+  }
+
+  public Agent getAgent() {
+    return agent;
+  }
+
+  public void setAgent(Agent agent) {
+    this.agent = agent;
   }
 
   // Méthode selon UML
