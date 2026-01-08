@@ -1,10 +1,13 @@
 package fr.univ.m1.projetagile.core.persistence;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.enums.StatutLocation;
+import fr.univ.m1.projetagile.enums.TypeV;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
@@ -76,6 +79,107 @@ public class VehiculeRepository {
     }
   }
 
+  public List<Vehicule> findWithFilters(LocalDate dateDebut, LocalDate dateFin, String ville,
+      String marque, String modele, String couleur, Double prixMin, Double prixMax, TypeV type) {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      StringBuilder jpql = new StringBuilder();
+      jpql.append("SELECT DISTINCT v FROM Vehicule v LEFT JOIN FETCH v.datesDispo");
+
+      List<String> conditions = new ArrayList<>();
+
+      // Filtre par ville
+      if (ville != null && !ville.trim().isEmpty()) {
+        conditions.add("LOWER(v.ville) LIKE LOWER(:ville)");
+      }
+
+      // Filtre par marque
+      if (marque != null && !marque.trim().isEmpty()) {
+        conditions.add("LOWER(v.marque) LIKE LOWER(:marque)");
+      }
+
+      // Filtre par modèle
+      if (modele != null && !modele.trim().isEmpty()) {
+        conditions.add("LOWER(v.modele) LIKE LOWER(:modele)");
+      }
+
+      // Filtre par couleur
+      if (couleur != null && !couleur.trim().isEmpty()) {
+        conditions.add("LOWER(v.couleur) LIKE LOWER(:couleur)");
+      }
+
+      // Filtre par type
+      if (type != null) {
+        conditions.add("v.type = :type");
+      }
+
+      // Filtre par prix minimum
+      if (prixMin != null) {
+        conditions.add("v.prixJ >= :prixMin");
+      }
+
+      // Filtre par prix maximum
+      if (prixMax != null) {
+        conditions.add("v.prixJ <= :prixMax");
+      }
+
+      // Filtre par disponibilité générale du véhicule
+      conditions.add("v.disponible = true");
+
+      // Ajouter les conditions WHERE si elles existent
+      if (!conditions.isEmpty()) {
+        jpql.append(" WHERE ");
+        jpql.append(String.join(" AND ", conditions));
+      }
+
+      // Si on a des dates de début et fin, ajouter la vérification des conflits de location
+      if (dateDebut != null && dateFin != null) {
+        jpql.append(" AND NOT EXISTS (");
+        jpql.append("SELECT l FROM Location l ");
+        jpql.append("WHERE l.vehicule = v ");
+        jpql.append("AND l.statut != :statutTermine ");
+        jpql.append("AND l.statut != :statutAnnule ");
+        jpql.append("AND l.dateDebut <= :dateFin ");
+        jpql.append("AND l.dateFin >= :dateDebut)");
+      }
+
+      TypedQuery<Vehicule> query = em.createQuery(jpql.toString(), Vehicule.class);
+
+      // Définir les paramètres
+      if (ville != null && !ville.trim().isEmpty()) {
+        query.setParameter("ville", "%" + ville.trim() + "%");
+      }
+      if (marque != null && !marque.trim().isEmpty()) {
+        query.setParameter("marque", "%" + marque.trim() + "%");
+      }
+      if (modele != null && !modele.trim().isEmpty()) {
+        query.setParameter("modele", "%" + modele.trim() + "%");
+      }
+      if (couleur != null && !couleur.trim().isEmpty()) {
+        query.setParameter("couleur", "%" + couleur.trim() + "%");
+      }
+      if (type != null) {
+        query.setParameter("type", type);
+      }
+      if (prixMin != null) {
+        query.setParameter("prixMin", prixMin);
+      }
+      if (prixMax != null) {
+        query.setParameter("prixMax", prixMax);
+      }
+      if (dateDebut != null && dateFin != null) {
+        query.setParameter("statutTermine", StatutLocation.TERMINE);
+        query.setParameter("statutAnnule", StatutLocation.ANNULE);
+        query.setParameter("dateDebut", dateDebut.atStartOfDay());
+        query.setParameter("dateFin", dateFin.atStartOfDay());
+      }
+
+      return query.getResultList();
+
+    } catch (Exception e) {
+      throw new RuntimeException("Erreur lors de la récupération des véhicules avec filtres", e);
+    }
+  }
+
   /**
    * Récupère un véhicule par son ID
    *
@@ -139,6 +243,26 @@ public class VehiculeRepository {
     } catch (Exception e) {
       throw new RuntimeException(
           "Erreur lors de la récupération des dates de location pour le véhicule " + vehiculeId, e);
+    }
+  }
+
+  /**
+   * Récupère tous les véhicules appartenant à un agent spécifique
+   *
+   * @param agentId l'identifiant de l'agent propriétaire
+   * @return la liste des véhicules de cet agent
+   */
+  public List<Vehicule> findByAgentId(Long agentId) {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      TypedQuery<Vehicule> query = em.createQuery(
+          "SELECT v FROM Vehicule v LEFT JOIN FETCH v.datesDispo WHERE v.proprietaire.idU = :agentId",
+          Vehicule.class);
+      query.setParameter("agentId", agentId);
+      return query.getResultList();
+
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Erreur lors de la récupération des véhicules de l'agent " + agentId, e);
     }
   }
 }

@@ -1,4 +1,4 @@
-package fr.univ.m1.projetagile.core.Service;
+package fr.univ.m1.projetagile.core.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -46,6 +46,61 @@ public class VehiculeService {
     return vehicules.stream().map(this::convertToDTO).collect(Collectors.toList());
   }
 
+  /**
+   * Récupère tous les véhicules appartenant à un agent spécifique
+   *
+   * @param agent l'agent propriétaire des véhicules
+   * @return Liste de VehiculeDTO des véhicules de cet agent avec leurs informations enrichies
+   */
+  public List<VehiculeDTO> getVehiculesByAgent(Agent agent) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (agent.getIdU() == null) {
+      throw new IllegalArgumentException("L'agent doit avoir un identifiant.");
+    }
+
+    List<Vehicule> vehicules = vehiculeRepository.findByAgentId(agent.getIdU());
+    return vehicules.stream().map(this::convertToDTO).collect(Collectors.toList());
+  }
+  
+   /**
+   * Recherche des véhicules avec des filtres et retourne leurs informations enrichies
+   *
+   * @param dateDebut date de début de la période souhaitée (optionnel)
+   * @param dateFin date de fin de la période souhaitée (optionnel)
+   * @param ville ville de recherche (optionnel)
+   * @param marque marque du véhicule (optionnel)
+   * @param modele modèle du véhicule (optionnel)
+   * @param couleur couleur du véhicule (optionnel)
+   * @param prixMin prix minimum journalier (optionnel)
+   * @param prixMax prix maximum journalier (optionnel)
+   * @param type type de véhicule (optionnel)
+   * @return Liste de VehiculeDTO filtrés contenant : - Les propriétés du véhicule - La note moyenne
+   *         calculée - Les dates de disponibilités - Le lieu (ville)
+   */
+  public List<VehiculeDTO> searchVehiculesWithFilters(LocalDate dateDebut, LocalDate dateFin,
+      String ville, String marque, String modele, String couleur, Double prixMin, Double prixMax,
+      TypeV type) {
+    List<Vehicule> vehicules = vehiculeRepository.findWithFilters(dateDebut, dateFin, ville, marque,
+        modele, couleur, prixMin, prixMax, type);
+
+    return vehicules.stream().map(this::convertToDTO).collect(Collectors.toList());
+  }
+
+  /**
+   * Crée un nouveau véhicule avec validation des données d'entrée
+   *
+   * @param type le type de véhicule (VOITURE, MOTO, etc.)
+   * @param marque la marque du véhicule (ex: Peugeot, Renault)
+   * @param modele le modèle du véhicule (ex: 308, Clio)
+   * @param couleur la couleur du véhicule
+   * @param ville la ville où se trouve le véhicule
+   * @param prixJ le prix journalier de location (doit être positif)
+   * @param proprietaire l'agent propriétaire du véhicule (doit être enregistré en base)
+   * @return le véhicule créé et sauvegardé en base de données
+   * @throws IllegalArgumentException si un paramètre est invalide (null, vide, ou négatif)
+   */
   public Vehicule createVehicule(TypeV type, String marque, String modele, String couleur,
       String ville, Double prixJ, Agent proprietaire) {
 
@@ -77,6 +132,195 @@ public class VehiculeService {
 
     Vehicule vehicule = new Vehicule(type, marque, modele, couleur, ville, prixJ, proprietaire);
     return vehiculeRepository.save(vehicule);
+  }
+
+  /**
+   * Permet à un agent de supprimer un de ses véhicules
+   *
+   * @param agent l'agent propriétaire
+   * @param vehiculeId l'identifiant du véhicule à supprimer
+   * @throws IllegalArgumentException si le véhicule n'existe pas ou n'appartient pas à l'agent
+   */
+  public void deleteVehiculeForAgent(Agent agent, Long vehiculeId) {
+    // Utiliser la méthode utilitaire pour vérifier la propriété et récupérer le véhicule
+    Vehicule vehicule = verifyOwnershipAndGetVehicule(agent, vehiculeId);
+
+    if (vehicule == null) {
+      throw new IllegalArgumentException("Aucun véhicule trouvé avec l'identifiant " + vehiculeId);
+    }
+
+    // Vérifier qu'aucune location active (non annulée/terminée) n'existe pour ce véhicule
+    List<Object[]> locationsActives = vehiculeRepository.getDatesLocationsActives(vehiculeId);
+    if (locationsActives != null && !locationsActives.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Impossible de supprimer ce véhicule : des locations sont encore en cours ou planifiées.");
+    }
+
+    // Supprimer le véhicule
+    vehiculeRepository.delete(vehiculeId);
+  }
+
+  /**
+   * Modifie le type d'un véhicule
+   *
+   * @param agent l'agent propriétaire
+   * @param vehiculeId l'identifiant du véhicule
+   * @param nouveauType le nouveau type de véhicule
+   * @return le véhicule modifié
+   */
+  public Vehicule updateVehiculeType(Agent agent, Long vehiculeId, TypeV nouveauType) {
+    Vehicule vehicule = verifyOwnershipAndGetVehicule(agent, vehiculeId);
+
+    if (nouveauType == null) {
+      throw new IllegalArgumentException("Le type de véhicule ne peut pas être nul.");
+    }
+
+    vehicule.setType(nouveauType);
+    return vehiculeRepository.save(vehicule);
+  }
+
+  /**
+   * Modifie la marque d'un véhicule
+   *
+   * @param agent l'agent propriétaire
+   * @param vehiculeId l'identifiant du véhicule
+   * @param nouvelleMarque la nouvelle marque
+   * @return le véhicule modifié
+   */
+  public Vehicule updateVehiculeMarque(Agent agent, Long vehiculeId, String nouvelleMarque) {
+    Vehicule vehicule = verifyOwnershipAndGetVehicule(agent, vehiculeId);
+
+    if (nouvelleMarque == null || nouvelleMarque.trim().isEmpty()) {
+      throw new IllegalArgumentException("La marque ne peut pas être vide.");
+    }
+
+    vehicule.setMarque(nouvelleMarque);
+    return vehiculeRepository.save(vehicule);
+  }
+
+  /**
+   * Modifie le modèle d'un véhicule
+   *
+   * @param agent l'agent propriétaire
+   * @param vehiculeId l'identifiant du véhicule
+   * @param nouveauModele le nouveau modèle
+   * @return le véhicule modifié
+   */
+  public Vehicule updateVehiculeModele(Agent agent, Long vehiculeId, String nouveauModele) {
+    Vehicule vehicule = verifyOwnershipAndGetVehicule(agent, vehiculeId);
+
+    if (nouveauModele == null || nouveauModele.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le modèle ne peut pas être vide.");
+    }
+
+    vehicule.setModele(nouveauModele);
+    return vehiculeRepository.save(vehicule);
+  }
+
+  /**
+   * Modifie la couleur d'un véhicule
+   *
+   * @param agent l'agent propriétaire
+   * @param vehiculeId l'identifiant du véhicule
+   * @param nouvelleCouleur la nouvelle couleur
+   * @return le véhicule modifié
+   */
+  public Vehicule updateVehiculeCouleur(Agent agent, Long vehiculeId, String nouvelleCouleur) {
+    Vehicule vehicule = verifyOwnershipAndGetVehicule(agent, vehiculeId);
+
+    if (nouvelleCouleur == null || nouvelleCouleur.trim().isEmpty()) {
+      throw new IllegalArgumentException("La couleur ne peut pas être vide.");
+    }
+
+    vehicule.setCouleur(nouvelleCouleur);
+    return vehiculeRepository.save(vehicule);
+  }
+
+  /**
+   * Modifie la ville d'un véhicule
+   *
+   * @param agent l'agent propriétaire
+   * @param vehiculeId l'identifiant du véhicule
+   * @param nouvelleVille la nouvelle ville
+   * @return le véhicule modifié
+   */
+  public Vehicule updateVehiculeVille(Agent agent, Long vehiculeId, String nouvelleVille) {
+    Vehicule vehicule = verifyOwnershipAndGetVehicule(agent, vehiculeId);
+
+    if (nouvelleVille == null || nouvelleVille.trim().isEmpty()) {
+      throw new IllegalArgumentException("La ville ne peut pas être vide.");
+    }
+
+    vehicule.setVille(nouvelleVille);
+    return vehiculeRepository.save(vehicule);
+  }
+
+  /**
+   * Modifie le prix journalier d'un véhicule
+   *
+   * @param agent l'agent propriétaire
+   * @param vehiculeId l'identifiant du véhicule
+   * @param nouveauPrixJ le nouveau prix journalier
+   * @return le véhicule modifié
+   */
+  public Vehicule updateVehiculePrixJ(Agent agent, Long vehiculeId, Double nouveauPrixJ) {
+    Vehicule vehicule = verifyOwnershipAndGetVehicule(agent, vehiculeId);
+
+    if (nouveauPrixJ == null || nouveauPrixJ.doubleValue() <= 0.0) {
+      throw new IllegalArgumentException("Le prix journalier doit être strictement positif.");
+    }
+
+    vehicule.setPrixJ(nouveauPrixJ);
+    return vehiculeRepository.save(vehicule);
+  }
+
+  /**
+   * Modifie la disponibilité d'un véhicule
+   *
+   * @param agent l'agent propriétaire
+   * @param vehiculeId l'identifiant du véhicule
+   * @param disponible true si le véhicule est disponible, false sinon
+   * @return le véhicule modifié
+   */
+  public Vehicule updateVehiculeDisponibilite(Agent agent, Long vehiculeId, boolean disponible) {
+    Vehicule vehicule = verifyOwnershipAndGetVehicule(agent, vehiculeId);
+
+    vehicule.setDisponible(disponible);
+    return vehiculeRepository.save(vehicule);
+  }
+
+  /**
+   * Méthode utilitaire pour vérifier la propriété et récupérer le véhicule
+   *
+   * @param agent l'agent propriétaire
+   * @param vehiculeId l'identifiant du véhicule
+   * @return le véhicule si les vérifications sont valides
+   * @throws IllegalArgumentException si les validations échouent
+   */
+  private Vehicule verifyOwnershipAndGetVehicule(Agent agent, Long vehiculeId) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (agent.getIdU() == null) {
+      throw new IllegalArgumentException("L'agent doit être déjà enregistré.");
+    }
+    if (vehiculeId == null) {
+      throw new IllegalArgumentException("L'identifiant du véhicule ne peut pas être nul.");
+    }
+
+    Vehicule vehicule = vehiculeRepository.findById(vehiculeId);
+    if (vehicule == null) {
+      throw new IllegalArgumentException("Aucun véhicule trouvé avec l'identifiant " + vehiculeId);
+    }
+
+    // Vérifier que le véhicule appartient bien à l'agent
+    if (vehicule.getProprietaire() == null
+        || !vehicule.getProprietaire().getIdU().equals(agent.getIdU())) {
+      throw new IllegalArgumentException(
+          "Ce véhicule n'appartient pas à l'agent spécifié. Seul le propriétaire peut modifier un véhicule.");
+    }
+
+    return vehicule;
   }
 
   /**
