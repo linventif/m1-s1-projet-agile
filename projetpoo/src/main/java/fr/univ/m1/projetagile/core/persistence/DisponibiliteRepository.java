@@ -216,14 +216,23 @@ public class DisponibiliteRepository {
   public List<Disponibilite> findOverlappingOrAdjacent(Long vehiculeId, LocalDate dateDebut,
       LocalDate dateFin, Long excludeId) {
     try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      // Calculer les dates pour inclure les périodes adjacentes (à un jour près)
+      LocalDate dateDebutMinus1 = dateDebut.minusDays(1);
+      LocalDate dateFinPlus1 = dateFin.plusDays(1);
+
       StringBuilder jpql = new StringBuilder();
       jpql.append("SELECT d FROM Disponibilite d ");
       jpql.append("WHERE d.vehicule.id = :vehiculeId ");
-      // Pour détecter les périodes adjacentes, on utilise <= et >= au lieu de < et >
-      // Cela permet de trouver les périodes qui se touchent exactement
-      // Par exemple: période existante se termine le 20, nouvelle commence le 20
-      jpql.append("AND d.dateDebut <= :dateFin ");
-      jpql.append("AND d.dateFin >= :dateDebut");
+      // Pour détecter les périodes adjacentes ET chevauchantes:
+      // - Une période existante est adjacente/chevauchante si:
+      //   * Sa fin est >= dateDebut - 1 (peut se terminer la veille du début)
+      //   * Son début est <= dateFin + 1 (peut commencer le lendemain de la fin)
+      // Exemples:
+      //   - Existant: 10-20, Nouveau: 21-30 → 20 >= 20 ET 10 <= 31 → trouvé (adjacent)
+      //   - Existant: 21-30, Nouveau: 10-20 → 30 >= 9 ET 21 <= 21 → trouvé (adjacent)
+      //   - Existant: 15-25, Nouveau: 10-20 → 25 >= 9 ET 15 <= 21 → trouvé (chevauchant)
+      jpql.append("AND d.dateDebut <= :dateFinPlus1 ");
+      jpql.append("AND d.dateFin >= :dateDebutMinus1");
 
       if (excludeId != null) {
         jpql.append(" AND d.id != :excludeId");
@@ -233,8 +242,8 @@ public class DisponibiliteRepository {
 
       TypedQuery<Disponibilite> query = em.createQuery(jpql.toString(), Disponibilite.class);
       query.setParameter("vehiculeId", vehiculeId);
-      query.setParameter("dateDebut", dateDebut);
-      query.setParameter("dateFin", dateFin);
+      query.setParameter("dateDebutMinus1", dateDebutMinus1);
+      query.setParameter("dateFinPlus1", dateFinPlus1);
 
       if (excludeId != null) {
         query.setParameter("excludeId", excludeId);
