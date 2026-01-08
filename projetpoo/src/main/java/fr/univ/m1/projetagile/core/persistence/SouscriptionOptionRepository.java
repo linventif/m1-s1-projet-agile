@@ -1,5 +1,6 @@
 package fr.univ.m1.projetagile.core.persistence;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Options;
@@ -57,5 +58,17 @@ public class SouscriptionOptionRepository {
       managed = em.merge(souscription);
     }
     em.remove(managed);
+  }
+
+  // ===== NOUVELLE MÉTHODE ===== pour pouvoir récupérer toutes les souscriptions d’options sur une
+  // période donnée.
+
+  public List<SouscriptionOption> findByLocationDateBetween(LocalDateTime debutInclus,
+      LocalDateTime finExclu) {
+
+    return em
+        .createQuery("SELECT s FROM SouscriptionOption s " + "WHERE s.location.dateDebut >= :debut "
+            + "AND s.location.dateDebut < :fin", SouscriptionOption.class)
+        .setParameter("debut", debutInclus).setParameter("fin", finExclu).getResultList();
   }
 }

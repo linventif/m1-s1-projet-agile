@@ -1,7 +1,14 @@
 package fr.univ.m1.projetagile.core.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import fr.univ.m1.projetagile.core.dto.FactureOptionsMensuelleDTO;
 import fr.univ.m1.projetagile.core.entity.Location;
+import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Options;
 import fr.univ.m1.projetagile.core.entity.SouscriptionOption;
 import fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository;
@@ -89,5 +96,61 @@ public class SouscriptionOptionService {
       }
       throw e;
     }
+  }
+
+  // ===== NOUVELLE MÉTHODE : FACTURATION MENSUELLE =====
+
+  public List<FactureOptionsMensuelleDTO> genererFacturationMensuelle(int annee, int mois) {
+    if (mois < 1 || mois > 12) {
+      throw new IllegalArgumentException("Le mois doit être compris entre 1 et 12.");
+    }
+
+    // bornes du mois
+    LocalDate debutMois = LocalDate.of(annee, mois, 1);
+    LocalDate debutMoisSuivant = debutMois.plusMonths(1);
+
+    LocalDateTime debut = debutMois.atStartOfDay();
+    LocalDateTime fin = debutMoisSuivant.atStartOfDay();
+
+    // Récupérer toutes les souscriptions dont la location commence dans ce mois
+    List<SouscriptionOption> souscriptions = repository.findByLocationDateBetween(debut, fin);
+
+    // Regrouper par loueur
+    Map<Loueur, Double> totalParLoueur = new HashMap<>();
+
+    for (SouscriptionOption s : souscriptions) {
+      Location location = s.getLocation();
+      Loueur loueur = location.getLoueur(); // suppose Location.getLoueur()
+
+      if (loueur == null) {
+        continue; // ou lever une exception, selon ta logique
+      }
+
+      Double prix = s.getOption().getPrix();
+      if (prix == null) {
+        prix = 0.0;
+      }
+
+      totalParLoueur.merge(loueur, prix, Double::sum);
+    }
+
+    // Transformer en DTO
+    List<FactureOptionsMensuelleDTO> factures = new ArrayList<>();
+
+    for (Map.Entry<Loueur, Double> entry : totalParLoueur.entrySet()) {
+      Loueur loueur = entry.getKey();
+      Double montant = entry.getValue();
+
+      FactureOptionsMensuelleDTO dto = new FactureOptionsMensuelleDTO();
+      dto.setAnnee(annee);
+      dto.setMois(mois);
+      dto.setLoueurId(loueur.getIdU()); // même logique que pour Agent
+      dto.setNomLoueur(loueur.getNom() + " " + loueur.getPrenom());
+      dto.setMontantTotalOptions(montant);
+
+      factures.add(dto);
+    }
+
+    return factures;
   }
 }
