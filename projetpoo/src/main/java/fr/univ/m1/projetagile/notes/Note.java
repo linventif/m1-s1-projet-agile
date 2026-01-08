@@ -1,4 +1,4 @@
-package fr.univ.m1.projetagile.core.entity;
+package fr.univ.m1.projetagile.notes;
 
 import java.time.LocalDate;
 import jakarta.persistence.Column;
