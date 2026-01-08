@@ -117,6 +117,7 @@ public class Loueur extends Utilisateur {
 
   @Override
   public String toString() {
-    return "[" + getIdU() + "] " + getNomComplet() + " <" + getEmail() + ">";
+    return "Loueur [id=" + getIdU() + ", nom=" + nom + ", prenom=" + prenom + ", email="
+        + getEmail() + "]";
   }
 }

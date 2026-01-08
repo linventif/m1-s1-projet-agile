@@ -63,4 +63,10 @@ public class AgentParticulier extends Agent {
   public boolean estProfessionnel() {
     return false;
   }
+
+  @Override
+  public String toString() {
+    return "AgentParticulier [id=" + getIdU() + ", nom=" + nom + ", prenom=" + prenom + ", email="
+        + getEmail() + ", telephone=" + telephone + "]";
+  }
 }
