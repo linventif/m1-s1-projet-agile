@@ -15,28 +15,30 @@ import fr.univ.m1.projetagile.enums.TypeV;
 import fr.univ.m1.projetagile.messagerie.entity.Message;
 import fr.univ.m1.projetagile.messagerie.persistence.MessageRepository;
 import fr.univ.m1.projetagile.messagerie.service.MessagerieService;
+import fr.univ.m1.projetagile.notes.service.NoteService;
 
 public class MainDemo {
   public static void main(String[] args) {
     try {
       // -- // -- // -- // -- // -- // -- // -- //
-      // Initialize database connection
+      // Database Connection
       // -- // -- // -- // -- // -- // -- // -- //
       DatabaseConnection.init();
       System.out.println("✓ DB connectée");
 
 
       // -- // -- // -- // -- // -- // -- // -- //
-      // Initialize services
+      // Services
       // -- // -- // -- // -- // -- // -- // -- //
       MessagerieService messagerieService = new MessagerieService(new MessageRepository());
       AgentService agentService = new AgentService(new AgentRepository());
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
+      NoteService noteService = new NoteService(new
 
 
       // -- // -- // -- // -- // -- // -- // -- //
-      // Initialize Utilisateurs
+      // Utilisateurs
       // -- // -- // -- // -- // -- // -- // -- //
       System.out.println("\n=== Initialisation des Utilisateurs ===");
       // Particulier
@@ -99,7 +101,7 @@ public class MainDemo {
       }
 
       // -- // -- // -- // -- // -- // -- // -- //
-      // Initialize Vehicules
+      // Vehicules
       // -- // -- // -- // -- // -- // -- // -- //
       System.out.println("\n=== Initialisation des Véhicules ===");
 
@@ -124,7 +126,7 @@ public class MainDemo {
       System.out.println("✓ Véhicule créé: " + V4);
 
       // -- // -- // -- // -- // -- // -- // -- //
-      // Messaging tests
+      // Messaging
       // -- // -- // -- // -- // -- // -- // -- //
       System.out.println("\n=== Tests de messagerie ===");
       // Loueur1 -> Agent Pro
@@ -145,6 +147,27 @@ public class MainDemo {
       Message msg4 = messagerieService.envoyerMessage(APar_bob, L_jane,
           "Bonjour, j'ai plusieurs véhicules disponibles. Quel type recherchez-vous ?");
       System.out.println("✓ Message envoyé: " + msg4);
+
+
+      // -- // -- // -- // -- // -- // -- // -- //
+      // Notes
+      // -- // -- // -- // -- // -- // -- // -- //
+      // // 5️⃣ Créer le service NoteService
+
+      // // 6️⃣ Loueur note Agent
+      // NoteA noteA = noteService.noterAgent(loueur, agent, 8.0, 9.0, 7.5);
+      // System.out.println("NoteA moyenne: " + noteA.getNoteMoyenne());
+
+      // // 7️⃣ Agent note Loueur
+      // NoteL noteL = noteService.noterLoueur(agent, loueur, 9.0, 8.5, 10.0);
+      // System.out.println("NoteL moyenne: " + noteL.getNoteMoyenne());
+
+      // // 8️⃣ Loueur note Vehicule
+      // NoteV noteV = noteService.noterVehicule(loueur, v, 7.0, 8.0, 9.0);
+      // System.out.println("NoteV moyenne: " + noteV.getNoteMoyenne());
+
+      // System.out.println("✓ Toutes les notes ont été créées avec succès !");
+
 
       System.out.println("\n✓ Tout s'est bien passé!");
     } catch (Exception e) {
