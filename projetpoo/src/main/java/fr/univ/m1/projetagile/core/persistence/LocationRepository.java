@@ -171,7 +171,10 @@ public class LocationRepository {
   public List<Location> getHistoriqueLocations(Long vehiculeId) {
     try (EntityManager em = DatabaseConnection.getEntityManager()) {
       TypedQuery<Location> query = em.createQuery("SELECT l FROM Location l "
-          + "WHERE l.vehicule.id = :vehiculeId " + "ORDER BY l.dateDebut DESC", Location.class);
+          + "JOIN FETCH l.vehicule "
+          + "JOIN FETCH l.loueur "
+          + "WHERE l.vehicule.id = :vehiculeId "
+          + "ORDER BY l.dateDebut DESC", Location.class);
 
       query.setParameter("vehiculeId", vehiculeId);
       return query.getResultList();
