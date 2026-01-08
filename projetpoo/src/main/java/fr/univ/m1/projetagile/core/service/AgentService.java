@@ -132,4 +132,100 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
     return dto;
   }
+
+  /**
+   * Modifie le nom d'un agent particulier
+   *
+   * @param agent l'agent particulier à modifier
+   * @param nouveauNom le nouveau nom
+   * @return l'agent modifié
+   */
+  public AgentParticulier updateAgentParticulierNom(AgentParticulier agent, String nouveauNom) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (nouveauNom == null || nouveauNom.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le nom ne peut pas être vide.");
+    }
+
+    agent.setNom(nouveauNom);
+    return (AgentParticulier) repository.save(agent);
+  }
+
+  /**
+   * Modifie le prénom d'un agent particulier
+   *
+   * @param agent l'agent particulier à modifier
+   * @param nouveauPrenom le nouveau prénom
+   * @return l'agent modifié
+   */
+  public AgentParticulier updateAgentParticulierPrenom(AgentParticulier agent,
+      String nouveauPrenom) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (nouveauPrenom == null || nouveauPrenom.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le prénom ne peut pas être vide.");
+    }
+
+    agent.setPrenom(nouveauPrenom);
+    return (AgentParticulier) repository.save(agent);
+  }
+
+  /**
+   * Modifie le téléphone d'un agent particulier
+   *
+   * @param agent l'agent particulier à modifier
+   * @param nouveauTelephone le nouveau numéro de téléphone
+   * @return l'agent modifié
+   */
+  public AgentParticulier updateAgentParticulierTelephone(AgentParticulier agent,
+      String nouveauTelephone) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+
+    agent.setTelephone(nouveauTelephone);
+    return (AgentParticulier) repository.save(agent);
+  }
+
+  /**
+   * Modifie le nom d'un agent professionnel
+   *
+   * @param agent l'agent professionnel à modifier
+   * @param nouveauNom le nouveau nom de l'entreprise
+   * @return l'agent modifié
+   */
+  public AgentProfessionnel updateAgentProfessionnelNom(AgentProfessionnel agent,
+      String nouveauNom) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (nouveauNom == null || nouveauNom.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le nom de l'entreprise ne peut pas être vide.");
+    }
+
+    agent.setNom(nouveauNom);
+    return (AgentProfessionnel) repository.save(agent);
+  }
+
+  /**
+   * Modifie le SIRET d'un agent professionnel
+   *
+   * @param agent l'agent professionnel à modifier
+   * @param nouveauSiret le nouveau numéro SIRET
+   * @return l'agent modifié
+   */
+  public AgentProfessionnel updateAgentProfessionnelSiret(AgentProfessionnel agent,
+      String nouveauSiret) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (nouveauSiret == null || nouveauSiret.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le SIRET ne peut pas être vide.");
+    }
+
+    agent.setSiret(nouveauSiret);
+    return (AgentProfessionnel) repository.save(agent);
+  }
 }
