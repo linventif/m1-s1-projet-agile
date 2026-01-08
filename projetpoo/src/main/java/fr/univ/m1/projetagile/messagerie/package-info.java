@@ -16,8 +16,7 @@
  * ├── persistence/      (Accès aux données)
  * │   └── MessageRepository
  * ├── service/          (Logique métier)
- * │   └── MessagerieService
- * └── Main              (Point d'entrée de démonstration)
+ *     └── MessagerieService
  * </pre>
  *
  * <h2>Fonctionnalités principales</h2>

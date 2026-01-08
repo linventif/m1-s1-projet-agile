@@ -1,4 +1,4 @@
-package fr.univ.m1.projetagile.messagerie;
+package fr.univ.m1.projetagile._example;
 
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
@@ -9,7 +9,7 @@ import fr.univ.m1.projetagile.messagerie.service.MessagerieService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
-public class Main {
+public class Messagerie {
   public static void main(String[] args) {
     try {
       // Initialize database connection
