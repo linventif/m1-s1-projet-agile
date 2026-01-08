@@ -44,7 +44,7 @@ public class NoteVehiculeRepository {
   public List<NoteVehicule> findByVehiculeId(Long vehiculeId) {
     EntityManager em = DatabaseConnection.getEntityManager();
     TypedQuery<NoteVehicule> query = em.createQuery(
-        "SELECT n FROM NoteVehicule n WHERE n.vehiculeId = :vehiculeId ORDER BY n.date DESC",
+        "SELECT n FROM NoteVehicule n WHERE n.vehicule.id = :vehiculeId ORDER BY n.date DESC",
         NoteVehicule.class);
     query.setParameter("vehiculeId", vehiculeId);
     return query.getResultList();
@@ -53,7 +53,7 @@ public class NoteVehiculeRepository {
   public List<NoteVehicule> findByLoueurId(Long loueurId) {
     EntityManager em = DatabaseConnection.getEntityManager();
     TypedQuery<NoteVehicule> query = em.createQuery(
-        "SELECT n FROM NoteVehicule n WHERE n.loueurId = :loueurId ORDER BY n.date DESC",
+        "SELECT n FROM NoteVehicule n WHERE n.loueur.idU = :loueurId ORDER BY n.date DESC",
         NoteVehicule.class);
     query.setParameter("loueurId", loueurId);
     return query.getResultList();
@@ -62,7 +62,7 @@ public class NoteVehiculeRepository {
   public Double getMoyenneByVehiculeId(Long vehiculeId) {
     EntityManager em = DatabaseConnection.getEntityManager();
     TypedQuery<Double> query = em.createQuery(
-        "SELECT AVG((n.note1 + n.note2 + n.note3) / 3.0) FROM NoteVehicule n WHERE n.vehiculeId = :vehiculeId",
+        "SELECT AVG((n.note1 + n.note2 + n.note3) / 3.0) FROM NoteVehicule n WHERE n.vehicule.id = :vehiculeId",
         Double.class);
     query.setParameter("vehiculeId", vehiculeId);
     Double result = query.getSingleResult();
