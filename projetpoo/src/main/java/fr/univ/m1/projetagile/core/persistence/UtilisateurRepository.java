@@ -1,15 +1,15 @@
 package fr.univ.m1.projetagile.core.persistence;
 
+import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 
 /**
- * Repository de base pour gérer la persistance des utilisateurs (Agent et Loueur)
- * Cette classe fournit les méthodes CRUD communes pour tous les types d'utilisateurs
+ * Repository de base pour gérer la persistance des utilisateurs (Agent et Loueur) Cette classe
+ * fournit les méthodes CRUD communes pour tous les types d'utilisateurs
  *
  * @param <T> le type d'utilisateur (Agent ou Loueur)
  */
@@ -68,6 +68,9 @@ public abstract class UtilisateurRepository<T extends Utilisateur> {
   /**
    * Récupère un utilisateur par son email
    *
+   * Pour les entités abstraites avec JOINED inheritance (comme Agent), JPA interroge
+   * automatiquement toutes les tables concrètes (AgentParticulier, AgentProfessionnel).
+   *
    * @param email l'email de l'utilisateur
    * @return l'utilisateur trouvé ou null si aucun utilisateur ne correspond
    */
@@ -77,10 +80,20 @@ public abstract class UtilisateurRepository<T extends Utilisateur> {
           "SELECT u FROM " + entityClass.getSimpleName() + " u WHERE u.email = :email",
           entityClass);
       query.setParameter("email", email);
-      return query.getSingleResult();
 
-    } catch (NoResultException e) {
-      return null;
+      List<T> results = query.getResultList();
+
+      if (results.isEmpty()) {
+        return null;
+      }
+
+      if (results.size() > 1) {
+        throw new RuntimeException(
+            "Plusieurs utilisateurs trouvés avec l'email " + email + " (incohérence de données)");
+      }
+
+      return results.get(0);
+
     } catch (Exception e) {
       throw new RuntimeException("Erreur lors de la récupération de l'utilisateur par email", e);
     }
@@ -99,8 +112,7 @@ public abstract class UtilisateurRepository<T extends Utilisateur> {
 
       T utilisateur = em.find(entityClass, id);
       if (utilisateur == null) {
-        throw new IllegalArgumentException(
-            "Aucun utilisateur trouvé avec l'identifiant " + id);
+        throw new IllegalArgumentException("Aucun utilisateur trouvé avec l'identifiant " + id);
       }
       em.remove(utilisateur);
 
