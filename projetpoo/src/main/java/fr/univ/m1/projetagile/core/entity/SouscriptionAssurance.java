@@ -1,8 +1,11 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import fr.univ.m1.projetagile.enums.TypeV;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -49,12 +52,15 @@ public class SouscriptionAssurance {
       List<String> options) {
     SouscriptionAssurance souscription = new SouscriptionAssurance(location, assurance);
     if (options != null) {
-      souscription.options.addAll(options);
+      for (String opt : options) {
+        if (opt != null && !opt.isBlank()) {
+          souscription.options.add(opt);
+        }
+      }
     }
     return souscription;
   }
 
-  // Getters et Setters
   public Long getId() {
     return id;
   }
@@ -64,7 +70,7 @@ public class SouscriptionAssurance {
   }
 
   public void ajouterOption(String option) {
-    if (option != null) {
+    if (option != null && !option.isBlank()) {
       options.add(option);
     }
   }
@@ -85,15 +91,62 @@ public class SouscriptionAssurance {
     this.assurance = assurance;
   }
 
-  // Méthode selon UML
+  /**
+   * Calcule le prix total de la souscription d'assurance : (tarifVehiculeParJour +
+   * sommeOptionsParJour) * nbJours
+   *
+   * nbJours est calculé depuis Location.dateDebut/dateFin (LocalDateTime).
+   */
   public Double calculerPrix() {
-    // Calcule le prix de la souscription d'assurance
-    // TODO: Implémenter le calcul basé sur la grille tarifaire et les options
-    Double prixBase = 0.0;
-    if (assurance != null && assurance.getGrille() != null) {
-      // Calculer selon la grille tarifaire
-      // Le prix dépendra des options sélectionnées et du type de véhicule
+    if (assurance == null || assurance.getGrille() == null) {
+      throw new IllegalStateException("Assurance ou grille tarifaire manquante");
     }
-    return prixBase;
+    if (location == null) {
+      throw new IllegalStateException("Location manquante");
+    }
+    if (location.getVehicule() == null) {
+      throw new IllegalStateException("Véhicule manquant dans la location");
+    }
+
+    // 1) Nb jours (LocalDateTime -> jours)
+    LocalDateTime debut = location.getDateDebut();
+    LocalDateTime fin = location.getDateFin();
+    if (debut == null || fin == null) {
+      throw new IllegalStateException("Dates de location manquantes");
+    }
+
+    long jours = ChronoUnit.DAYS.between(debut, fin);
+    if (jours <= 0) {
+      throw new IllegalArgumentException(
+          "Dates invalides: la date de fin doit être après la date de début");
+    }
+    int nbJours = (int) jours;
+
+    // 2) Info véhicule
+    TypeV typeVehicule = location.getVehicule().getType();
+    String modeleVehicule = location.getVehicule().getModele();
+
+    // 3) Tarif véhicule par jour (via GrilleTarif)
+    TarifVehicule tarifVehicule =
+        assurance.getGrille().trouverTarifVehicule(typeVehicule, modeleVehicule);
+
+    if (tarifVehicule == null) {
+      throw new IllegalArgumentException(
+          "Aucun tarif véhicule trouvé pour type=" + typeVehicule + ", modele=" + modeleVehicule);
+    }
+
+    double prixVehiculeParJour = tarifVehicule.getPrix();
+
+    // 4) Options par jour
+    double prixOptionsParJour = 0.0;
+    for (String opt : options) {
+      TarifOption tarifOpt = assurance.getGrille().trouverTarifOption(opt);
+      if (tarifOpt == null) {
+        throw new IllegalArgumentException("Option inconnue dans la grille: " + opt);
+      }
+      prixOptionsParJour += tarifOpt.getPrix();
+    }
+
+    return (prixVehiculeParJour + prixOptionsParJour) * nbJours;
   }
 }

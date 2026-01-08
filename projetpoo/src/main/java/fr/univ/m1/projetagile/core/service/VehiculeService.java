@@ -61,10 +61,46 @@ public class VehiculeService {
     }
 
     List<Vehicule> vehicules = vehiculeRepository.findByAgentId(agent.getIdU());
+    return vehicules.stream().map(this::convertToDTO).collect(Collectors.toList());
+  }
+  
+   /**
+   * Recherche des véhicules avec des filtres et retourne leurs informations enrichies
+   *
+   * @param dateDebut date de début de la période souhaitée (optionnel)
+   * @param dateFin date de fin de la période souhaitée (optionnel)
+   * @param ville ville de recherche (optionnel)
+   * @param marque marque du véhicule (optionnel)
+   * @param modele modèle du véhicule (optionnel)
+   * @param couleur couleur du véhicule (optionnel)
+   * @param prixMin prix minimum journalier (optionnel)
+   * @param prixMax prix maximum journalier (optionnel)
+   * @param type type de véhicule (optionnel)
+   * @return Liste de VehiculeDTO filtrés contenant : - Les propriétés du véhicule - La note moyenne
+   *         calculée - Les dates de disponibilités - Le lieu (ville)
+   */
+  public List<VehiculeDTO> searchVehiculesWithFilters(LocalDate dateDebut, LocalDate dateFin,
+      String ville, String marque, String modele, String couleur, Double prixMin, Double prixMax,
+      TypeV type) {
+    List<Vehicule> vehicules = vehiculeRepository.findWithFilters(dateDebut, dateFin, ville, marque,
+        modele, couleur, prixMin, prixMax, type);
 
     return vehicules.stream().map(this::convertToDTO).collect(Collectors.toList());
   }
 
+  /**
+   * Crée un nouveau véhicule avec validation des données d'entrée
+   *
+   * @param type le type de véhicule (VOITURE, MOTO, etc.)
+   * @param marque la marque du véhicule (ex: Peugeot, Renault)
+   * @param modele le modèle du véhicule (ex: 308, Clio)
+   * @param couleur la couleur du véhicule
+   * @param ville la ville où se trouve le véhicule
+   * @param prixJ le prix journalier de location (doit être positif)
+   * @param proprietaire l'agent propriétaire du véhicule (doit être enregistré en base)
+   * @return le véhicule créé et sauvegardé en base de données
+   * @throws IllegalArgumentException si un paramètre est invalide (null, vide, ou négatif)
+   */
   public Vehicule createVehicule(TypeV type, String marque, String modele, String couleur,
       String ville, Double prixJ, Agent proprietaire) {
 

@@ -1,5 +1,6 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import java.util.Objects;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,23 +31,24 @@ public class TarifOption {
   @JoinColumn(name = "grille_tarif_id", nullable = false)
   private GrilleTarif grilleTarif;
 
-  // Constructeur sans argument pour JPA
   protected TarifOption() {}
 
-  public TarifOption(String nomOption, Double prix, GrilleTarif grilleTarif) {
-    this.nomOption = nomOption;
-    this.prix = prix;
-    this.grilleTarif = grilleTarif;
-  }
-
   public TarifOption(String nomOption, String description, Double prix, GrilleTarif grilleTarif) {
+    if (nomOption == null || nomOption.isBlank()) {
+      throw new IllegalArgumentException("nomOption ne peut pas être vide");
+    }
+    if (prix == null || prix < 0) {
+      throw new IllegalArgumentException("prix doit être >= 0");
+    }
+    if (grilleTarif == null) {
+      throw new IllegalArgumentException("grilleTarif ne peut pas être null");
+    }
     this.nomOption = nomOption;
     this.description = description;
     this.prix = prix;
     this.grilleTarif = grilleTarif;
   }
 
-  // Getters et Setters
   public Long getId() {
     return id;
   }
@@ -56,23 +58,10 @@ public class TarifOption {
   }
 
   public void setNomOption(String nomOption) {
+    if (nomOption == null || nomOption.isBlank()) {
+      throw new IllegalArgumentException("nomOption ne peut pas être vide");
+    }
     this.nomOption = nomOption;
-  }
-
-  public Double getPrix() {
-    return prix;
-  }
-
-  public void setPrix(Double prix) {
-    this.prix = prix;
-  }
-
-  public GrilleTarif getGrilleTarif() {
-    return grilleTarif;
-  }
-
-  public void setGrilleTarif(GrilleTarif grilleTarif) {
-    this.grilleTarif = grilleTarif;
   }
 
   public String getDescription() {
@@ -81,5 +70,54 @@ public class TarifOption {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public Double getPrix() {
+    return prix;
+  }
+
+  public void setPrix(Double prix) {
+    if (prix == null || prix < 0) {
+      throw new IllegalArgumentException("prix doit être >= 0");
+    }
+    this.prix = prix;
+  }
+
+  public GrilleTarif getGrilleTarif() {
+    return grilleTarif;
+  }
+
+  public void setGrilleTarif(GrilleTarif grilleTarif) {
+    if (grilleTarif == null) {
+      throw new IllegalArgumentException("grilleTarif ne peut pas être null");
+    }
+    this.grilleTarif = grilleTarif;
+  }
+
+  @Override
+  public String toString() {
+    return "TarifOption{" + "id=" + id + ", nomOption='" + nomOption + '\'' + ", prix=" + prix
+        + '}';
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (!(o instanceof TarifOption))
+      return false;
+    TarifOption that = (TarifOption) o;
+
+    if (this.id != null && that.id != null) {
+      return Objects.equals(this.id, that.id);
+    }
+    return Objects.equals(nomOption, that.nomOption) && Objects.equals(prix, that.prix);
+  }
+
+  @Override
+  public int hashCode() {
+    if (id != null)
+      return Objects.hash(id);
+    return Objects.hash(nomOption, prix);
   }
 }
