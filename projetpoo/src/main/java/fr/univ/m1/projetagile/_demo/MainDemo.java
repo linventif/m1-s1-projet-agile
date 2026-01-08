@@ -15,28 +15,33 @@ import fr.univ.m1.projetagile.enums.TypeV;
 import fr.univ.m1.projetagile.messagerie.entity.Message;
 import fr.univ.m1.projetagile.messagerie.persistence.MessageRepository;
 import fr.univ.m1.projetagile.messagerie.service.MessagerieService;
+import fr.univ.m1.projetagile.notes.entity.NoteAgent;
+import fr.univ.m1.projetagile.notes.entity.NoteLoueur;
+import fr.univ.m1.projetagile.notes.entity.NoteVehicule;
+import fr.univ.m1.projetagile.notes.service.NoteService;
 
 public class MainDemo {
   public static void main(String[] args) {
     try {
       // -- // -- // -- // -- // -- // -- // -- //
-      // Initialize database connection
+      // Database Connection
       // -- // -- // -- // -- // -- // -- // -- //
       DatabaseConnection.init();
       System.out.println("✓ DB connectée");
 
 
       // -- // -- // -- // -- // -- // -- // -- //
-      // Initialize services
+      // Services
       // -- // -- // -- // -- // -- // -- // -- //
       MessagerieService messagerieService = new MessagerieService(new MessageRepository());
       AgentService agentService = new AgentService(new AgentRepository());
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
+      NoteService noteService = new NoteService();
 
 
       // -- // -- // -- // -- // -- // -- // -- //
-      // Initialize Utilisateurs
+      // Utilisateurs
       // -- // -- // -- // -- // -- // -- // -- //
       System.out.println("\n=== Initialisation des Utilisateurs ===");
       // Particulier
@@ -99,7 +104,7 @@ public class MainDemo {
       }
 
       // -- // -- // -- // -- // -- // -- // -- //
-      // Initialize Vehicules
+      // Vehicules
       // -- // -- // -- // -- // -- // -- // -- //
       System.out.println("\n=== Initialisation des Véhicules ===");
 
@@ -124,7 +129,7 @@ public class MainDemo {
       System.out.println("✓ Véhicule créé: " + V4);
 
       // -- // -- // -- // -- // -- // -- // -- //
-      // Messaging tests
+      // Messaging
       // -- // -- // -- // -- // -- // -- // -- //
       System.out.println("\n=== Tests de messagerie ===");
       // Loueur1 -> Agent Pro
@@ -146,7 +151,55 @@ public class MainDemo {
           "Bonjour, j'ai plusieurs véhicules disponibles. Quel type recherchez-vous ?");
       System.out.println("✓ Message envoyé: " + msg4);
 
-      System.out.println("\n✓ Tout s'est bien passé!");
+
+      // -- // -- // -- // -- // -- // -- // -- //
+      // Notes
+      // -- // -- // -- // -- // -- // -- // -- //
+      System.out.println("\n=== Tests de notation ===");
+
+      // Loueur 1 note Agent Bob
+      NoteAgent noteAgent1 = noteService.noterAgent(L_john, APar_bob, 8.5, 9.0, 8.0);
+      System.out.println("✓ Note créée: " + noteAgent1);
+      System.out.println("  Moyenne: " + noteAgent1.getNoteMoyenne() + "/10");
+
+      // Loueur 2 note Agent Alice
+      NoteAgent noteAgent2 = noteService.noterAgent(L_jane, APar_alice, 9.0, 9.5, 8.5);
+      System.out.println("✓ Note créée: " + noteAgent2);
+      System.out.println("  Moyenne: " + noteAgent2.getNoteMoyenne() + "/10");
+
+      // Agent Bob note Loueur 1
+      NoteLoueur noteLoueur1 = noteService.noterLoueur(APar_bob, L_john, 9.0, 8.5, 9.0);
+      System.out.println("✓ Note créée: " + noteLoueur1);
+      System.out.println("  Moyenne: " + noteLoueur1.getNoteMoyenne() + "/10");
+
+      // Agent Alice note Loueur 2
+      NoteLoueur noteLoueur2 = noteService.noterLoueur(APar_alice, L_jane, 8.0, 8.5, 7.5);
+      System.out.println("✓ Note créée: " + noteLoueur2);
+      System.out.println("  Moyenne: " + noteLoueur2.getNoteMoyenne() + "/10");
+
+      // Loueur 1 note Véhicule 3 (Camion)
+      NoteVehicule noteVehicule1 = noteService.noterVehicule(L_john, V3, 8.0, 9.0, 8.5);
+      System.out.println("✓ Note créée: " + noteVehicule1);
+      System.out.println("  Moyenne: " + noteVehicule1.getNoteMoyenne() + "/10");
+
+      // Loueur 2 note Véhicule 1 (Peugeot)
+      NoteVehicule noteVehicule2 = noteService.noterVehicule(L_jane, V1, 9.5, 9.0, 9.0);
+      System.out.println("✓ Note créée: " + noteVehicule2);
+      System.out.println("  Moyenne: " + noteVehicule2.getNoteMoyenne() + "/10");
+
+      // Affichage des moyennes générales
+      System.out.println("\n=== Statistiques des notes ===");
+      System.out.println("Moyenne Agent Bob: " + noteService.getMoyenneAgent(APar_bob) + "/10");
+      System.out.println("Moyenne Agent Alice: " + noteService.getMoyenneAgent(APar_alice) + "/10");
+      System.out.println("Moyenne Loueur John: " + noteService.getMoyenneLoueur(L_john) + "/10");
+      System.out.println("Moyenne Loueur Jane: " + noteService.getMoyenneLoueur(L_jane) + "/10");
+      System.out
+          .println("Moyenne Véhicule Peugeot 308: " + noteService.getMoyenneVehicule(V1) + "/10");
+      System.out.println(
+          "Moyenne Véhicule Renault Master: " + noteService.getMoyenneVehicule(V3) + "/10");
+
+
+      System.out.println("\n✓ Démonstration complète terminée avec succès!");
     } catch (Exception e) {
       System.err.println("✗ Erreur: " + e.getMessage());
       e.printStackTrace();
