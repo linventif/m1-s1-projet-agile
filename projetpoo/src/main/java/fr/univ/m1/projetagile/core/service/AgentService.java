@@ -8,10 +8,11 @@ import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
+import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 
 /**
- * Service métier pour la gestion des agents (particuliers et professionnels)
- * Fournit des méthodes pour créer, récupérer et gérer les agents
+ * Service métier pour la gestion des agents (particuliers et professionnels) Fournit des méthodes
+ * pour créer, récupérer et gérer les agents
  */
 public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
@@ -19,16 +20,12 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
   public AgentService(AgentRepository agentRepository) {
     super(agentRepository);
-  }
-
-  public AgentService(AgentRepository agentRepository, VehiculeService vehiculeService) {
-    super(agentRepository);
-    this.vehiculeService = vehiculeService;
+    vehiculeService = new VehiculeService(new VehiculeRepository());
   }
 
   /**
-   * Valide le format d'un numéro de téléphone
-   * Le format attendu est: 11 chiffres commençant par un code pays (ex: 33638472527)
+   * Valide le format d'un numéro de téléphone Le format attendu est: 11 chiffres commençant par un
+   * code pays (ex: 33638472527)
    *
    * @param telephone le numéro de téléphone à valider
    * @throws IllegalArgumentException si le format est invalide
@@ -37,13 +34,13 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     if (telephone == null || telephone.trim().isEmpty()) {
       throw new IllegalArgumentException("Le numéro de téléphone ne peut pas être vide.");
     }
-    
+
     // Vérifier que le numéro ne contient que des chiffres
     if (!telephone.matches("\\d+")) {
       throw new IllegalArgumentException(
           "Le numéro de téléphone ne doit contenir que des chiffres.");
     }
-    
+
     // Vérifier que le numéro a exactement 11 chiffres
     if (telephone.length() != 11) {
       throw new IllegalArgumentException(
@@ -79,8 +76,7 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
       throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà.");
     }
 
-    AgentParticulier agent =
-        new AgentParticulier(nom, prenom, email, motDePasse, telephone);
+    AgentParticulier agent = new AgentParticulier(nom, prenom, email, motDePasse, telephone);
     return (AgentParticulier) repository.save(agent);
   }
 
@@ -210,7 +206,7 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     if (agent == null) {
       throw new IllegalArgumentException("L'agent ne peut pas être nul.");
     }
-    
+
     validateTelephone(nouveauTelephone);
 
     agent.setTelephone(nouveauTelephone);
