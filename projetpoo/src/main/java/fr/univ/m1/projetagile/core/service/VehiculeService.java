@@ -73,8 +73,21 @@ public class VehiculeService {
     List<Vehicule> vehicules = vehiculeRepository.findByAgentId(agent.getIdU());
     return vehicules.stream().map(this::convertToDTO).collect(Collectors.toList());
   }
-  
-   /**
+
+  /**
+   * Récupère un véhicule par son identifiant
+   *
+   * @param id l'identifiant du véhicule
+   * @return le véhicule trouvé ou null si aucun véhicule n'existe avec cet identifiant
+   */
+  public Vehicule findVehiculeById(Long id) {
+    if (id == null) {
+      throw new IllegalArgumentException("L'identifiant du véhicule ne peut pas être nul.");
+    }
+    return vehiculeRepository.findById(id);
+  }
+
+  /**
    * Recherche des véhicules avec des filtres et retourne leurs informations enrichies
    *
    * @param dateDebut date de début de la période souhaitée (optionnel)
@@ -142,6 +155,26 @@ public class VehiculeService {
 
     Vehicule vehicule = new Vehicule(type, marque, modele, couleur, ville, prixJ, proprietaire);
     return vehiculeRepository.save(vehicule);
+  }
+
+  /**
+   * Supprime un véhicule par son identifiant
+   *
+   * @param vehiculeId l'identifiant du véhicule à supprimer
+   * @throws IllegalArgumentException si le véhicule n'existe pas
+   */
+  public void deleteVehicule(Long vehiculeId) {
+    if (vehiculeId == null) {
+      throw new IllegalArgumentException("L'identifiant du véhicule ne peut pas être nul.");
+    }
+
+    Vehicule vehicule = vehiculeRepository.findById(vehiculeId);
+    if (vehicule == null) {
+      throw new IllegalArgumentException("Aucun véhicule trouvé avec l'identifiant " + vehiculeId);
+    }
+
+    // Supprimer le véhicule
+    vehiculeRepository.delete(vehiculeId);
   }
 
   /**
@@ -374,7 +407,8 @@ public class VehiculeService {
 
       return dto;
     } catch (Exception e) {
-      throw new RuntimeException("Erreur lors de la conversion du véhicule en DTO: " + e.getMessage(), e);
+      throw new RuntimeException(
+          "Erreur lors de la conversion du véhicule en DTO: " + e.getMessage(), e);
     }
   }
 
