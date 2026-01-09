@@ -3,6 +3,8 @@ package fr.univ.m1.projetagile.core.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import fr.univ.m1.projetagile.core.dto.LocationDTO;
+import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
@@ -126,5 +128,63 @@ public class LocationService {
     }
     location.setStatut(StatutLocation.TERMINE);
     locationRepository.save(location);
+  }
+
+  /**
+   * Récupère une location par son identifiant et la convertit en LocationDTO
+   *
+   * @param id l'identifiant de la location
+   * @return le LocationDTO correspondant avec le prix total calculé, ou null si la location n'existe
+   *         pas
+   */
+  public LocationDTO getLocation(Long id) {
+    if (id == null) {
+      throw new IllegalArgumentException("L'identifiant de la location ne peut pas être nul.");
+    }
+
+    Location location = locationRepository.findById(id);
+    if (location == null) {
+      return null;
+    }
+
+    return convertLocationToDTO(location);
+  }
+
+  /**
+   * Convertit une entité Location en LocationDTO
+   *
+   * @param location l'entité Location à convertir
+   * @return le DTO correspondant avec toutes les informations incluant le prix total
+   */
+  private LocationDTO convertLocationToDTO(Location location) {
+    LocationDTO dto = new LocationDTO();
+
+    dto.setId(location.getId());
+    dto.setDateDebut(location.getDateDebut());
+    dto.setDateFin(location.getDateFin());
+    dto.setLieuDepot(location.getLieuDepot());
+    dto.setStatut(location.getStatut());
+
+    // Calculer et définir le prix total
+    dto.setPrixTotal(getPrixLocation(location));
+
+    // Convertir le véhicule en VehiculeDTO
+    if (location.getVehicule() != null) {
+      Vehicule vehicule = location.getVehicule();
+      VehiculeDTO vehiculeDTO = new VehiculeDTO();
+      vehiculeDTO.setId(vehicule.getId());
+      vehiculeDTO.setType(vehicule.getType());
+      vehiculeDTO.setMarque(vehicule.getMarque());
+      vehiculeDTO.setModele(vehicule.getModele());
+      vehiculeDTO.setCouleur(vehicule.getCouleur());
+      vehiculeDTO.setVille(vehicule.getVille());
+      vehiculeDTO.setPrixJ(vehicule.getPrixJ());
+      vehiculeDTO.setDisponible(vehicule.isDisponible());
+      vehiculeDTO.setNoteMoyenne(vehicule.calculerNote());
+
+      dto.setVehicule(vehiculeDTO);
+    }
+
+    return dto;
   }
 }
