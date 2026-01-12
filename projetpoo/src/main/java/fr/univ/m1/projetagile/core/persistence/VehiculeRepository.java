@@ -70,10 +70,8 @@ public class VehiculeRepository {
    */
   public List<Vehicule> findAll() {
     try (EntityManager em = DatabaseConnection.getEntityManager()) {
-      TypedQuery<Vehicule> query =
-          em.createQuery("SELECT DISTINCT v FROM Vehicule v " +
-              "LEFT JOIN FETCH v.datesDispo " +
-              "LEFT JOIN FETCH v.proprietaire", Vehicule.class);
+      TypedQuery<Vehicule> query = em.createQuery("SELECT DISTINCT v FROM Vehicule v "
+          + "LEFT JOIN FETCH v.datesDispo " + "LEFT JOIN FETCH v.proprietaire", Vehicule.class);
       return query.getResultList();
 
     } catch (Exception e) {
@@ -82,12 +80,12 @@ public class VehiculeRepository {
   }
 
   public List<Vehicule> findWithFilters(LocalDate dateDebut, LocalDate dateFin, String ville,
-      String marque, String modele, String couleur, Double prixMin, Double prixMax, TypeV type) {
+      String marque, String modele, String couleur, Double prixMin, Double prixMax, TypeV type,
+      Boolean hasParkingOption) {
     try (EntityManager em = DatabaseConnection.getEntityManager()) {
       StringBuilder jpql = new StringBuilder();
-      jpql.append("SELECT DISTINCT v FROM Vehicule v " +
-          "LEFT JOIN FETCH v.datesDispo " +
-          "LEFT JOIN FETCH v.proprietaire");
+      jpql.append("SELECT DISTINCT v FROM Vehicule v " + "LEFT JOIN FETCH v.datesDispo "
+          + "LEFT JOIN FETCH v.proprietaire");
 
       List<String> conditions = new ArrayList<>();
 
@@ -129,6 +127,12 @@ public class VehiculeRepository {
       // Filtre par disponibilité générale du véhicule
       conditions.add("v.disponible = true");
 
+      // Filtre par option Parking (si demandé)
+      if (hasParkingOption != null && hasParkingOption) {
+        conditions.add(
+            "EXISTS (SELECT so FROM SouscriptionOption so WHERE so.agent = v.proprietaire AND so.option.id = :parkingOptionId)");
+      }
+
       // Ajouter les conditions WHERE si elles existent
       if (!conditions.isEmpty()) {
         jpql.append(" WHERE ");
@@ -137,7 +141,12 @@ public class VehiculeRepository {
 
       // Si on a des dates de début et fin, ajouter la vérification des conflits de location
       if (dateDebut != null && dateFin != null) {
-        jpql.append(" AND NOT EXISTS (");
+        if (conditions.isEmpty()) {
+          jpql.append(" WHERE ");
+        } else {
+          jpql.append(" AND ");
+        }
+        jpql.append("NOT EXISTS (");
         jpql.append("SELECT l FROM Location l ");
         jpql.append("WHERE l.vehicule = v ");
         jpql.append("AND l.statut != :statutTermine ");
@@ -175,6 +184,9 @@ public class VehiculeRepository {
         query.setParameter("statutAnnule", StatutLocation.ANNULE);
         query.setParameter("dateDebut", dateDebut.atStartOfDay());
         query.setParameter("dateFin", dateFin.atStartOfDay());
+      }
+      if (hasParkingOption != null && hasParkingOption) {
+        query.setParameter("parkingOptionId", 5L);
       }
 
       return query.getResultList();
