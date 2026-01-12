@@ -3,6 +3,7 @@ package fr.univ.m1.projetagile.core.entity;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import fr.univ.m1.projetagile.enums.TypeV;
@@ -239,6 +240,20 @@ public class Vehicule {
         + ", proprietaire=" + (proprietaire != null ? proprietaire.getIdU() : "null") + "]";
   }
 
-  // Méthode filter serait typiquement dans un service/repository, pas dans l'entité
-  // public static List<Vehicule> filter(...) { ... }
+  /**
+   * Retourne le dernier entretien (par date) effectué sur ce véhicule, ou null si aucun entretien
+   * n'a encore été enregistré.
+   */
+  public EntretienVehicule getDernierEntretienVehicule() {
+    return entretienVehicules.stream()
+        .max(Comparator.comparing(EntretienVehicule::getDateEntretien)).orElse(null);
+  }
+
+  /**
+   * Retourne la date du dernier entretien effectué sur ce véhicule, ou null si aucun entretien.
+   */
+  public LocalDate getDateDernierEntretienVehicule() {
+    EntretienVehicule dernier = getDernierEntretienVehicule();
+    return (dernier != null) ? dernier.getDateEntretien() : null;
+  }
 }
