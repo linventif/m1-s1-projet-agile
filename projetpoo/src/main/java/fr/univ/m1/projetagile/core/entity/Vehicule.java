@@ -232,6 +232,13 @@ public class Vehicule {
     return Collections.unmodifiableList(locations);
   }
 
+  @Override
+  public String toString() {
+    return "Vehicule [id=" + id + ", type=" + type + ", marque=" + marque + ", modele=" + modele
+        + ", couleur=" + couleur + ", ville=" + ville + ", prix=" + prixJ + "€/j"
+        + ", proprietaire=" + (proprietaire != null ? proprietaire.getIdU() : "null") + "]";
+  }
+
   // Méthode filter serait typiquement dans un service/repository, pas dans l'entité
   // public static List<Vehicule> filter(...) { ... }
 }

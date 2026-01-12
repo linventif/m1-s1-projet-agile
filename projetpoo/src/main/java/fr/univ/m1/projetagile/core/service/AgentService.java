@@ -1,0 +1,255 @@
+package fr.univ.m1.projetagile.core.service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import fr.univ.m1.projetagile.core.dto.AgentDTO;
+import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
+import fr.univ.m1.projetagile.core.entity.Agent;
+import fr.univ.m1.projetagile.core.entity.AgentParticulier;
+import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
+import fr.univ.m1.projetagile.core.persistence.AgentRepository;
+import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
+
+/**
+ * Service métier pour la gestion des agents (particuliers et professionnels) Fournit des méthodes
+ * pour créer, récupérer et gérer les agents
+ */
+public class AgentService extends UtilisateurService<Agent, AgentRepository> {
+
+  private VehiculeService vehiculeService;
+
+  public AgentService(AgentRepository agentRepository) {
+    super(agentRepository);
+    vehiculeService = new VehiculeService(new VehiculeRepository());
+  }
+
+  /**
+   * Valide le format d'un numéro de téléphone Le format attendu est: 11 chiffres commençant par un
+   * code pays (ex: 33638472527)
+   *
+   * @param telephone le numéro de téléphone à valider
+   * @throws IllegalArgumentException si le format est invalide
+   */
+  private void validateTelephone(String telephone) {
+    if (telephone == null || telephone.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le numéro de téléphone ne peut pas être vide.");
+    }
+
+    // Vérifier que le numéro ne contient que des chiffres
+    if (!telephone.matches("\\d+")) {
+      throw new IllegalArgumentException(
+          "Le numéro de téléphone ne doit contenir que des chiffres.");
+    }
+
+    // Vérifier que le numéro a exactement 11 chiffres
+    if (telephone.length() != 11) {
+      throw new IllegalArgumentException(
+          "Le numéro de téléphone doit contenir exactement 11 chiffres (ex: 33638472527).");
+    }
+  }
+
+  /**
+   * Crée un nouvel agent particulier
+   *
+   * @param nom le nom de l'agent
+   * @param prenom le prénom de l'agent
+   * @param email l'email de l'agent
+   * @param motDePasse le mot de passe de l'agent
+   * @param telephone le numéro de téléphone de l'agent
+   * @return l'agent créé et enregistré
+   */
+  public AgentParticulier createAgentParticulier(String nom, String prenom, String email,
+      String motDePasse, String telephone) {
+
+    validateCommonFields(email, motDePasse);
+    validateTelephone(telephone);
+
+    if (nom == null || nom.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le nom ne peut pas être vide.");
+    }
+    if (prenom == null || prenom.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le prénom ne peut pas être vide.");
+    }
+
+    // Vérifier que l'email n'est pas déjà utilisé
+    if (repository.findByEmail(email) != null) {
+      throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà.");
+    }
+
+    AgentParticulier agent = new AgentParticulier(nom, prenom, email, motDePasse, telephone);
+    return (AgentParticulier) repository.save(agent);
+  }
+
+  /**
+   * Crée un nouvel agent professionnel
+   *
+   * @param email l'email de l'agent
+   * @param motDePasse le mot de passe de l'agent
+   * @param siret le numéro SIRET de l'entreprise
+   * @param nom le nom de l'entreprise
+   * @return l'agent créé et enregistré
+   */
+  public AgentProfessionnel createAgentProfessionnel(String email, String motDePasse, String siret,
+      String nom) {
+
+    validateCommonFields(email, motDePasse);
+
+    if (siret == null || siret.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le SIRET ne peut pas être vide.");
+    }
+    if (nom == null || nom.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le nom de l'entreprise ne peut pas être vide.");
+    }
+
+    // Vérifier que l'email n'est pas déjà utilisé
+    if (repository.findByEmail(email) != null) {
+      throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà.");
+    }
+
+    AgentProfessionnel agent = new AgentProfessionnel(email, motDePasse, siret, nom);
+    return (AgentProfessionnel) repository.save(agent);
+  }
+
+  /**
+   * Récupère le profil complet d'un agent sous forme de DTO
+   *
+   * @param agent l'agent dont on veut récupérer le profil
+   * @return AgentDTO contenant toutes les informations du profil et les véhicules disponibles
+   */
+  public AgentDTO getAgentProfile(Agent agent) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (vehiculeService == null) {
+      throw new IllegalStateException(
+          "VehiculeService n'est pas initialisé. Utilisez le constructeur avec VehiculeService.");
+    }
+
+    AgentDTO dto = new AgentDTO();
+
+    // Informations communes
+    dto.setIdU(agent.getIdU());
+    dto.setEmail(agent.getEmail());
+    dto.setTypeAgent(agent.getTypeAgent());
+    dto.setNoteMoyenne(agent.calculerNote());
+
+    // Informations spécifiques selon le type d'agent
+    if (agent instanceof AgentParticulier) {
+      AgentParticulier particulier = (AgentParticulier) agent;
+      dto.setNom(particulier.getNom());
+      dto.setPrenom(particulier.getPrenom());
+      dto.setTelephone(particulier.getTelephone());
+    } else if (agent instanceof AgentProfessionnel) {
+      AgentProfessionnel professionnel = (AgentProfessionnel) agent;
+      dto.setNom(professionnel.getNom());
+      dto.setSiret(professionnel.getSiret());
+    }
+
+    // Récupérer les véhicules de l'agent et filtrer uniquement ceux qui sont disponibles
+    List<VehiculeDTO> tousLesVehicules = vehiculeService.getVehiculesByAgent(agent);
+    List<VehiculeDTO> vehiculesDisponibles =
+        tousLesVehicules.stream().filter(VehiculeDTO::isDisponible).collect(Collectors.toList());
+
+    dto.setVehicules(vehiculesDisponibles);
+
+    return dto;
+  }
+
+  /**
+   * Modifie le nom d'un agent particulier
+   *
+   * @param agent l'agent particulier à modifier
+   * @param nouveauNom le nouveau nom
+   * @return l'agent modifié
+   */
+  public AgentParticulier updateAgentParticulierNom(AgentParticulier agent, String nouveauNom) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (nouveauNom == null || nouveauNom.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le nom ne peut pas être vide.");
+    }
+
+    agent.setNom(nouveauNom);
+    return (AgentParticulier) repository.save(agent);
+  }
+
+  /**
+   * Modifie le prénom d'un agent particulier
+   *
+   * @param agent l'agent particulier à modifier
+   * @param nouveauPrenom le nouveau prénom
+   * @return l'agent modifié
+   */
+  public AgentParticulier updateAgentParticulierPrenom(AgentParticulier agent,
+      String nouveauPrenom) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (nouveauPrenom == null || nouveauPrenom.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le prénom ne peut pas être vide.");
+    }
+
+    agent.setPrenom(nouveauPrenom);
+    return (AgentParticulier) repository.save(agent);
+  }
+
+  /**
+   * Modifie le téléphone d'un agent particulier
+   *
+   * @param agent l'agent particulier à modifier
+   * @param nouveauTelephone le nouveau numéro de téléphone
+   * @return l'agent modifié
+   */
+  public AgentParticulier updateAgentParticulierTelephone(AgentParticulier agent,
+      String nouveauTelephone) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+
+    validateTelephone(nouveauTelephone);
+
+    agent.setTelephone(nouveauTelephone);
+    return (AgentParticulier) repository.save(agent);
+  }
+
+  /**
+   * Modifie le nom d'un agent professionnel
+   *
+   * @param agent l'agent professionnel à modifier
+   * @param nouveauNom le nouveau nom de l'entreprise
+   * @return l'agent modifié
+   */
+  public AgentProfessionnel updateAgentProfessionnelNom(AgentProfessionnel agent,
+      String nouveauNom) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (nouveauNom == null || nouveauNom.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le nom de l'entreprise ne peut pas être vide.");
+    }
+
+    agent.setNom(nouveauNom);
+    return (AgentProfessionnel) repository.save(agent);
+  }
+
+  /**
+   * Modifie le SIRET d'un agent professionnel
+   *
+   * @param agent l'agent professionnel à modifier
+   * @param nouveauSiret le nouveau numéro SIRET
+   * @return l'agent modifié
+   */
+  public AgentProfessionnel updateAgentProfessionnelSiret(AgentProfessionnel agent,
+      String nouveauSiret) {
+    if (agent == null) {
+      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
+    }
+    if (nouveauSiret == null || nouveauSiret.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le SIRET ne peut pas être vide.");
+    }
+
+    agent.setSiret(nouveauSiret);
+    return (AgentProfessionnel) repository.save(agent);
+  }
+}

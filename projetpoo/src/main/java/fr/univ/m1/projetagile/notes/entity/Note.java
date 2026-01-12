@@ -1,9 +1,16 @@
-package fr.univ.m1.projetagile.core.entity;
+package fr.univ.m1.projetagile.notes.entity;
 
 import java.time.LocalDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 
+/**
+ * Classe abstraite représentant une note générique.
+ *
+ * <p>
+ * Une note est composée de 3 notes partielles et d'une date de notation.
+ * </p>
+ */
 @MappedSuperclass
 public abstract class Note {
 
@@ -19,22 +26,35 @@ public abstract class Note {
   @Column(nullable = false, name = "date_note")
   protected LocalDate date;
 
-  // Constructeur sans argument pour JPA
   protected Note() {}
 
   protected Note(Double note1, Double note2, Double note3) {
+    validateNote(note1, "note1");
+    validateNote(note2, "note2");
+    validateNote(note3, "note3");
+
     this.note1 = note1;
     this.note2 = note2;
     this.note3 = note3;
     this.date = LocalDate.now();
   }
 
-  // Getters et Setters
+  private void validateNote(Double note, String nomNote) {
+    if (note == null) {
+      throw new IllegalArgumentException(nomNote + " ne peut pas être null");
+    }
+    if (note < 0.0 || note > 10.0) {
+      throw new IllegalArgumentException(
+          nomNote + " doit être entre 0 et 10 (valeur: " + note + ")");
+    }
+  }
+
   public Double getNote1() {
     return note1;
   }
 
   public void setNote1(Double note1) {
+    validateNote(note1, "note1");
     this.note1 = note1;
   }
 
@@ -43,6 +63,7 @@ public abstract class Note {
   }
 
   public void setNote2(Double note2) {
+    validateNote(note2, "note2");
     this.note2 = note2;
   }
 
@@ -51,6 +72,7 @@ public abstract class Note {
   }
 
   public void setNote3(Double note3) {
+    validateNote(note3, "note3");
     this.note3 = note3;
   }
 
@@ -62,13 +84,12 @@ public abstract class Note {
     this.date = date;
   }
 
+  /**
+   * Calcule la moyenne des 3 notes.
+   *
+   * @return la moyenne arrondie à 2 décimales
+   */
   public Double getNoteMoyenne() {
-    if (note1 != null && note2 != null && note3 != null) {
-      return (note1 + note2 + note3) / 3.0;
-    }
-    return null;
+    return Math.round((note1 + note2 + note3) / 3.0 * 100.0) / 100.0;
   }
-
-  // Méthode abstraite selon UML
-  public abstract void Noter();
 }
