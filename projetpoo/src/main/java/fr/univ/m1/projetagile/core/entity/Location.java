@@ -1,7 +1,10 @@
 package fr.univ.m1.projetagile.core.entity;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import fr.univ.m1.projetagile.core.service.LocationConfig;
 import fr.univ.m1.projetagile.enums.StatutLocation;
+import fr.univ.m1.projetagile.enums.TypeDureeLocation;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -42,7 +45,7 @@ public class Location {
   @JoinColumn(name = "loueur_id", nullable = false)
   private Loueur loueur;
 
-  // JPA exige un constructeur sans arguments
+  // 🔹 Constructeur requis par JPA
   protected Location() {}
 
   public Location(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule,
@@ -62,7 +65,8 @@ public class Location {
     this.loueur = loueur;
   }
 
-  // Getters et setters
+  // ==================== GETTERS / SETTERS ====================
+
   public Long getId() {
     return id;
   }
@@ -113,5 +117,38 @@ public class Location {
 
   public void setLoueur(Loueur loueur) {
     this.loueur = loueur;
+  }
+
+  // ==================== LOGIQUE LLD (TICKET #99) ====================
+
+  /**
+   * Nombre de jours de location (en jours pleins).
+   */
+  public int getNombreJours() {
+    if (dateDebut == null || dateFin == null) {
+      throw new IllegalStateException("Dates de location non définies");
+    }
+
+    long jours = ChronoUnit.DAYS.between(dateDebut, dateFin);
+
+    if (jours <= 0) {
+      throw new IllegalArgumentException("dateFin doit être après dateDebut");
+    }
+
+    return (int) jours;
+  }
+
+  /**
+   * Indique si la location est une location longue durée (LLD).
+   */
+  public boolean estLongueDuree() {
+    return getNombreJours() >= LocationConfig.SEUIL_LONGUE_DUREE_JOURS;
+  }
+
+  /**
+   * Type de durée de la location (COURTE ou LONGUE).
+   */
+  public TypeDureeLocation getTypeDuree() {
+    return estLongueDuree() ? TypeDureeLocation.LONGUE_DUREE : TypeDureeLocation.COURTE_DUREE;
   }
 }
