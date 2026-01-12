@@ -57,9 +57,8 @@ public class CreditRepository {
    * @throws RuntimeException si une erreur survient lors de l'enregistrement
    */
   public Crédit save(Crédit credit) {
-    EntityManager em = DatabaseConnection.getEntityManager();
     EntityTransaction transaction = null;
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       transaction = em.getTransaction();
       transaction.begin();
 
@@ -88,8 +87,7 @@ public class CreditRepository {
    * @throws RuntimeException si une erreur survient lors de la récupération
    */
   public Crédit findById(Long id) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.find(Crédit.class, id);
     } catch (Exception e) {
       throw new RuntimeException("Erreur lors de la récupération du crédit", e);
@@ -108,8 +106,7 @@ public class CreditRepository {
    * @throws RuntimeException si une erreur survient lors de la récupération
    */
   public Crédit findByUtilisateurId(Long utilisateurId) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       String jpql = "SELECT c FROM Crédit c WHERE c.utilisateurId = :utilisateurId";
 
       TypedQuery<Crédit> query = em.createQuery(jpql, Crédit.class);
@@ -131,8 +128,7 @@ public class CreditRepository {
    * @throws RuntimeException si une erreur survient lors de la vérification
    */
   public boolean hasCredit(Long utilisateurId) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       String jpql = "SELECT COUNT(c) FROM Crédit c WHERE c.utilisateurId = :utilisateurId";
 
       TypedQuery<Long> query = em.createQuery(jpql, Long.class);
@@ -154,8 +150,7 @@ public class CreditRepository {
    * @throws RuntimeException si une erreur survient lors de la récupération
    */
   public List<Crédit> findAll() {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       String jpql = "SELECT c FROM Crédit c";
 
       TypedQuery<Crédit> query = em.createQuery(jpql, Crédit.class);
@@ -179,9 +174,8 @@ public class CreditRepository {
    * @throws RuntimeException si une erreur survient lors de la suppression
    */
   public void delete(Long id) {
-    EntityManager em = DatabaseConnection.getEntityManager();
     EntityTransaction transaction = null;
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       transaction = em.getTransaction();
       transaction.begin();
 
@@ -207,13 +201,16 @@ public class CreditRepository {
    * @throws RuntimeException si une erreur survient lors de la suppression
    */
   public void deleteByUtilisateurId(Long utilisateurId) {
-    EntityManager em = DatabaseConnection.getEntityManager();
     EntityTransaction transaction = null;
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       transaction = em.getTransaction();
       transaction.begin();
 
-      Crédit credit = findByUtilisateurId(utilisateurId);
+      String jpql = "SELECT c FROM Crédit c WHERE c.utilisateurId = :utilisateurId";
+      TypedQuery<Crédit> query = em.createQuery(jpql, Crédit.class);
+      query.setParameter("utilisateurId", utilisateurId);
+
+      Crédit credit = query.getResultStream().findFirst().orElse(null);
       if (credit != null) {
         em.remove(credit);
       }
