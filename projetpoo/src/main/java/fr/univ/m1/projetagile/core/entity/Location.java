@@ -1,6 +1,7 @@
 package fr.univ.m1.projetagile.core.entity;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import org.hibernate.annotations.Any;
 import org.hibernate.annotations.AnyDiscriminator;
 import org.hibernate.annotations.AnyDiscriminatorValue;
@@ -53,7 +54,8 @@ public class Location {
   @JoinColumn(name = "loueur_id", nullable = false)
   private Loueur loueur;
 
-  // JPA exige un constructeur sans arguments
+  // ===== Constructeurs =====
+
   protected Location() {}
 
   public Location(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule,
@@ -73,7 +75,8 @@ public class Location {
     this.loueur = loueur;
   }
 
-  // Getters et setters
+  // ===== Getters / Setters =====
+
   public Long getId() {
     return id;
   }
@@ -124,5 +127,24 @@ public class Location {
 
   public void setLoueur(Loueur loueur) {
     this.loueur = loueur;
+  }
+
+  // ======================================================
+  // ================== MÉTIER LOCATION ===================
+  // ======================================================
+
+  /**
+   * Retourne le nombre de jours de location. Exemple : du 1 au 4 = 3 jours
+   */
+  public int getNombreJours() {
+    return (int) ChronoUnit.DAYS.between(this.dateDebut, this.dateFin);
+  }
+
+  /**
+   * Indique si la location est une Location Longue Durée (LLD). Règle métier : LLD à partir de 7
+   * jours.
+   */
+  public boolean estLongueDuree() {
+    return getNombreJours() >= 7;
   }
 }

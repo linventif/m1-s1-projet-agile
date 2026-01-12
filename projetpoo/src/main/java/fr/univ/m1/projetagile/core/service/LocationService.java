@@ -2,7 +2,6 @@ package fr.univ.m1.projetagile.core.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import fr.univ.m1.projetagile.core.dto.LocationDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Location;
@@ -19,6 +18,10 @@ import fr.univ.m1.projetagile.enums.StatutLocation;
 public class LocationService {
 
   private final LocationRepository locationRepository;
+
+  // ==================== #100 : règles commission ====================
+  private static final double COMMISSION_NORMALE = 0.10; // 10%
+  private static final double COMMISSION_LLD = 0.05; // 5% (rabais LLD)
 
   public LocationService(LocationRepository locationRepository) {
     this.locationRepository = locationRepository;
@@ -40,9 +43,9 @@ public class LocationService {
     if (dateDebut == null || dateFin == null) {
       throw new IllegalArgumentException("Les dates de début et de fin sont obligatoires.");
     }
-    if (dateFin.isBefore(dateDebut)) {
+    if (!dateFin.isAfter(dateDebut)) {
       throw new IllegalArgumentException(
-          "La date de fin doit être postérieure à la date de début.");
+          "La date de fin doit être strictement postérieure à la date de début.");
     }
     if (vehicule == null || vehicule.getId() == null) {
       throw new IllegalArgumentException("Le véhicule doit être spécifié et enregistré.");
@@ -65,12 +68,6 @@ public class LocationService {
 
   /**
    * Crée et enregistre une nouvelle location sans lieu de dépôt spécifié.
-   *
-   * @param dateDebut date et heure de début souhaitées
-   * @param dateFin date et heure de fin souhaitées
-   * @param vehicule véhicule concerné (doit être déjà persisté)
-   * @param loueur loueur effectuant la réservation
-   * @return la location sauvegardée
    */
   public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule,
       Loueur loueur) {
@@ -78,38 +75,37 @@ public class LocationService {
   }
 
   /**
-   * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
-   * - Le prix de base (prix par jour × nombre de jours) - Une commission proportionnelle de 10% sur
-   * le prix de base - Des frais fixes de 2€ par jour
+   * Calcule le prix total d'une location en fonction de la durée et du véhicule.
    *
-   * @param location la location pour laquelle calculer le prix
-   * @return le prix total de la location
+   * Prix total = prix de base + commission + frais fixes - prix de base = prix par jour × nombre de
+   * jours - commission = 10% du prixBase (ou 5% si LLD) - frais fixes = 2€ par jour
+   *
+   * ✅ #99 : durée calculée par location.getNombreJours() ✅ #100 : rabais LLD sur la commission
+   * (part variable)
    */
   public double getPrixLocation(Location location) {
     if (location == null) {
       throw new IllegalArgumentException("La location ne peut pas être nulle.");
     }
-    // Calcul du nombre de jours de location
-    long nombreJours = ChronoUnit.DAYS.between(location.getDateDebut(), location.getDateFin());
 
-    // Prix de base = prix par jour × nombre de jours
+    // ✅ #99 : on utilise la méthode centralisée dans Location
+    int nombreJours = location.getNombreJours();
+
+    // Prix de base
     double prixBase = location.getVehicule().getPrixJ() * nombreJours;
 
-    // Commission de 10% sur le prix de base
-    double commissionProportionnelle = prixBase * 0.1;
+    // ✅ #100 : commission réduite si LLD
+    double tauxCommission = location.estLongueDuree() ? COMMISSION_LLD : COMMISSION_NORMALE;
+    double commissionProportionnelle = prixBase * tauxCommission;
 
-    // Frais fixes de 2€ par jour
+    // Frais fixes
     double fraisFixes = 2.0 * nombreJours;
 
-    // Prix total = prix de base + commission + frais fixes
     return prixBase + commissionProportionnelle + fraisFixes;
   }
 
   /**
-   * Annule une location en cours. Change le statut de la location à ANNULER et la sauvegarde en
-   * base de données.
-   *
-   * @param location la location à annuler
+   * Annule une location en cours.
    */
   public void annuler(Location location) {
     if (location == null) {
@@ -127,10 +123,7 @@ public class LocationService {
   }
 
   /**
-   * Termine une location en cours. Change le statut de la location à TERMINE et la sauvegarde en
-   * base de données.
-   *
-   * @param location la location à terminer
+   * Termine une location en cours.
    */
   public void terminer(Location location) {
     if (location == null) {
@@ -146,11 +139,7 @@ public class LocationService {
   }
 
   /**
-   * Récupère une location par son identifiant et la convertit en LocationDTO
-   *
-   * @param id l'identifiant de la location
-   * @return le LocationDTO correspondant avec le prix total calculé, ou null si la location
-   *         n'existe pas
+   * Récupère une location par son identifiant et la convertit en LocationDTO.
    */
   public LocationDTO getLocation(Long id) {
     if (id == null) {
@@ -166,10 +155,7 @@ public class LocationService {
   }
 
   /**
-   * Convertit une entité Location en LocationDTO
-   *
-   * @param location l'entité Location à convertir
-   * @return le DTO correspondant avec toutes les informations incluant le prix total
+   * Convertit une entité Location en LocationDTO.
    */
   private LocationDTO convertLocationToDTO(Location location) {
     LocationDTO dto = new LocationDTO();
@@ -180,10 +166,8 @@ public class LocationService {
     dto.setLieuDepot(location.getLieuDepot());
     dto.setStatut(location.getStatut());
 
-    // Calculer et définir le prix total
     dto.setPrixTotal(getPrixLocation(location));
 
-    // Convertir le véhicule en VehiculeDTO
     if (location.getVehicule() != null) {
       Vehicule vehicule = location.getVehicule();
       VehiculeDTO vehiculeDTO = new VehiculeDTO();

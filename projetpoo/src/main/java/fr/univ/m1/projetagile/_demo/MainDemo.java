@@ -1,14 +1,18 @@
 package fr.univ.m1.projetagile._demo;
 
+import java.time.LocalDateTime;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
+import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
+import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.core.persistence.LoueurRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.core.service.AgentService;
+import fr.univ.m1.projetagile.core.service.LocationService;
 import fr.univ.m1.projetagile.core.service.LoueurService;
 import fr.univ.m1.projetagile.core.service.VehiculeService;
 import fr.univ.m1.projetagile.enums.TypeV;
@@ -29,7 +33,6 @@ public class MainDemo {
       DatabaseConnection.init();
       System.out.println("✓ DB connectée");
 
-
       // -- // -- // -- // -- // -- // -- // -- //
       // Services
       // -- // -- // -- // -- // -- // -- // -- //
@@ -39,6 +42,9 @@ public class MainDemo {
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
       NoteService noteService = new NoteService();
 
+      // ✅ Location (pour #99 + #100)
+      LocationRepository locationRepository = new LocationRepository();
+      LocationService locationService = new LocationService(locationRepository);
 
       // -- // -- // -- // -- // -- // -- // -- //
       // Utilisateurs
@@ -129,6 +135,41 @@ public class MainDemo {
       System.out.println("✓ Véhicule créé: " + V4);
 
       // -- // -- // -- // -- // -- // -- // -- //
+      // TEST LLD (#99 + #100)
+      // -- // -- // -- // -- // -- // -- // -- //
+      System.out.println("\n=== TEST LLD (#99 + #100) : Location courte vs longue ===");
+
+      // Location courte (3 jours)
+      LocalDateTime debutCourte = LocalDateTime.now();
+      LocalDateTime finCourte = debutCourte.plusDays(3);
+
+      Location locCourte = new Location(debutCourte, finCourte, V1, L_john);
+      locCourte = locationRepository.save(locCourte);
+
+      System.out.println("\n--- Location COURTE (3 jours) ---");
+      System.out.println("ID   : " + locCourte.getId());
+      System.out.println("Début: " + locCourte.getDateDebut());
+      System.out.println("Fin  : " + locCourte.getDateFin());
+      System.out.println("Jours: " + locCourte.getNombreJours());
+      System.out.println("LLD ? " + locCourte.estLongueDuree());
+      System.out.println("Prix courte: " + locationService.getPrixLocation(locCourte));
+
+      // Location longue (7 jours)
+      LocalDateTime debutLongue = LocalDateTime.now();
+      LocalDateTime finLongue = debutLongue.plusDays(7);
+
+      Location locLongue = new Location(debutLongue, finLongue, V1, L_john);
+      locLongue = locationRepository.save(locLongue);
+
+      System.out.println("\n--- Location LONGUE (7 jours) ---");
+      System.out.println("ID   : " + locLongue.getId());
+      System.out.println("Début: " + locLongue.getDateDebut());
+      System.out.println("Fin  : " + locLongue.getDateFin());
+      System.out.println("Jours: " + locLongue.getNombreJours());
+      System.out.println("LLD ? " + locLongue.estLongueDuree());
+      System.out.println("Prix longue: " + locationService.getPrixLocation(locLongue));
+
+      // -- // -- // -- // -- // -- // -- // -- //
       // Messaging
       // -- // -- // -- // -- // -- // -- // -- //
       System.out.println("\n=== Tests de messagerie ===");
@@ -150,7 +191,6 @@ public class MainDemo {
       Message msg4 = messagerieService.envoyerMessage(APar_bob, L_jane,
           "Bonjour, j'ai plusieurs véhicules disponibles. Quel type recherchez-vous ?");
       System.out.println("✓ Message envoyé: " + msg4);
-
 
       // -- // -- // -- // -- // -- // -- // -- //
       // Notes
@@ -198,13 +238,11 @@ public class MainDemo {
       System.out.println(
           "Moyenne Véhicule Renault Master: " + noteService.getMoyenneVehicule(V3) + "/10");
 
-
       System.out.println("\n✓ Démonstration complète terminée avec succès!");
     } catch (Exception e) {
       System.err.println("✗ Erreur: " + e.getMessage());
       e.printStackTrace();
     } finally {
-      // Fermer la connexion
       DatabaseConnection.close();
     }
   }
