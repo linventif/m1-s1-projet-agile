@@ -28,6 +28,13 @@ public class SouscriptionOptionRepository {
   }
 
   /**
+   * Recherche une souscription par son identifiant.
+   */
+  public SouscriptionOption findById(Long id) {
+    return em.find(SouscriptionOption.class, id);
+  }
+
+  /**
    * Recherche une option par son identifiant.
    */
   public Options findOptionById(Long optionId) {
@@ -42,15 +49,17 @@ public class SouscriptionOptionRepository {
   }
 
   /**
-   * Liste toutes les souscriptions associées à une location.
+   * Liste toutes les souscriptions NON ANNULEES associées à une location.
    */
   public List<SouscriptionOption> findByLocation(Long locationId) {
-    return em.createQuery("SELECT s FROM SouscriptionOption s WHERE s.location.id = :id",
-        SouscriptionOption.class).setParameter("id", locationId).getResultList();
+    return em
+        .createQuery("SELECT s FROM SouscriptionOption s "
+            + "WHERE s.location.id = :id AND s.annulee = false", SouscriptionOption.class)
+        .setParameter("id", locationId).getResultList();
   }
 
   /**
-   * Supprime une souscription d’option.
+   * Supprime physiquement une souscription d’option (optionnel, si tu en as besoin).
    */
   public void delete(SouscriptionOption souscription) {
     SouscriptionOption managed = souscription;
@@ -60,15 +69,17 @@ public class SouscriptionOptionRepository {
     em.remove(managed);
   }
 
-  // ===== NOUVELLE MÉTHODE ===== pour pouvoir récupérer toutes les souscriptions d’options sur une
-  // période donnée.
-
+  /**
+   * Récupère toutes les souscriptions NON ANNULEES dont la location commence dans une période.
+   */
   public List<SouscriptionOption> findByLocationDateBetween(LocalDateTime debutInclus,
       LocalDateTime finExclu) {
 
     return em
-        .createQuery("SELECT s FROM SouscriptionOption s " + "WHERE s.location.dateDebut >= :debut "
-            + "AND s.location.dateDebut < :fin", SouscriptionOption.class)
+        .createQuery(
+            "SELECT s FROM SouscriptionOption s " + "WHERE s.location.dateDebut >= :debut "
+                + "AND s.location.dateDebut < :fin " + "AND s.annulee = false",
+            SouscriptionOption.class)
         .setParameter("debut", debutInclus).setParameter("fin", finExclu).getResultList();
   }
 }

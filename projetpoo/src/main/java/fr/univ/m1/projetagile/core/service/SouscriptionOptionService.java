@@ -1,3 +1,5 @@
+
+
 package fr.univ.m1.projetagile.core.service;
 
 import java.time.LocalDate;
@@ -60,17 +62,18 @@ public class SouscriptionOptionService {
   }
 
   /**
-   * Liste toutes les souscriptions d’options pour une location.
+   * Liste toutes les souscriptions d’options actives pour une location.
    */
   public List<SouscriptionOption> listerOptionsPourLocation(Long locationId) {
     if (locationId == null) {
       throw new IllegalArgumentException("L'identifiant de la location est obligatoire");
     }
+    // on ne retourne que les souscriptions non annulées
     return repository.findByLocation(locationId);
   }
 
   /**
-   * Annule (supprime) une souscription d’option.
+   * Annule une souscription d’option (marque comme annulée).
    */
   public void annulerSouscription(Long souscriptionId) {
     if (souscriptionId == null) {
@@ -81,12 +84,16 @@ public class SouscriptionOptionService {
     try {
       tx.begin();
 
-      SouscriptionOption souscription = em.find(SouscriptionOption.class, souscriptionId);
+      SouscriptionOption souscription = repository.findById(souscriptionId);
       if (souscription == null) {
         throw new IllegalArgumentException("Souscription d'option introuvable");
       }
 
-      repository.delete(souscription);
+      // logique métier dans l'entité (annulee = true, dateAnnulation = now)
+      souscription.annulerOption();
+
+      // sauvegarde de l’état annulé
+      repository.save(souscription);
 
       tx.commit();
 
@@ -98,7 +105,7 @@ public class SouscriptionOptionService {
     }
   }
 
-  // ===== NOUVELLE MÉTHODE : FACTURATION MENSUELLE =====
+  // ===== FACTURATION MENSUELLE =====
 
   public List<FactureOptionsMensuelleDTO> genererFacturationMensuelle(int annee, int mois) {
     if (mois < 1 || mois > 12) {
@@ -112,7 +119,7 @@ public class SouscriptionOptionService {
     LocalDateTime debut = debutMois.atStartOfDay();
     LocalDateTime fin = debutMoisSuivant.atStartOfDay();
 
-    // Récupérer toutes les souscriptions dont la location commence dans ce mois
+    // Récupérer toutes les souscriptions (non annulées) dont la location commence dans ce mois
     List<SouscriptionOption> souscriptions = repository.findByLocationDateBetween(debut, fin);
 
     // Regrouper par loueur
@@ -144,7 +151,7 @@ public class SouscriptionOptionService {
       FactureOptionsMensuelleDTO dto = new FactureOptionsMensuelleDTO();
       dto.setAnnee(annee);
       dto.setMois(mois);
-      dto.setLoueurId(loueur.getIdU()); // même logique que pour Agent
+      dto.setLoueurId(loueur.getIdU()); // ou getId(), selon ton entité
       dto.setNomLoueur(loueur.getNom() + " " + loueur.getPrenom());
       dto.setMontantTotalOptions(montant);
 

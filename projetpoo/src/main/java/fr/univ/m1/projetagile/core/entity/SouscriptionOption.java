@@ -1,5 +1,7 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import java.time.LocalDateTime;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,10 +26,16 @@ public class SouscriptionOption {
   @JoinColumn(name = "location_id", nullable = false)
   private Location location;
 
+  @Column(name = "annulee", nullable = false)
+  private boolean annulee = false;
+
+  @Column(name = "date_annulation")
+  private LocalDateTime dateAnnulation;
+
   // Constructeur sans argument pour JPA
   protected SouscriptionOption() {}
 
-  // >>> constructeur utilisé dans ton service <<<
+  // constructeur métier
   public SouscriptionOption(Options option, Location location) {
     this.option = option;
     this.location = location;
@@ -54,8 +62,19 @@ public class SouscriptionOption {
     this.location = location;
   }
 
-  // Méthode selon UML
+  public boolean isAnnulee() {
+    return annulee;
+  }
+
+  public LocalDateTime getDateAnnulation() {
+    return dateAnnulation;
+  }
+
+  // Méthode métier d'annulation
   public void annulerOption() {
-    // À implémenter si tu veux une logique métier spécifique
+    if (!this.annulee) {
+      this.annulee = true;
+      this.dateAnnulation = LocalDateTime.now();
+    }
   }
 }
