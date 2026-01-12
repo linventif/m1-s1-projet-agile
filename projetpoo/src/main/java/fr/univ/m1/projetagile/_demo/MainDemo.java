@@ -15,6 +15,7 @@ import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.core.persistence.LoueurRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.core.service.AgentService;
+import fr.univ.m1.projetagile.core.service.DisponibiliteService;
 import fr.univ.m1.projetagile.core.service.LocationService;
 import fr.univ.m1.projetagile.core.service.LoueurService;
 import fr.univ.m1.projetagile.core.service.VehiculeService;
@@ -43,13 +44,10 @@ public class MainDemo {
       AgentService agentService = new AgentService(new AgentRepository());
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
-      LocationService locationService = new LocationService(new LocationRepository());
-      DisponibiliteService disponibiliteService = new DisponibiliteService();
-      NoteService noteService = new NoteService();
-
-      // ✅ Location (pour #99 + #100)
       LocationRepository locationRepository = new LocationRepository();
       LocationService locationService = new LocationService(locationRepository);
+      DisponibiliteService disponibiliteService = new DisponibiliteService();
+      NoteService noteService = new NoteService();
 
       // -- // -- // -- // -- // -- // -- // -- //
       // Utilisateurs
@@ -219,7 +217,7 @@ public class MainDemo {
       System.out.println("\n✓ Locations acceptées par les agents");
 
       // Terminer la location 4 (historique)
-      locationService.terminer(loc4);
+      locationService.terminer(loc4, 1000, "photo.jpg");
       System.out.println("✓ Location terminée (historique): " + L_jane.getNomComplet() + " a loué "
           + V4.getMarque() + " " + V4.getModele());
 
