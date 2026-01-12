@@ -68,6 +68,12 @@ public class LocationService {
 
   /**
    * Crée et enregistre une nouvelle location sans lieu de dépôt spécifié.
+   *
+   * @param dateDebut date et heure de début souhaitées
+   * @param dateFin date et heure de fin souhaitées
+   * @param vehicule véhicule concerné (doit être déjà persisté)
+   * @param loueur loueur effectuant la réservation
+   * @return la location sauvegardée
    */
   public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule,
       Loueur loueur) {
@@ -75,17 +81,15 @@ public class LocationService {
   }
 
   /**
-   * Calcule le prix total d'une location en fonction de la durée et du véhicule.
-   *
-   * Le prix total est composé de&nbsp;:
-   * <ul>
-   *   <li>un prix de base = prix par jour × nombre de jours ;</li>
-   *   <li>une commission = 10&nbsp;% du prix de base (ou 5&nbsp;% si location de longue durée) ;</li>
-   *   <li>des frais fixes = 2&nbsp;€ par jour.</li>
-   * </ul>
+   * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
+   * - Le prix de base (prix par jour × nombre de jours) - Une commission proportionnelle de 10% sur
+   * le prix de base (ou 5% si location de longue durée) - Des frais fixes de 2€ par jour
    *
    * ✅ #99 : durée calculée par location.getNombreJours() ✅ #100 : rabais LLD sur la commission
    * (part variable)
+   *
+   * @param location la location pour laquelle calculer le prix
+   * @return le prix total de la location
    */
   public double getPrixLocation(Location location) {
     if (location == null) {
@@ -109,7 +113,10 @@ public class LocationService {
   }
 
   /**
-   * Annule une location en cours.
+   * Annule une location en cours. Change le statut de la location à ANNULER et la sauvegarde en
+   * base de données.
+   *
+   * @param location la location à annuler
    */
   public void annuler(Location location) {
     if (location == null) {
@@ -127,7 +134,10 @@ public class LocationService {
   }
 
   /**
-   * Termine une location en cours.
+   * Termine une location en cours. Change le statut de la location à TERMINE et la sauvegarde en
+   * base de données.
+   *
+   * @param location la location à terminer
    */
   public void terminer(Location location) {
     if (location == null) {
@@ -143,7 +153,11 @@ public class LocationService {
   }
 
   /**
-   * Récupère une location par son identifiant et la convertit en LocationDTO.
+   * Récupère une location par son identifiant et la convertit en LocationDTO
+   *
+   * @param id l'identifiant de la location
+   * @return le LocationDTO correspondant avec le prix total calculé, ou null si la location
+   *         n'existe pas
    */
   public LocationDTO getLocation(Long id) {
     if (id == null) {
@@ -159,7 +173,10 @@ public class LocationService {
   }
 
   /**
-   * Convertit une entité Location en LocationDTO.
+   * Convertit une entité Location en LocationDTO
+   *
+   * @param location l'entité Location à convertir
+   * @return le DTO correspondant avec toutes les informations incluant le prix total
    */
   private LocationDTO convertLocationToDTO(Location location) {
     LocationDTO dto = new LocationDTO();
@@ -170,8 +187,10 @@ public class LocationService {
     dto.setLieuDepot(location.getLieuDepot());
     dto.setStatut(location.getStatut());
 
+    // Calculer et définir le prix total
     dto.setPrixTotal(getPrixLocation(location));
 
+    // Convertir le véhicule en VehiculeDTO
     if (location.getVehicule() != null) {
       Vehicule vehicule = location.getVehicule();
       VehiculeDTO vehiculeDTO = new VehiculeDTO();
