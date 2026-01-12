@@ -9,10 +9,14 @@ import fr.univ.m1.projetagile.core.dto.LocationDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.enums.StatutLocation;
+import fr.univ.m1.projetagile.parrainage.entity.Parrainage;
+import fr.univ.m1.projetagile.parrainage.service.CreditService;
+import fr.univ.m1.projetagile.parrainage.service.ParrainageService;
 
 /**
  * Service métier pour la gestion des locations de véhicules. Fournit les opérations CRUD et les
@@ -21,9 +25,20 @@ import fr.univ.m1.projetagile.enums.StatutLocation;
 public class LocationService {
 
   private final LocationRepository locationRepository;
+  private final ParrainageService parrainageService;
+  private final CreditService creditService;
 
   public LocationService(LocationRepository locationRepository) {
     this.locationRepository = locationRepository;
+    this.parrainageService = new ParrainageService();
+    this.creditService = new CreditService();
+  }
+
+  public LocationService(LocationRepository locationRepository, ParrainageService parrainageService,
+      CreditService creditService) {
+    this.locationRepository = locationRepository;
+    this.parrainageService = parrainageService;
+    this.creditService = creditService;
   }
 
   /**
@@ -62,7 +77,91 @@ public class LocationService {
     }
 
     Location location = new Location(dateDebut, dateFin, lieuDepot, vehicule, loueur);
-    return locationRepository.save(location);
+    Location locationSauvegardee = locationRepository.save(location);
+
+    // Vérifier et gérer le parrainage du loueur
+    gererParrainage(loueur);
+    // Vérifier et gérer le parrainage éventuel de l'agent propriétaire du véhicule
+    if (vehicule.getProprietaire() != null) {
+      gererParrainage(vehicule.getProprietaire());
+    }
+
+    return locationSauvegardee;
+  }
+
+  /**
+   * Gère le parrainage d'un utilisateur (loueur ou agent) lors de la création d'une location. Si
+   * l'utilisateur a été parrainé et que le parrainage n'est pas encore activé, active le parrainage
+   * et crédite le compte du parrain.
+   *
+   * @param utilisateur l'utilisateur pour lequel vérifier le parrainage
+   */
+  private void gererParrainage(Utilisateur utilisateur) {
+    if (utilisateur == null || utilisateur.getIdU() == null) {
+      return;
+    }
+
+    try {
+      // Vérifier si l'utilisateur a un parrain
+      Utilisateur parrain = parrainageService.getParrainFromParraineId(utilisateur.getIdU());
+      if (parrain == null) {
+        // L'utilisateur n'a pas de parrain, rien à faire
+        return;
+      }
+
+      // Récupérer le parrainage
+      Parrainage parrainage =
+          parrainageService.getParrainageBetween(parrain.getIdU(), utilisateur.getIdU());
+      if (parrainage == null) {
+        return;
+      }
+
+      // Vérifier si le parrainage est déjà activé
+      if (parrainage.isActivated()) {
+        // Le parrainage est déjà activé, rien à faire
+        return;
+      }
+
+      // Activer le parrainage
+      parrainageService.activerParrainage(parrainage.getId());
+
+      // Créditer le compte du parrain
+      crediterParrain(parrain);
+    } catch (Exception e) {
+      // En cas d'erreur lors de la gestion du parrainage, on ne bloque pas la création de la
+      // location
+      // On pourrait logger l'erreur ici
+      System.err.println("Erreur lors de la gestion du parrainage pour l'utilisateur "
+          + utilisateur.getIdU() + ": " + e.getMessage());
+    }
+  }
+
+  /**
+   * Crédite le compte du parrain du montant défini dans Parrainage.MONTANT_CREDIT_PARRAIN. Crée le
+   * crédit si nécessaire.
+   *
+   * @param parrain le parrain à créditer
+   */
+  private void crediterParrain(Utilisateur parrain) {
+    if (parrain == null || parrain.getIdU() == null) {
+      return;
+    }
+
+    try {
+      // Vérifier si le parrain a déjà un crédit
+      if (creditService.hasCredit(parrain.getIdU())) {
+        // Ajouter le crédit au compte existant
+        creditService.ajouterCredit(parrain.getIdU(), Parrainage.MONTANT_CREDIT_PARRAIN);
+      } else {
+        // Créer un nouveau crédit avec le montant
+        creditService.creerSolde(parrain, Parrainage.MONTANT_CREDIT_PARRAIN);
+      }
+    } catch (Exception e) {
+      // En cas d'erreur lors du crédit, on ne bloque pas la création de la location
+      // On pourrait logger l'erreur ici
+      System.err
+          .println("Erreur lors du crédit du parrain " + parrain.getIdU() + ": " + e.getMessage());
+    }
   }
 
   /**
