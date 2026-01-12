@@ -5,12 +5,14 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import fr.univ.m1.projetagile.core.dto.LocationDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
+import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.enums.StatutLocation;
+import fr.univ.m1.projetagile.parking.entity.Parking;
 
 /**
  * Service métier pour la gestion des locations de véhicules. Fournit les opérations CRUD et les
@@ -49,6 +51,24 @@ public class LocationService {
     }
     if (loueur == null) {
       throw new IllegalArgumentException("Le loueur doit être spécifié.");
+    }
+
+    // Vérifier si le lieu de dépôt est un Parking
+    if (lieuDepot instanceof Parking) {
+      Agent agent = vehicule.getProprietaire();
+      if (agent == null) {
+        throw new IllegalStateException("Le véhicule n'a pas de propriétaire associé.");
+      }
+
+      // Vérifier si l'agent a une souscription à l'option Parking (ID 5)
+      boolean aOptionParking =
+          agent.getOptionsActives().stream().anyMatch(so -> so.getOption() != null
+              && so.getOption().getId() != null && so.getOption().getId().equals(5L));
+
+      if (!aOptionParking) {
+        throw new IllegalStateException(
+            "L'agent n'a pas activé l'option pour permettre de déposer ce véhicule dans un parking");
+      }
     }
 
     LocalDate debutJour = dateDebut.toLocalDate();

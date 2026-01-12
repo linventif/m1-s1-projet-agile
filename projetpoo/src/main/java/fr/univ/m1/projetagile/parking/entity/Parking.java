@@ -1,0 +1,107 @@
+package fr.univ.m1.projetagile.parking.entity;
+
+import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "parkings")
+public class Parking implements LieuRestitution {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
+  private Long id;
+
+  @Column(nullable = false)
+  private String nom;
+
+  @Column(nullable = false)
+  private String rue;
+
+  @Column(nullable = false)
+  private String ville;
+
+  @Column(nullable = false, name = "cp")
+  private String cp; // code postal
+
+  @Column(nullable = false)
+  private Double prix;
+
+  // Constructeur sans argument pour JPA
+  protected Parking() {}
+
+  public Parking(String nom, String rue, String ville, String cp, Double prix) {
+    this.nom = nom;
+    this.rue = rue;
+    this.ville = ville;
+    this.cp = cp;
+    this.prix = prix;
+  }
+
+  // Getters et Setters
+  public Long getId() {
+    return id;
+  }
+
+  public String getNom() {
+    return nom;
+  }
+
+  public void setNom(String nom) {
+    this.nom = nom;
+  }
+
+  public String getRue() {
+    return rue;
+  }
+
+  public void setRue(String rue) {
+    this.rue = rue;
+  }
+
+  public String getVille() {
+    return ville;
+  }
+
+  public void setVille(String ville) {
+    this.ville = ville;
+  }
+
+  public String getCp() {
+    return cp;
+  }
+
+  public void setCp(String cp) {
+    this.cp = cp;
+  }
+
+  public Double getPrix() {
+    return prix;
+  }
+
+  public void setPrix(Double prix) {
+    this.prix = prix;
+  }
+
+  // Implémentation de l'interface LieuRestitution
+  @Override
+  public String getAdresse() {
+    return rue + ", " + cp + " " + ville;
+  }
+
+  @Override
+  public Double getCoutSupp() {
+    return prix;
+  }
+
+  @Override
+  public String toString() {
+    return "Parking [id=" + id + ", nom=" + nom + ", rue=" + rue + ", ville=" + ville + ", cp=" + cp
+        + ", prix=" + prix + "€]";
+  }
+}
