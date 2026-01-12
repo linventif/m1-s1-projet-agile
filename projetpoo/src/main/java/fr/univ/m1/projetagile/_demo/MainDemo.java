@@ -164,6 +164,9 @@ public class MainDemo {
       LocalDateTime debut4 = LocalDateTime.now().minusDays(10);
       LocalDateTime fin4 = debut4.plusDays(2);
       Location loc4 = locationService.creerLocation(debut4, fin4, V4, L_jane);
+      System.out.println("✓ Location créée: " + L_jane.getNomComplet() + " loue " + V4.getMarque()
+          + " " + V4.getModele() + " du " + debut4.toLocalDate() + " au " + fin4.toLocalDate());
+      System.out.println("  Prix total: " + locationService.getPrixLocation(loc4) + "€");
 
       // Accepter les locations
       APar_bob.accepterLocation(loc1);
