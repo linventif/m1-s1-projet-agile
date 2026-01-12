@@ -1,7 +1,9 @@
 package fr.univ.m1.projetagile.entretienTechnique.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepository;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.entretienTechnique.entity.EntretienTechnique;
@@ -398,5 +400,80 @@ public class EntretienTechniqueService {
       throw new IllegalArgumentException("L'ID de l'entretien technique ne peut pas être null.");
     }
     entretienTechniqueRepository.delete(id);
+  }
+
+  // ==================== RECOMMANDATIONS D'ENTRETIEN ====================
+
+  /**
+   * Génère les recommandations d'entretien technique pour un véhicule donné. Cette méthode récupère
+   * le dernier kilométrage disponible du véhicule depuis les vérifications de location, puis
+   * compare ce kilométrage avec les kilométrages recommandés de chaque type technique. Si le
+   * kilométrage dépasse le kilométrage recommandé d'un type technique et qu'aucun entretien
+   * technique n'a encore été effectué pour ce type sur ce véhicule, le nom du type technique est
+   * ajouté à la liste.
+   *
+   * @param vehiculeId l'identifiant du véhicule pour lequel générer les recommandations
+   * @return la liste des noms des types techniques pour lesquels un entretien est recommandé
+   * @throws IllegalArgumentException si l'ID du véhicule est null
+   * @throws IllegalArgumentException si le véhicule n'existe pas
+   */
+  public List<String> genererRecommandationsEntretien(Long vehiculeId) {
+    if (vehiculeId == null) {
+      throw new IllegalArgumentException("L'ID du véhicule ne peut pas être null.");
+    }
+
+    // Vérifier que le véhicule existe
+    Vehicule vehicule = vehiculeRepository.findById(vehiculeId);
+    if (vehicule == null) {
+      throw new IllegalArgumentException("Aucun véhicule trouvé avec l'identifiant " + vehiculeId);
+    }
+
+    // Récupérer le dernier kilométrage disponible depuis les vérifications de location
+    VerificationRepository verificationRepository = new VerificationRepository();
+    Integer dernierKilometrage = verificationRepository.getDernierKilometrage(vehiculeId);
+
+    // Si aucun kilométrage n'est disponible, retourner une liste vide
+    if (dernierKilometrage == null) {
+      return new ArrayList<>();
+    }
+
+    // Récupérer tous les types techniques
+    List<TypeTechnique> tousLesTypes = typeTechniqueRepository.findAll();
+
+    // Récupérer tous les entretiens techniques existants pour ce véhicule
+    List<EntretienTechnique> entretiensExistants =
+        entretienTechniqueRepository.findByVehiculeId(vehiculeId);
+
+    // Créer la liste des noms de types techniques recommandés
+    List<String> recommandations = new ArrayList<>();
+
+    // Pour chaque type technique, vérifier si une recommandation est nécessaire
+    for (TypeTechnique typeTechnique : tousLesTypes) {
+      Integer kmRecommandee = typeTechnique.getKmRecommandee();
+
+      // Si le kilométrage recommandé est null ou 0, on ignore ce type
+      if (kmRecommandee == null || kmRecommandee <= 0) {
+        continue;
+      }
+
+      // Vérifier si le kilométrage actuel dépasse le kilométrage recommandé
+      if (dernierKilometrage >= kmRecommandee) {
+        // Vérifier s'il existe déjà un entretien technique pour ce véhicule et ce type
+        boolean entretienExistant = false;
+        for (EntretienTechnique entretien : entretiensExistants) {
+          if (entretien.getTypeTechnique().getId().equals(typeTechnique.getId())) {
+            entretienExistant = true;
+            break;
+          }
+        }
+
+        // Si aucun entretien n'existe pour ce type, ajouter le nom du type technique
+        if (!entretienExistant) {
+          recommandations.add(typeTechnique.getNom());
+        }
+      }
+    }
+
+    return recommandations;
   }
 }

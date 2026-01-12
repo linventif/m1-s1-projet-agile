@@ -98,6 +98,35 @@ public class VerificationRepository {
   }
 
   /**
+   * Récupère le dernier kilométrage disponible pour un véhicule donné. Le kilométrage est recherché
+   * dans toutes les vérifications des locations du véhicule. Si une vérification a un kilométrage
+   * de fin, celui-ci est utilisé, sinon le kilométrage de début. Le kilométrage le plus récent
+   * (basé sur la date de fin de location) est retourné.
+   *
+   * @param vehiculeId l'identifiant du véhicule
+   * @return le dernier kilométrage trouvé, ou null si aucune vérification n'existe pour ce véhicule
+   */
+  public Integer getDernierKilometrage(Long vehiculeId) {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      // Récupérer toutes les vérifications pour les locations de ce véhicule
+      // On préfère le kilometrageFin s'il existe, sinon kilometrageDebut
+      // On trie par date de fin de location décroissante pour avoir le plus récent
+      TypedQuery<Integer> query = em
+          .createQuery("SELECT COALESCE(v.kilometrageFin, v.kilometrageDebut) FROM Verification v "
+              + "JOIN v.location l " + "WHERE l.vehicule.id = :vehiculeId "
+              + "AND (v.kilometrageDebut IS NOT NULL OR v.kilometrageFin IS NOT NULL) "
+              + "ORDER BY l.dateFin DESC", Integer.class);
+      query.setParameter("vehiculeId", vehiculeId);
+      query.setMaxResults(1);
+      return query.getResultStream().findFirst().orElse(null);
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Erreur lors de la récupération du dernier kilométrage pour le véhicule " + vehiculeId,
+          e);
+    }
+  }
+
+  /**
    * Supprime une vérification de la base de données.
    *
    * @param id identifiant de la vérification à supprimer
