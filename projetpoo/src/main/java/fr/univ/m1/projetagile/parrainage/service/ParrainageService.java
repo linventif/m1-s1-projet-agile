@@ -2,13 +2,9 @@ package fr.univ.m1.projetagile.parrainage.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import fr.univ.m1.projetagile.core.DatabaseConnection;
-import fr.univ.m1.projetagile.core.entity.Agent;
-import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import fr.univ.m1.projetagile.parrainage.entity.Parrainage;
 import fr.univ.m1.projetagile.parrainage.persistence.ParrainageRepository;
-import jakarta.persistence.EntityManager;
 
 /**
  * Service pour gérer les relations de parrainage entre utilisateurs.
@@ -153,7 +149,7 @@ public class ParrainageService {
       return null;
     }
 
-    return loadUtilisateurById(parrainage.getParrainId());
+    return parrainageRepository.loadUtilisateurById(parrainage.getParrainId());
   }
 
   /**
@@ -172,7 +168,7 @@ public class ParrainageService {
     List<Utilisateur> parraines = new ArrayList<>();
 
     for (Parrainage parrainage : parrainages) {
-      Utilisateur parraine = loadUtilisateurById(parrainage.getParraineId());
+      Utilisateur parraine = parrainageRepository.loadUtilisateurById(parrainage.getParraineId());
       if (parraine != null) {
         parraines.add(parraine);
       }
@@ -334,30 +330,5 @@ public class ParrainageService {
     }
 
     return parrainage.isActivated();
-  }
-
-  /**
-   * Charge un utilisateur par son ID. Essaie d'abord de charger comme Loueur, puis comme Agent.
-   *
-   * @param utilisateurId l'ID de l'utilisateur à charger
-   * @return l'utilisateur trouvé, ou null s'il n'existe pas
-   */
-  private Utilisateur loadUtilisateurById(Long utilisateurId) {
-    if (utilisateurId == null) {
-      return null;
-    }
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
-      // Essayer de charger comme Loueur d'abord
-      Loueur loueur = em.find(Loueur.class, utilisateurId);
-      if (loueur != null) {
-        return loueur;
-      }
-      // Sinon, essayer comme Agent
-      Agent agent = em.find(Agent.class, utilisateurId);
-      return agent;
-    } catch (Exception e) {
-      throw new RuntimeException("Erreur lors du chargement de l'utilisateur " + utilisateurId, e);
-    }
   }
 }

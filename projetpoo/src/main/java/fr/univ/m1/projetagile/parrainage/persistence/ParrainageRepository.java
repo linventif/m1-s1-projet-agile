@@ -2,6 +2,9 @@ package fr.univ.m1.projetagile.parrainage.persistence;
 
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
+import fr.univ.m1.projetagile.core.entity.Agent;
+import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import fr.univ.m1.projetagile.parrainage.entity.Parrainage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
@@ -57,9 +60,8 @@ public class ParrainageRepository {
    * @throws RuntimeException si une erreur survient lors de l'enregistrement
    */
   public Parrainage save(Parrainage parrainage) {
-    EntityManager em = DatabaseConnection.getEntityManager();
     EntityTransaction transaction = null;
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       transaction = em.getTransaction();
       transaction.begin();
 
@@ -88,8 +90,7 @@ public class ParrainageRepository {
    * @throws RuntimeException si une erreur survient lors de la récupération
    */
   public Parrainage findById(Long id) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.find(Parrainage.class, id);
     } catch (Exception e) {
       throw new RuntimeException("Erreur lors de la récupération du parrainage", e);
@@ -108,8 +109,7 @@ public class ParrainageRepository {
    * @throws RuntimeException si une erreur survient lors de la récupération
    */
   public Parrainage findByParraineId(Long parraineId) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       String jpql = "SELECT p FROM Parrainage p WHERE p.parraineId = :parraineId";
 
       TypedQuery<Parrainage> query = em.createQuery(jpql, Parrainage.class);
@@ -136,8 +136,7 @@ public class ParrainageRepository {
    * @throws RuntimeException si une erreur survient lors de la récupération
    */
   public List<Parrainage> findByParrainId(Long parrainId) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       String jpql = "SELECT p FROM Parrainage p WHERE p.parrainId = :parrainId";
 
       TypedQuery<Parrainage> query = em.createQuery(jpql, Parrainage.class);
@@ -165,8 +164,7 @@ public class ParrainageRepository {
    * @throws RuntimeException si une erreur survient lors de la vérification
    */
   public boolean existsParrainageBetween(Long user1Id, Long user2Id) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       String jpql = "SELECT COUNT(p) FROM Parrainage p WHERE "
           + "(p.parrainId = :user1Id AND p.parraineId = :user2Id) OR "
           + "(p.parrainId = :user2Id AND p.parraineId = :user1Id)";
@@ -194,8 +192,7 @@ public class ParrainageRepository {
    * @throws RuntimeException si une erreur survient lors de la vérification
    */
   public boolean hasParrain(Long utilisateurId) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       String jpql = "SELECT COUNT(p) FROM Parrainage p WHERE p.parraineId = :utilisateurId";
 
       TypedQuery<Long> query = em.createQuery(jpql, Long.class);
@@ -217,8 +214,7 @@ public class ParrainageRepository {
    * @throws RuntimeException si une erreur survient lors de la récupération
    */
   public List<Parrainage> findAll() {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       String jpql = "SELECT p FROM Parrainage p";
 
       TypedQuery<Parrainage> query = em.createQuery(jpql, Parrainage.class);
@@ -242,9 +238,8 @@ public class ParrainageRepository {
    * @throws RuntimeException si une erreur survient lors de la suppression
    */
   public void delete(Long id) {
-    EntityManager em = DatabaseConnection.getEntityManager();
     EntityTransaction transaction = null;
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       transaction = em.getTransaction();
       transaction.begin();
 
@@ -260,6 +255,31 @@ public class ParrainageRepository {
         transaction.rollback();
       }
       throw new RuntimeException("Erreur lors de la suppression du parrainage", e);
+    }
+  }
+
+  /**
+   * Charge un utilisateur par son ID. Essaie d'abord de charger comme Loueur, puis comme Agent.
+   *
+   * @param utilisateurId l'ID de l'utilisateur à charger
+   * @return l'utilisateur trouvé, ou null s'il n'existe pas
+   * @throws RuntimeException si une erreur survient lors du chargement
+   */
+  public Utilisateur loadUtilisateurById(Long utilisateurId) {
+    if (utilisateurId == null) {
+      return null;
+    }
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      // Essayer de charger comme Loueur d'abord
+      Loueur loueur = em.find(Loueur.class, utilisateurId);
+      if (loueur != null) {
+        return loueur;
+      }
+      // Sinon, essayer comme Agent
+      Agent agent = em.find(Agent.class, utilisateurId);
+      return agent;
+    } catch (Exception e) {
+      throw new RuntimeException("Erreur lors du chargement de l'utilisateur " + utilisateurId, e);
     }
   }
 }
