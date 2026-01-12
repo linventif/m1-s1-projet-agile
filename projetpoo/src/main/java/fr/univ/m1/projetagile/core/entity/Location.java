@@ -1,8 +1,15 @@
 package fr.univ.m1.projetagile.core.entity;
 
 import java.time.LocalDateTime;
+import org.hibernate.annotations.Any;
+import org.hibernate.annotations.AnyDiscriminator;
+import org.hibernate.annotations.AnyDiscriminatorValue;
+import org.hibernate.annotations.AnyKeyJavaClass;
+import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
 import fr.univ.m1.projetagile.enums.StatutLocation;
+import fr.univ.m1.projetagile.parking.entity.Parking;
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -27,8 +34,14 @@ public class Location {
   @Column(nullable = false)
   private LocalDateTime dateFin;
 
-  @Column(nullable = true)
-  private String lieuDepot;
+  @Any
+  @AnyDiscriminator(DiscriminatorType.STRING)
+  @AnyKeyJavaClass(Long.class)
+  @AnyDiscriminatorValue(discriminator = "ADRESSE", entity = Adresse.class)
+  @AnyDiscriminatorValue(discriminator = "PARKING", entity = Parking.class)
+  @Column(name = "lieu_depot_type")
+  @JoinColumn(name = "lieu_depot_id")
+  private LieuRestitution lieuDepot;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -53,7 +66,7 @@ public class Location {
     this.loueur = loueur;
   }
 
-  public Location(LocalDateTime dateDebut, LocalDateTime dateFin, String lieuDepot,
+  public Location(LocalDateTime dateDebut, LocalDateTime dateFin, LieuRestitution lieuDepot,
       Vehicule vehicule, Loueur loueur) {
     this.dateDebut = dateDebut;
     this.dateFin = dateFin;
@@ -83,11 +96,11 @@ public class Location {
     this.dateFin = dateFin;
   }
 
-  public String getLieuDepot() {
+  public LieuRestitution getLieuDepot() {
     return lieuDepot;
   }
 
-  public void setLieuDepot(String lieuDepot) {
+  public void setLieuDepot(LieuRestitution lieuDepot) {
     this.lieuDepot = lieuDepot;
   }
 

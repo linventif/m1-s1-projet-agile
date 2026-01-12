@@ -8,6 +8,7 @@ import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
+import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 
@@ -28,13 +29,13 @@ public class LocationService {
    *
    * @param dateDebut date et heure de début souhaitées
    * @param dateFin date et heure de fin souhaitées
-   * @param lieuDepot lieu de dépôt du véhicule
+   * @param lieuDepot lieu de dépôt du véhicule (facultatif, peut être null)
    * @param vehicule véhicule concerné (doit être déjà persisté)
    * @param loueur loueur effectuant la réservation
    * @return la location sauvegardée
    */
-  public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin, String lieuDepot,
-      Vehicule vehicule, Loueur loueur) {
+  public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin,
+      LieuRestitution lieuDepot, Vehicule vehicule, Loueur loueur) {
 
     if (dateDebut == null || dateFin == null) {
       throw new IllegalArgumentException("Les dates de début et de fin sont obligatoires.");
@@ -60,6 +61,20 @@ public class LocationService {
 
     Location location = new Location(dateDebut, dateFin, lieuDepot, vehicule, loueur);
     return locationRepository.save(location);
+  }
+
+  /**
+   * Crée et enregistre une nouvelle location sans lieu de dépôt spécifié.
+   *
+   * @param dateDebut date et heure de début souhaitées
+   * @param dateFin date et heure de fin souhaitées
+   * @param vehicule véhicule concerné (doit être déjà persisté)
+   * @param loueur loueur effectuant la réservation
+   * @return la location sauvegardée
+   */
+  public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule,
+      Loueur loueur) {
+    return creerLocation(dateDebut, dateFin, null, vehicule, loueur);
   }
 
   /**
@@ -134,8 +149,8 @@ public class LocationService {
    * Récupère une location par son identifiant et la convertit en LocationDTO
    *
    * @param id l'identifiant de la location
-   * @return le LocationDTO correspondant avec le prix total calculé, ou null si la location n'existe
-   *         pas
+   * @return le LocationDTO correspondant avec le prix total calculé, ou null si la location
+   *         n'existe pas
    */
   public LocationDTO getLocation(Long id) {
     if (id == null) {
