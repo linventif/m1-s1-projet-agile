@@ -100,7 +100,8 @@ public class LocationService {
   /**
    * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
    * - Le prix de base (prix par jour × nombre de jours) - Une commission proportionnelle de 10% sur
-   * le prix de base - Des frais fixes de 2€ par jour
+   * le prix de base - Des frais fixes de 2€ par jour - Une promotion de 10% si le lieu de dépôt est
+   * un parking
    *
    * @param location la location pour laquelle calculer le prix
    * @return le prix total de la location
@@ -122,7 +123,14 @@ public class LocationService {
     double fraisFixes = 2.0 * nombreJours;
 
     // Prix total = prix de base + commission + frais fixes
-    return prixBase + commissionProportionnelle + fraisFixes;
+    double prixTotal = prixBase + commissionProportionnelle + fraisFixes;
+
+    // Promotion de 10% si le lieu de dépôt est un parking
+    if (location.getLieuDepot() != null && location.getLieuDepot() instanceof Parking) {
+      prixTotal = prixTotal * 0.9;
+    }
+
+    return prixTotal;
   }
 
   /**
