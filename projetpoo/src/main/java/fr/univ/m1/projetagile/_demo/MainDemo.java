@@ -149,28 +149,17 @@ public class MainDemo {
       LocalDate dans6mois = aujourdhui.plusMonths(6);
 
       Disponibilite dispo1 = disponibiliteService.creerDisponibilite(V1, aujourdhui, dans6mois);
-      System.out.println("✓ Disponibilité créée pour " + V1.getMarque() + " " + V1.getModele());
+      System.out.println("✓ Disponibilité créée: " + dispo1);
 
       Disponibilite dispo2 = disponibiliteService.creerDisponibilite(V2, aujourdhui, dans6mois);
-      System.out.println("✓ Disponibilité créée pour " + V2.getMarque() + " " + V2.getModele());
+      System.out.println("✓ Disponibilité créée: " + dispo2);
 
       Disponibilite dispo3 = disponibiliteService.creerDisponibilite(V3, aujourdhui, dans6mois);
-      System.out.println("✓ Disponibilité créée pour " + V3.getMarque() + " " + V3.getModele());
+      System.out.println("✓ Disponibilité créée: " + dispo3);
 
       Disponibilite dispo4 =
           disponibiliteService.creerDisponibilite(V4, aujourdhui.minusDays(30), dans6mois);
-      System.out.println("✓ Disponibilité créée pour " + V4.getMarque() + " " + V4.getModele());
-
-      // Exemples d'utilisation des disponibilités créées
-      System.out.println("\n=== Informations sur les disponibilités ===");
-      System.out.println("Disponibilité #" + dispo1.getId() + " : " + V1.getMarque() + " "
-          + V1.getModele() + " du " + dispo1.getDateDebut() + " au " + dispo1.getDateFin());
-      System.out.println("Disponibilité #" + dispo2.getId() + " : " + V2.getMarque() + " "
-          + V2.getModele() + " du " + dispo2.getDateDebut() + " au " + dispo2.getDateFin());
-      System.out.println("Disponibilité #" + dispo3.getId() + " : " + V3.getMarque() + " "
-          + V3.getModele() + " du " + dispo3.getDateDebut() + " au " + dispo3.getDateFin());
-      System.out.println("Disponibilité #" + dispo4.getId() + " : " + V4.getMarque() + " "
-          + V4.getModele() + " du " + dispo4.getDateDebut() + " au " + dispo4.getDateFin());
+      System.out.println("✓ Disponibilité créée: " + dispo4);
 
       // Récupération des disponibilités d'un véhicule
       List<Disponibilite> disponibilitesV1 = disponibiliteService.getDisponibilitesVehicule(V1);

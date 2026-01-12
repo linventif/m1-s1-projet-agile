@@ -65,4 +65,10 @@ public class Disponibilite {
   public void setDateFin(LocalDate dateFin) {
     this.dateFin = dateFin;
   }
+
+  @Override
+  public String toString() {
+    return "Disponibilite [id=" + id + ", vehicule=" + vehicule.getMarque() + " "
+        + vehicule.getModele() + ", du " + dateDebut + " au " + dateFin + "]";
+  }
 }
