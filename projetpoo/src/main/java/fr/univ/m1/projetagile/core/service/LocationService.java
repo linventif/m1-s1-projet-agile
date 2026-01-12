@@ -60,10 +60,10 @@ public class LocationService {
         throw new IllegalStateException("Le véhicule n'a pas de propriétaire associé.");
       }
 
-      // Vérifier si l'agent a une souscription à l'option Parking (ID 5)
-      boolean aOptionParking =
-          agent.getOptionsActives().stream().anyMatch(so -> so.getOption() != null
-              && so.getOption().getId() != null && so.getOption().getId().equals(5L));
+      // Vérifier si l'agent a une souscription à l'option Parking
+      boolean aOptionParking = agent.getOptionsActives().stream()
+          .anyMatch(so -> so.getOption() != null && so.getOption().getId() != null
+              && so.getOption().getId().equals(Parking.PARKING_OPTION_ID));
 
       if (!aOptionParking) {
         throw new IllegalStateException(
@@ -127,7 +127,7 @@ public class LocationService {
 
     // Promotion de 10% si le lieu de dépôt est un parking
     if (location.getLieuDepot() != null && location.getLieuDepot() instanceof Parking) {
-      prixTotal = prixTotal * 0.9;
+      prixTotal = prixTotal * Parking.DISCOUNT_RATE;
     }
 
     return prixTotal;

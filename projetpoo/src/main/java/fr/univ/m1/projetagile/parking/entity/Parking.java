@@ -12,6 +12,17 @@ import jakarta.persistence.Table;
 @Table(name = "parkings")
 public class Parking implements LieuRestitution {
 
+  /**
+   * ID de l'option Parking dans le système
+   */
+  public static final Long PARKING_OPTION_ID = 5L;
+
+  /**
+   * Taux de réduction appliqué au prix total de la location lorsque le lieu de dépôt est un parking
+   * (0.9 = 10% de réduction)
+   */
+  public static final Double DISCOUNT_RATE = 0.9;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "id")
