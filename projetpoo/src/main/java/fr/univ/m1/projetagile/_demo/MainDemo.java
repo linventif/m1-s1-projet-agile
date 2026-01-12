@@ -54,63 +54,30 @@ public class MainDemo {
       // -- // -- // -- // -- // -- // -- // -- //
       System.out.println("\n=== Initialisation des Utilisateurs ===");
       // Particulier
-      AgentParticulier APar_bob =
-          (AgentParticulier) agentService.findByEmail("bob.maurise@gmail.com");
-      if (APar_bob == null) {
-        APar_bob = agentService.createAgentParticulier("maurise", "bob", "bob.maurise@gmail.com",
-            "p@ssw0rd", "33601020304");
-        System.out.println("✓ Agent créé: " + APar_bob);
-      } else {
-        System.out.println("✓ Agent existant récupéré: " + APar_bob);
-      }
+      AgentParticulier APar_bob = agentService.createAgentParticulier("maurise", "bob",
+          "bob.maurise@gmail.com", "p@ssw0rd", "33601020304");
+      System.out.println("✓ Agent créé: " + APar_bob);
 
-      AgentParticulier APar_alice =
-          (AgentParticulier) agentService.findByEmail("alice.dupont@gmail.com");
-      if (APar_alice == null) {
-        APar_alice = agentService.createAgentParticulier("dupont", "alice",
-            "alice.dupont@gmail.com", "p@ssw0rd", "33605060708");
-        System.out.println("✓ Agent créé: " + APar_alice);
-      } else {
-        System.out.println("✓ Agent existant récupéré: " + APar_alice);
-      }
+      AgentParticulier APar_alice = agentService.createAgentParticulier("dupont", "alice",
+          "alice.dupont@gmail.com", "p@ssw0rd", "33605060708");
+      System.out.println("✓ Agent créé: " + APar_alice);
 
       // Professionnel
-      AgentProfessionnel APro_locasmart =
-          (AgentProfessionnel) agentService.findByEmail("contact@localsmart.fr");
-      if (APro_locasmart == null) {
-        APro_locasmart = agentService.createAgentProfessionnel("contact@localsmart.fr", "p@ssw0rd",
-            "12345678901234", "LocaSmart");
-        System.out.println("✓ Agent créé: " + APro_locasmart);
-      } else {
-        System.out.println("✓ Agent existant récupéré: " + APro_locasmart);
-      }
+      AgentProfessionnel APro_locasmart = agentService.createAgentProfessionnel(
+          "contact@localsmart.fr", "p@ssw0rd", "12345678901234", "LocaSmart");
+      System.out.println("✓ Agent créé: " + APro_locasmart);
 
-      AgentProfessionnel APro_habitatplus =
-          (AgentProfessionnel) agentService.findByEmail("contact@habitatplus.fr");
-      if (APro_habitatplus == null) {
-        APro_habitatplus = agentService.createAgentProfessionnel("contact@habitatplus.fr",
-            "p@ssw0rd", "98765432109876", "HabitatPlus");
-        System.out.println("✓ Agent créé: " + APro_habitatplus);
-      } else {
-        System.out.println("✓ Agent existant récupéré: " + APro_habitatplus);
-      }
+      AgentProfessionnel APro_habitatplus = agentService.createAgentProfessionnel(
+          "contact@habitatplus.fr", "p@ssw0rd", "98765432109876", "HabitatPlus");
+      System.out.println("✓ Agent créé: " + APro_habitatplus);
 
       // Loueur
-      Loueur L_john = loueurService.findByEmail("john.doe@gmail.com");
-      if (L_john == null) {
-        L_john = loueurService.createLoueur("doe", "john", "john.doe@gmail.com", "p@ssw0rd");
-        System.out.println("✓ Loueur créé: " + L_john);
-      } else {
-        System.out.println("✓ Loueur existant récupéré: " + L_john);
-      }
+      Loueur L_john = loueurService.createLoueur("doe", "john", "john.doe@gmail.com", "p@ssw0rd");
+      System.out.println("✓ Loueur créé: " + L_john);
 
-      Loueur L_jane = loueurService.findByEmail("jane.smith@gmail.com");
-      if (L_jane == null) {
-        L_jane = loueurService.createLoueur("smith", "jane", "jane.smith@gmail.com", "p@ssw0rd");
-        System.out.println("✓ Loueur créé: " + L_jane);
-      } else {
-        System.out.println("✓ Loueur existant récupéré: " + L_jane);
-      }
+      Loueur L_jane =
+          loueurService.createLoueur("smith", "jane", "jane.smith@gmail.com", "p@ssw0rd");
+      System.out.println("✓ Loueur créé: " + L_jane);
 
       // -- // -- // -- // -- // -- // -- // -- //
       // Vehicules
