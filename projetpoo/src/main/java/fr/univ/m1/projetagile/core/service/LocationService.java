@@ -27,19 +27,17 @@ public class LocationService {
   }
 
   /**
-   * Crée et enregistre une nouvelle location après validation métier basique. Crée également une
-   * vérification avec le kilométrage de début.
+   * Crée et enregistre une nouvelle location après validation métier basique.
    *
    * @param dateDebut date et heure de début souhaitées
    * @param dateFin date et heure de fin souhaitées
    * @param lieuDepot lieu de dépôt du véhicule (facultatif, peut être null)
    * @param vehicule véhicule concerné (doit être déjà persisté)
    * @param loueur loueur effectuant la réservation
-   * @param kilometrageDebut le kilométrage du véhicule au début de la location
    * @return la location sauvegardée
    */
   public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin,
-      LieuRestitution lieuDepot, Vehicule vehicule, Loueur loueur, Integer kilometrageDebut) {
+      LieuRestitution lieuDepot, Vehicule vehicule, Loueur loueur) {
 
     if (dateDebut == null || dateFin == null) {
       throw new IllegalArgumentException("Les dates de début et de fin sont obligatoires.");
@@ -54,10 +52,6 @@ public class LocationService {
     if (loueur == null) {
       throw new IllegalArgumentException("Le loueur doit être spécifié.");
     }
-    if (kilometrageDebut == null || kilometrageDebut < 0) {
-      throw new IllegalArgumentException(
-          "Le kilométrage de début doit être un entier positif ou nul.");
-    }
 
     LocalDate debutJour = dateDebut.toLocalDate();
     LocalDate finJour = dateFin.toLocalDate();
@@ -68,23 +62,7 @@ public class LocationService {
     }
 
     Location location = new Location(dateDebut, dateFin, lieuDepot, vehicule, loueur);
-    location = locationRepository.save(location);
-
-    // Créer la vérification avec le kilométrage de début
-    VerificationRepository verificationRepository = new VerificationRepository();
-    VerificationService verificationService =
-        new VerificationService(verificationRepository, locationRepository);
-
-    try {
-      verificationService.creerVerification(location.getId(), kilometrageDebut);
-    } catch (Exception e) {
-      throw new IllegalStateException(
-          "Impossible de créer la location : la vérification n'a pas pu être créée. "
-              + e.getMessage(),
-          e);
-    }
-
-    return location;
+    return locationRepository.save(location);
   }
 
   /**
@@ -94,12 +72,11 @@ public class LocationService {
    * @param dateFin date et heure de fin souhaitées
    * @param vehicule véhicule concerné (doit être déjà persisté)
    * @param loueur loueur effectuant la réservation
-   * @param kilometrageDebut le kilométrage du véhicule au début de la location
    * @return la location sauvegardée
    */
   public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule,
-      Loueur loueur, Integer kilometrageDebut) {
-    return creerLocation(dateDebut, dateFin, null, vehicule, loueur, kilometrageDebut);
+      Loueur loueur) {
+    return creerLocation(dateDebut, dateFin, null, vehicule, loueur);
   }
 
   /**

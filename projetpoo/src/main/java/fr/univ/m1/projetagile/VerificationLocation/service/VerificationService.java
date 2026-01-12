@@ -59,6 +59,45 @@ public class VerificationService {
   }
 
   /**
+   * Enregistre le kilométrage de début pour une location. Crée une vérification si elle n'existe
+   * pas encore, ou met à jour le kilométrage de début si la vérification existe déjà. Cette méthode
+   * est appelée lorsque le loueur récupère le véhicule.
+   *
+   * @param locationId l'identifiant de la location
+   * @param kilometrageDebut le kilométrage du véhicule au moment de la récupération
+   * @return la vérification créée ou mise à jour
+   * @throws IllegalArgumentException si la location n'existe pas ou si le kilométrage est invalide
+   */
+  public Verification enregistrerKilometrageDebut(Long locationId, Integer kilometrageDebut) {
+    if (locationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la location ne peut pas être nul.");
+    }
+    if (kilometrageDebut == null || kilometrageDebut < 0) {
+      throw new IllegalArgumentException(
+          "Le kilométrage de début doit être un entier positif ou nul.");
+    }
+
+    // Vérifier que la location existe
+    Location location = locationRepository.findById(locationId);
+    if (location == null) {
+      throw new IllegalArgumentException(
+          "Aucune location trouvée avec l'identifiant " + locationId);
+    }
+
+    // Vérifier si une vérification existe déjà pour cette location
+    Verification verificationExistante = verificationRepository.findByLocationId(locationId);
+    if (verificationExistante != null) {
+      // Mettre à jour le kilométrage de début
+      verificationExistante.setKilometrageDebut(kilometrageDebut);
+      return verificationRepository.save(verificationExistante);
+    } else {
+      // Créer une nouvelle vérification
+      Verification verification = new Verification(location, kilometrageDebut);
+      return verificationRepository.save(verification);
+    }
+  }
+
+  /**
    * Récupère une vérification par son identifiant.
    *
    * @param id l'identifiant de la vérification
