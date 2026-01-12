@@ -1,0 +1,217 @@
+package fr.univ.m1.projetagile.VerificationLocation.service;
+
+import fr.univ.m1.projetagile.VerificationLocation.entity.Verification;
+import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepository;
+import fr.univ.m1.projetagile.core.entity.Location;
+import fr.univ.m1.projetagile.core.persistence.LocationRepository;
+
+/**
+ * Service métier pour la gestion des vérifications de locations. Fournit les opérations CRUD et les
+ * fonctionnalités métier liées aux vérifications.
+ */
+public class VerificationService {
+
+  private final VerificationRepository verificationRepository;
+  private final LocationRepository locationRepository;
+
+  public VerificationService(VerificationRepository verificationRepository,
+      LocationRepository locationRepository) {
+    this.verificationRepository = verificationRepository;
+    this.locationRepository = locationRepository;
+  }
+
+  /**
+   * Crée et enregistre une nouvelle vérification pour une location donnée avec le kilométrage de
+   * début. Vérifie qu'il n'existe pas déjà une vérification pour cette location (une seule
+   * vérification par location).
+   *
+   * @param locationId l'identifiant de la location
+   * @param kilometrageDebut le kilométrage du véhicule au début de la location
+   * @return la vérification sauvegardée
+   * @throws IllegalArgumentException si la location n'existe pas ou si une vérification existe déjà
+   *         pour cette location
+   */
+  public Verification creerVerification(Long locationId, Integer kilometrageDebut) {
+    if (locationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la location ne peut pas être nul.");
+    }
+    if (kilometrageDebut == null || kilometrageDebut < 0) {
+      throw new IllegalArgumentException(
+          "Le kilométrage de début doit être un entier positif ou nul.");
+    }
+
+    // Vérifier que la location existe
+    Location location = locationRepository.findById(locationId);
+    if (location == null) {
+      throw new IllegalArgumentException(
+          "Aucune location trouvée avec l'identifiant " + locationId);
+    }
+
+    // Vérifier qu'il n'existe pas déjà une vérification pour cette location
+    Verification verificationExistante = verificationRepository.findByLocationId(locationId);
+    if (verificationExistante != null) {
+      throw new IllegalStateException(
+          "Une vérification existe déjà pour la location " + locationId + ".");
+    }
+
+    Verification verification = new Verification(location, kilometrageDebut);
+    return verificationRepository.save(verification);
+  }
+
+  /**
+   * Récupère une vérification par son identifiant.
+   *
+   * @param id l'identifiant de la vérification
+   * @return la vérification trouvée ou null si elle n'existe pas
+   * @throws IllegalArgumentException si l'identifiant est nul
+   */
+  public Verification getVerification(Long id) {
+    if (id == null) {
+      throw new IllegalArgumentException("L'identifiant de la vérification ne peut pas être nul.");
+    }
+    return verificationRepository.findById(id);
+  }
+
+  /**
+   * Récupère une vérification à partir de l'identifiant de la location associée.
+   *
+   * @param locationId l'identifiant de la location
+   * @return la vérification trouvée ou null si elle n'existe pas
+   * @throws IllegalArgumentException si l'identifiant de la location est nul
+   */
+  public Verification getVerificationByLocationId(Long locationId) {
+    if (locationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la location ne peut pas être nul.");
+    }
+    return verificationRepository.findByLocationId(locationId);
+  }
+
+  /**
+   * Met à jour le kilométrage de fin d'une vérification existante.
+   *
+   * @param verificationId l'identifiant de la vérification
+   * @param kilometrageFin le kilométrage de fin
+   * @return la vérification mise à jour
+   * @throws IllegalArgumentException si l'identifiant est nul, si le kilométrage est invalide, ou
+   *         si la vérification n'existe pas
+   */
+  public Verification modifierKilometrageFin(Long verificationId, Integer kilometrageFin) {
+    if (verificationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la vérification ne peut pas être nul.");
+    }
+    if (kilometrageFin == null || kilometrageFin < 0) {
+      throw new IllegalArgumentException(
+          "Le kilométrage de fin doit être un entier positif ou nul.");
+    }
+
+    Verification verification = verificationRepository.findById(verificationId);
+    if (verification == null) {
+      throw new IllegalArgumentException(
+          "Aucune vérification trouvée avec l'identifiant " + verificationId);
+    }
+
+    verification.setKilometrageFin(kilometrageFin);
+    return verificationRepository.save(verification);
+  }
+
+  /**
+   * Met à jour le kilométrage de début d'une vérification existante.
+   *
+   * @param verificationId l'identifiant de la vérification
+   * @param kilometrageDebut le kilométrage de début
+   * @return la vérification mise à jour
+   * @throws IllegalArgumentException si l'identifiant est nul, si le kilométrage est invalide, ou
+   *         si la vérification n'existe pas
+   */
+  public Verification modifierKilometrageDebut(Long verificationId, Integer kilometrageDebut) {
+    if (verificationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la vérification ne peut pas être nul.");
+    }
+    if (kilometrageDebut == null || kilometrageDebut < 0) {
+      throw new IllegalArgumentException(
+          "Le kilométrage de début doit être un entier positif ou nul.");
+    }
+
+    Verification verification = verificationRepository.findById(verificationId);
+    if (verification == null) {
+      throw new IllegalArgumentException(
+          "Aucune vérification trouvée avec l'identifiant " + verificationId);
+    }
+
+    verification.setKilometrageDebut(kilometrageDebut);
+    return verificationRepository.save(verification);
+  }
+
+  /**
+   * Met à jour la photo d'une vérification existante.
+   *
+   * @param verificationId l'identifiant de la vérification
+   * @param photo la nouvelle photo (peut être null pour supprimer la photo)
+   * @return la vérification mise à jour
+   * @throws IllegalArgumentException si l'identifiant est nul ou si la vérification n'existe pas
+   */
+  public Verification modifierPhoto(Long verificationId, String photo) {
+    if (verificationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la vérification ne peut pas être nul.");
+    }
+
+    Verification verification = verificationRepository.findById(verificationId);
+    if (verification == null) {
+      throw new IllegalArgumentException(
+          "Aucune vérification trouvée avec l'identifiant " + verificationId);
+    }
+
+    verification.setPhoto(photo);
+    return verificationRepository.save(verification);
+  }
+
+  /**
+   * Met à jour le kilométrage de fin et la photo d'une vérification existante.
+   *
+   * @param verificationId l'identifiant de la vérification
+   * @param kilometrageFin le kilométrage de fin
+   * @param photo la nouvelle photo (peut être null)
+   * @return la vérification mise à jour
+   * @throws IllegalArgumentException si l'identifiant est nul, si le kilométrage est invalide, ou
+   *         si la vérification n'existe pas
+   */
+  public Verification modifierVerificationFin(Long verificationId, Integer kilometrageFin,
+      String photo) {
+    if (verificationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la vérification ne peut pas être nul.");
+    }
+    if (kilometrageFin == null || kilometrageFin < 0) {
+      throw new IllegalArgumentException(
+          "Le kilométrage de fin doit être un entier positif ou nul.");
+    }
+
+    Verification verification = verificationRepository.findById(verificationId);
+    if (verification == null) {
+      throw new IllegalArgumentException(
+          "Aucune vérification trouvée avec l'identifiant " + verificationId);
+    }
+
+    verification.setKilometrageFin(kilometrageFin);
+    verification.setPhoto(photo);
+    return verificationRepository.save(verification);
+  }
+
+  /**
+   * Supprime une vérification de la base de données.
+   *
+   * @param id l'identifiant de la vérification à supprimer
+   * @throws IllegalArgumentException si l'identifiant est nul ou si la vérification n'existe pas
+   */
+  public void supprimerVerification(Long id) {
+    if (id == null) {
+      throw new IllegalArgumentException("L'identifiant de la vérification ne peut pas être nul.");
+    }
+
+    Verification verification = verificationRepository.findById(id);
+    if (verification == null) {
+      throw new IllegalArgumentException("Aucune vérification trouvée avec l'identifiant " + id);
+    }
+
+    verificationRepository.delete(id);
+  }
+}

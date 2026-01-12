@@ -3,6 +3,8 @@ package fr.univ.m1.projetagile.core.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepository;
+import fr.univ.m1.projetagile.VerificationLocation.service.VerificationService;
 import fr.univ.m1.projetagile.core.dto.LocationDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Location;
@@ -25,17 +27,19 @@ public class LocationService {
   }
 
   /**
-   * Crée et enregistre une nouvelle location après validation métier basique.
+   * Crée et enregistre une nouvelle location après validation métier basique. Crée également une
+   * vérification avec le kilométrage de début.
    *
    * @param dateDebut date et heure de début souhaitées
    * @param dateFin date et heure de fin souhaitées
    * @param lieuDepot lieu de dépôt du véhicule (facultatif, peut être null)
    * @param vehicule véhicule concerné (doit être déjà persisté)
    * @param loueur loueur effectuant la réservation
+   * @param kilometrageDebut le kilométrage du véhicule au début de la location
    * @return la location sauvegardée
    */
   public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin,
-      LieuRestitution lieuDepot, Vehicule vehicule, Loueur loueur) {
+      LieuRestitution lieuDepot, Vehicule vehicule, Loueur loueur, Integer kilometrageDebut) {
 
     if (dateDebut == null || dateFin == null) {
       throw new IllegalArgumentException("Les dates de début et de fin sont obligatoires.");
@@ -50,6 +54,10 @@ public class LocationService {
     if (loueur == null) {
       throw new IllegalArgumentException("Le loueur doit être spécifié.");
     }
+    if (kilometrageDebut == null || kilometrageDebut < 0) {
+      throw new IllegalArgumentException(
+          "Le kilométrage de début doit être un entier positif ou nul.");
+    }
 
     LocalDate debutJour = dateDebut.toLocalDate();
     LocalDate finJour = dateFin.toLocalDate();
@@ -60,7 +68,23 @@ public class LocationService {
     }
 
     Location location = new Location(dateDebut, dateFin, lieuDepot, vehicule, loueur);
-    return locationRepository.save(location);
+    location = locationRepository.save(location);
+
+    // Créer la vérification avec le kilométrage de début
+    VerificationRepository verificationRepository = new VerificationRepository();
+    VerificationService verificationService =
+        new VerificationService(verificationRepository, locationRepository);
+
+    try {
+      verificationService.creerVerification(location.getId(), kilometrageDebut);
+    } catch (Exception e) {
+      throw new IllegalStateException(
+          "Impossible de créer la location : la vérification n'a pas pu être créée. "
+              + e.getMessage(),
+          e);
+    }
+
+    return location;
   }
 
   /**
@@ -70,11 +94,12 @@ public class LocationService {
    * @param dateFin date et heure de fin souhaitées
    * @param vehicule véhicule concerné (doit être déjà persisté)
    * @param loueur loueur effectuant la réservation
+   * @param kilometrageDebut le kilométrage du véhicule au début de la location
    * @return la location sauvegardée
    */
   public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule,
-      Loueur loueur) {
-    return creerLocation(dateDebut, dateFin, null, vehicule, loueur);
+      Loueur loueur, Integer kilometrageDebut) {
+    return creerLocation(dateDebut, dateFin, null, vehicule, loueur, kilometrageDebut);
   }
 
   /**
@@ -127,20 +152,67 @@ public class LocationService {
   }
 
   /**
-   * Termine une location en cours. Change le statut de la location à TERMINE et la sauvegarde en
-   * base de données.
+   * Termine une location en cours. Met à jour la vérification existante avec le kilométrage de fin
+   * et la photo, vérifie que tout est correct, puis change le statut de la location à TERMINE et la
+   * sauvegarde en base de données.
    *
    * @param location la location à terminer
+   * @param kilometrageFin le kilométrage du véhicule à la fin de la location
+   * @param photo la photo du véhicule (peut être null)
+   * @throws IllegalArgumentException si la location est nulle, si le kilométrage est invalide, ou
+   *         si la vérification n'existe pas
+   * @throws IllegalStateException si la location ne peut pas être terminée (statut incorrect ou
+   *         vérification échouée)
    */
-  public void terminer(Location location) {
+  public void terminer(Location location, Integer kilometrageFin, String photo) {
     if (location == null) {
       throw new IllegalArgumentException("La location ne peut pas être nulle.");
     }
+    if (location.getId() == null) {
+      throw new IllegalArgumentException("La location doit avoir un identifiant.");
+    }
+    if (kilometrageFin == null || kilometrageFin < 0) {
+      throw new IllegalArgumentException(
+          "Le kilométrage de fin doit être un entier positif ou nul.");
+    }
+
     StatutLocation statutActuel = location.getStatut();
     if (statutActuel != StatutLocation.ACCEPTE) {
       throw new IllegalStateException(
           "Terminaison impossible : la location ne peut être terminée que si son statut est ACCEPTE.");
     }
+
+    // Récupérer et mettre à jour la vérification existante
+    VerificationRepository verificationRepository = new VerificationRepository();
+    VerificationService verificationService =
+        new VerificationService(verificationRepository, locationRepository);
+
+    // Vérifier que la vérification existe
+    fr.univ.m1.projetagile.VerificationLocation.entity.Verification verification =
+        verificationService.getVerificationByLocationId(location.getId());
+    if (verification == null) {
+      throw new IllegalStateException(
+          "Impossible de terminer la location : aucune vérification trouvée pour cette location.");
+    }
+
+    // Vérifier que le kilométrage de fin est supérieur ou égal au kilométrage de début
+    if (verification.getKilometrageDebut() != null
+        && kilometrageFin < verification.getKilometrageDebut()) {
+      throw new IllegalArgumentException("Le kilométrage de fin (" + kilometrageFin
+          + ") ne peut pas être inférieur au kilométrage de début ("
+          + verification.getKilometrageDebut() + ").");
+    }
+
+    try {
+      verificationService.modifierVerificationFin(verification.getId(), kilometrageFin, photo);
+    } catch (Exception e) {
+      throw new IllegalStateException(
+          "Impossible de terminer la location : la vérification n'a pas pu être mise à jour. "
+              + e.getMessage(),
+          e);
+    }
+
+    // Si la vérification a été mise à jour avec succès, terminer la location
     location.setStatut(StatutLocation.TERMINE);
     locationRepository.save(location);
   }
