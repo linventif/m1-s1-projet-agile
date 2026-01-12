@@ -45,6 +45,13 @@ public class Parrainage {
   private Long parraineId;
 
   /**
+   * Indique si le parrainage a fonctionné correctement (ex: un loueur a loué un véhicule et il a
+   * été parrainé, donc son parrainage a marché). Une fois activé, il ne peut plus être désactivé.
+   */
+  @Column(nullable = false)
+  private Boolean activated = false;
+
+  /**
    * Constructeur sans argument pour JPA. Ne pas utiliser directement.
    */
   protected Parrainage() {}
@@ -156,8 +163,35 @@ public class Parrainage {
     this.parraineId = parraine.getIdU();
   }
 
+  /**
+   * Retourne l'état d'activation du parrainage.
+   *
+   * @return true si le parrainage a fonctionné correctement, false sinon
+   */
+  public Boolean isActivated() {
+    return activated;
+  }
+
+  /**
+   * Retourne l'état d'activation du parrainage (méthode alternative pour compatibilité).
+   *
+   * @return true si le parrainage a fonctionné correctement, false sinon
+   */
+  public Boolean getActivated() {
+    return activated;
+  }
+
+  /**
+   * Marque le parrainage comme ayant fonctionné correctement (met activated à true). Une fois
+   * activé, le parrainage ne peut plus être désactivé.
+   */
+  public void activer() {
+    this.activated = true;
+  }
+
   @Override
   public String toString() {
-    return "Parrainage [id=" + id + ", parrainId=" + parrainId + ", parraineId=" + parraineId + "]";
+    return "Parrainage [id=" + id + ", parrainId=" + parrainId + ", parraineId=" + parraineId
+        + ", activated=" + activated + "]";
   }
 }

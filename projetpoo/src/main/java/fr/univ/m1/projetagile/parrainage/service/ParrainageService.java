@@ -288,6 +288,55 @@ public class ParrainageService {
   }
 
   /**
+   * Marque un parrainage comme ayant fonctionné correctement (met activated à true). Par exemple,
+   * lorsqu'un loueur parrainé a loué un véhicule, le parrainage peut être marqué comme ayant
+   * fonctionné. Une fois activé, le parrainage ne peut plus être désactivé.
+   *
+   * @param parrainageId l'ID du parrainage à activer
+   * @return le parrainage activé et sauvegardé
+   * @throws IllegalArgumentException si l'ID est null
+   * @throws IllegalStateException si le parrainage n'existe pas ou est déjà activé
+   */
+  public Parrainage activerParrainage(Long parrainageId) {
+    if (parrainageId == null) {
+      throw new IllegalArgumentException("L'ID du parrainage ne peut pas être null");
+    }
+
+    Parrainage parrainage = parrainageRepository.findById(parrainageId);
+    if (parrainage == null) {
+      throw new IllegalStateException("Le parrainage avec l'ID " + parrainageId + " n'existe pas");
+    }
+
+    if (parrainage.isActivated()) {
+      throw new IllegalStateException("Le parrainage est déjà activé");
+    }
+
+    parrainage.activer();
+    return parrainageRepository.save(parrainage);
+  }
+
+  /**
+   * Vérifie si un parrainage a fonctionné correctement (est activé).
+   *
+   * @param parrainageId l'ID du parrainage à vérifier
+   * @return true si le parrainage a fonctionné correctement, false sinon (ou si le parrainage
+   *         n'existe pas)
+   * @throws IllegalArgumentException si l'ID est null
+   */
+  public boolean estActive(Long parrainageId) {
+    if (parrainageId == null) {
+      throw new IllegalArgumentException("L'ID du parrainage ne peut pas être null");
+    }
+
+    Parrainage parrainage = parrainageRepository.findById(parrainageId);
+    if (parrainage == null) {
+      return false;
+    }
+
+    return parrainage.isActivated();
+  }
+
+  /**
    * Charge un utilisateur par son ID. Essaie d'abord de charger comme Loueur, puis comme Agent.
    *
    * @param utilisateurId l'ID de l'utilisateur à charger
