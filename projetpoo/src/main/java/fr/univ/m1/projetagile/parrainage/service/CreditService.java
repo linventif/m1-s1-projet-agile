@@ -194,8 +194,8 @@ public class CreditService {
     if (montant == null) {
       throw new IllegalArgumentException("Le montant ne peut pas être null");
     }
-    if (montant < 0) {
-      throw new IllegalArgumentException("Le montant à retirer ne peut pas être négatif");
+    if (montant <= 0) {
+      throw new IllegalArgumentException("Le montant à retirer doit être strictement positif");
     }
 
     // Récupérer le crédit de l'utilisateur
