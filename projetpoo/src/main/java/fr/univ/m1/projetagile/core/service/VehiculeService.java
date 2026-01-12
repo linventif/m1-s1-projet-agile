@@ -99,14 +99,16 @@ public class VehiculeService {
    * @param prixMin prix minimum journalier (optionnel)
    * @param prixMax prix maximum journalier (optionnel)
    * @param type type de véhicule (optionnel)
+   * @param hasParkingOption si true, filtre les véhicules dont l'agent a l'option Parking
+   *        (optionnel)
    * @return Liste de VehiculeDTO filtrés contenant : - Les propriétés du véhicule - La note moyenne
    *         calculée - Les dates de disponibilités - Le lieu (ville)
    */
   public List<VehiculeDTO> searchVehiculesWithFilters(LocalDate dateDebut, LocalDate dateFin,
       String ville, String marque, String modele, String couleur, Double prixMin, Double prixMax,
-      TypeV type) {
+      TypeV type, Boolean hasParkingOption) {
     List<Vehicule> vehicules = vehiculeRepository.findWithFilters(dateDebut, dateFin, ville, marque,
-        modele, couleur, prixMin, prixMax, type);
+        modele, couleur, prixMin, prixMax, type, hasParkingOption);
 
     return vehicules.stream().map(this::convertToDTO).collect(Collectors.toList());
   }
@@ -487,14 +489,13 @@ public class VehiculeService {
   // ========== Gestion des Disponibilités ==========
 
   /**
-   * Crée une nouvelle disponibilité pour un véhicule Si la nouvelle période touche ou chevauche
-   * des disponibilités existantes, elles seront automatiquement fusionnées en une seule période
+   * Crée une nouvelle disponibilité pour un véhicule Si la nouvelle période touche ou chevauche des
+   * disponibilités existantes, elles seront automatiquement fusionnées en une seule période
    * continue
    *
-   * Exemples de fusion : 
-   * - Existant: 10-20 oct, Nouveau: 20-30 oct → Résultat: 10-30 oct 
-   * - Existant: 10-20 oct, Nouveau: 15-25 oct → Résultat: 10-25 oct 
-   * - Existant: 10-15 oct + 20-25 oct, Nouveau: 14-21 oct → Résultat: 10-25 oct
+   * Exemples de fusion : - Existant: 10-20 oct, Nouveau: 20-30 oct → Résultat: 10-30 oct -
+   * Existant: 10-20 oct, Nouveau: 15-25 oct → Résultat: 10-25 oct - Existant: 10-15 oct + 20-25
+   * oct, Nouveau: 14-21 oct → Résultat: 10-25 oct
    *
    * @param agent l'agent propriétaire du véhicule
    * @param vehiculeId l'identifiant du véhicule
@@ -629,8 +630,8 @@ public class VehiculeService {
     validateDateRange(dateDebut, dateFin);
 
     // Chercher les disponibilités qui se touchent ou se chevauchent (en excluant celle-ci)
-    List<Disponibilite> overlapping = disponibiliteRepository
-        .findOverlappingOrAdjacent(vehiculeId, dateDebut, dateFin, disponibiliteId);
+    List<Disponibilite> overlapping = disponibiliteRepository.findOverlappingOrAdjacent(vehiculeId,
+        dateDebut, dateFin, disponibiliteId);
 
     if (overlapping.isEmpty()) {
       // Aucun chevauchement : simplement mettre à jour les dates
@@ -676,12 +677,11 @@ public class VehiculeService {
    * Supprime une plage de dates des disponibilités d'un véhicule. Cette méthode "découpe" les
    * disponibilités existantes en supprimant la plage spécifiée.
    *
-   * Exemples: 
-   * - Disponibilité: 10-20 oct, Supprimer: 13-18 oct → Résultat: 10-12 oct + 19-20 oct 
-   * - Disponibilité: 10-20 oct, Supprimer: 10-15 oct → Résultat: 16-20 oct 
-   * - Disponibilité: 10-20 oct, Supprimer: 15-20 oct → Résultat: 10-14 oct 
-   * - Disponibilité: 10-20 oct, Supprimer: 10-20 oct → Résultat: (supprimée complètement) 
-   * - Disponibilité: 10-20 oct, Supprimer: 5-25 oct → Résultat: (supprimée complètement)
+   * Exemples: - Disponibilité: 10-20 oct, Supprimer: 13-18 oct → Résultat: 10-12 oct + 19-20 oct -
+   * Disponibilité: 10-20 oct, Supprimer: 10-15 oct → Résultat: 16-20 oct - Disponibilité: 10-20
+   * oct, Supprimer: 15-20 oct → Résultat: 10-14 oct - Disponibilité: 10-20 oct, Supprimer: 10-20
+   * oct → Résultat: (supprimée complètement) - Disponibilité: 10-20 oct, Supprimer: 5-25 oct →
+   * Résultat: (supprimée complètement)
    *
    * @param agent l'agent propriétaire du véhicule
    * @param vehiculeId l'identifiant du véhicule
@@ -696,7 +696,8 @@ public class VehiculeService {
     // Vérifier que le véhicule existe et appartient à l'agent
     Vehicule vehicule = verifyOwnershipAndGetVehicule(agent, vehiculeId);
 
-    // Valider les dates (sans la vérification du passé car on peut vouloir supprimer des dates passées)
+    // Valider les dates (sans la vérification du passé car on peut vouloir supprimer des dates
+    // passées)
     if (dateDebut == null) {
       throw new IllegalArgumentException("La date de début ne peut pas être nulle.");
     }

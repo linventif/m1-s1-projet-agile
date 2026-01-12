@@ -1,9 +1,11 @@
 package fr.univ.m1.projetagile.notes.service;
 
+import java.util.Arrays;
 import java.util.List;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
+import fr.univ.m1.projetagile.notes.entity.Critere;
 import fr.univ.m1.projetagile.notes.entity.NoteAgent;
 import fr.univ.m1.projetagile.notes.entity.NoteLoueur;
 import fr.univ.m1.projetagile.notes.entity.NoteVehicule;
@@ -16,8 +18,12 @@ import fr.univ.m1.projetagile.notes.persistence.NoteVehiculeRepository;
  *
  * <p>
  * Ce service fournit une couche métier pour créer et gérer les notes avec validation automatique et
- * sauvegarde en base de données.
+ * sauvegarde en base de données. Supporte les critères d'évaluation personnalisables.
  * </p>
+ *
+ * @author Projet Agile M1
+ * @version 2.0
+ * @since 1.0
  */
 public class NoteService {
 
@@ -41,10 +47,15 @@ public class NoteService {
   // ==================== NOTES AGENT ====================
 
   /**
-   * Permet à un loueur de noter un agent.
+   * Permet à un loueur de noter un agent avec une liste de critères personnalisés.
+   *
+   * @param loueur le loueur qui note
+   * @param agent l'agent noté
+   * @param criteres la liste des critères d'évaluation
+   * @return la note créée et sauvegardée
+   * @throws IllegalArgumentException si les paramètres sont invalides
    */
-  public NoteAgent noterAgent(Loueur loueur, Agent agent, Double note1, Double note2,
-      Double note3) {
+  public NoteAgent noterAgent(Loueur loueur, Agent agent, List<Critere> criteres) {
     if (loueur == null) {
       throw new IllegalArgumentException("Le loueur ne peut pas être null");
     }
@@ -52,8 +63,25 @@ public class NoteService {
       throw new IllegalArgumentException("L'agent ne peut pas être null");
     }
 
-    NoteAgent note = new NoteAgent(agent, loueur, note1, note2, note3);
+    NoteAgent note = new NoteAgent(agent, loueur, criteres);
     return noteAgentRepository.save(note);
+  }
+
+  /**
+   * Permet à un loueur de noter un agent avec 3 notes (compatibilité ancienne version).
+   *
+   * @param loueur le loueur qui note
+   * @param agent l'agent noté
+   * @param note1 première note (entre 0 et 10)
+   * @param note2 deuxième note (entre 0 et 10)
+   * @param note3 troisième note (entre 0 et 10)
+   * @return la note créée et sauvegardée
+   */
+  public NoteAgent noterAgent(Loueur loueur, Agent agent, Double note1, Double note2,
+      Double note3) {
+    List<Critere> criteres = Arrays.asList(new Critere("Critère 1", note1),
+        new Critere("Critère 2", note2), new Critere("Critère 3", note3));
+    return noterAgent(loueur, agent, criteres);
   }
 
   public List<NoteAgent> getNotesAgent(Agent agent) {
@@ -73,10 +101,15 @@ public class NoteService {
   // ==================== NOTES LOUEUR ====================
 
   /**
-   * Permet à un agent de noter un loueur.
+   * Permet à un agent de noter un loueur avec une liste de critères personnalisés.
+   *
+   * @param agent l'agent qui note
+   * @param loueur le loueur noté
+   * @param criteres la liste des critères d'évaluation
+   * @return la note créée et sauvegardée
+   * @throws IllegalArgumentException si les paramètres sont invalides
    */
-  public NoteLoueur noterLoueur(Agent agent, Loueur loueur, Double note1, Double note2,
-      Double note3) {
+  public NoteLoueur noterLoueur(Agent agent, Loueur loueur, List<Critere> criteres) {
     if (agent == null) {
       throw new IllegalArgumentException("L'agent ne peut pas être null");
     }
@@ -84,8 +117,25 @@ public class NoteService {
       throw new IllegalArgumentException("Le loueur ne peut pas être null");
     }
 
-    NoteLoueur note = new NoteLoueur(agent, loueur, note1, note2, note3);
+    NoteLoueur note = new NoteLoueur(agent, loueur, criteres);
     return noteLoueurRepository.save(note);
+  }
+
+  /**
+   * Permet à un agent de noter un loueur avec 3 notes (compatibilité ancienne version).
+   *
+   * @param agent l'agent qui note
+   * @param loueur le loueur noté
+   * @param note1 première note (entre 0 et 10)
+   * @param note2 deuxième note (entre 0 et 10)
+   * @param note3 troisième note (entre 0 et 10)
+   * @return la note créée et sauvegardée
+   */
+  public NoteLoueur noterLoueur(Agent agent, Loueur loueur, Double note1, Double note2,
+      Double note3) {
+    List<Critere> criteres = Arrays.asList(new Critere("Critère 1", note1),
+        new Critere("Critère 2", note2), new Critere("Critère 3", note3));
+    return noterLoueur(agent, loueur, criteres);
   }
 
   public List<NoteLoueur> getNotesLoueur(Loueur loueur) {
@@ -105,10 +155,15 @@ public class NoteService {
   // ==================== NOTES VEHICULE ====================
 
   /**
-   * Permet à un loueur de noter un véhicule.
+   * Permet à un loueur de noter un véhicule avec une liste de critères personnalisés.
+   *
+   * @param loueur le loueur qui note
+   * @param vehicule le véhicule noté
+   * @param criteres la liste des critères d'évaluation
+   * @return la note créée et sauvegardée
+   * @throws IllegalArgumentException si les paramètres sont invalides
    */
-  public NoteVehicule noterVehicule(Loueur loueur, Vehicule vehicule, Double note1, Double note2,
-      Double note3) {
+  public NoteVehicule noterVehicule(Loueur loueur, Vehicule vehicule, List<Critere> criteres) {
     if (loueur == null) {
       throw new IllegalArgumentException("Le loueur ne peut pas être null");
     }
@@ -116,8 +171,25 @@ public class NoteService {
       throw new IllegalArgumentException("Le véhicule ne peut pas être null");
     }
 
-    NoteVehicule note = new NoteVehicule(vehicule, loueur, note1, note2, note3);
+    NoteVehicule note = new NoteVehicule(vehicule, loueur, criteres);
     return noteVehiculeRepository.save(note);
+  }
+
+  /**
+   * Permet à un loueur de noter un véhicule avec 3 notes (compatibilité ancienne version).
+   *
+   * @param loueur le loueur qui note
+   * @param vehicule le véhicule noté
+   * @param note1 première note (entre 0 et 10)
+   * @param note2 deuxième note (entre 0 et 10)
+   * @param note3 troisième note (entre 0 et 10)
+   * @return la note créée et sauvegardée
+   */
+  public NoteVehicule noterVehicule(Loueur loueur, Vehicule vehicule, Double note1, Double note2,
+      Double note3) {
+    List<Critere> criteres = Arrays.asList(new Critere("Critère 1", note1),
+        new Critere("Critère 2", note2), new Critere("Critère 3", note3));
+    return noterVehicule(loueur, vehicule, criteres);
   }
 
   public List<NoteVehicule> getNotesVehicule(Vehicule vehicule) {

@@ -1,6 +1,7 @@
 package fr.univ.m1.projetagile.core.dto;
 
 import java.time.LocalDateTime;
+import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 
 /**
@@ -11,15 +12,15 @@ public class LocationDTO {
   private Long id;
   private LocalDateTime dateDebut;
   private LocalDateTime dateFin;
-  private String lieuDepot;
+  private LieuRestitution lieuDepot;
   private StatutLocation statut;
   private VehiculeDTO vehicule;
   private Double prixTotal;
 
   public LocationDTO() {}
 
-  public LocationDTO(Long id, LocalDateTime dateDebut, LocalDateTime dateFin, String lieuDepot,
-      StatutLocation statut, VehiculeDTO vehicule, Double prixTotal) {
+  public LocationDTO(Long id, LocalDateTime dateDebut, LocalDateTime dateFin,
+      LieuRestitution lieuDepot, StatutLocation statut, VehiculeDTO vehicule, Double prixTotal) {
     this.id = id;
     this.dateDebut = dateDebut;
     this.dateFin = dateFin;
@@ -54,11 +55,11 @@ public class LocationDTO {
     this.dateFin = dateFin;
   }
 
-  public String getLieuDepot() {
+  public LieuRestitution getLieuDepot() {
     return lieuDepot;
   }
 
-  public void setLieuDepot(String lieuDepot) {
+  public void setLieuDepot(LieuRestitution lieuDepot) {
     this.lieuDepot = lieuDepot;
   }
 
