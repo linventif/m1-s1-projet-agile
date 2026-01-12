@@ -7,6 +7,7 @@ import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepos
 import fr.univ.m1.projetagile.VerificationLocation.service.VerificationService;
 import fr.univ.m1.projetagile.core.dto.LocationDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
+import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
@@ -14,6 +15,7 @@ import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.enums.StatutLocation;
+import fr.univ.m1.projetagile.parking.entity.Parking;
 import fr.univ.m1.projetagile.parrainage.entity.Parrainage;
 import fr.univ.m1.projetagile.parrainage.service.CreditService;
 import fr.univ.m1.projetagile.parrainage.service.ParrainageService;
@@ -66,6 +68,24 @@ public class LocationService {
     }
     if (loueur == null) {
       throw new IllegalArgumentException("Le loueur doit être spécifié.");
+    }
+
+    // Vérifier si le lieu de dépôt est un Parking
+    if (lieuDepot instanceof Parking) {
+      Agent agent = vehicule.getProprietaire();
+      if (agent == null) {
+        throw new IllegalStateException("Le véhicule n'a pas de propriétaire associé.");
+      }
+
+      // Vérifier si l'agent a une souscription à l'option Parking
+      boolean aOptionParking = agent.getOptionsActives().stream()
+          .anyMatch(so -> so.getOption() != null && so.getOption().getId() != null
+              && so.getOption().getId().equals(Parking.PARKING_OPTION_ID));
+
+      if (!aOptionParking) {
+        throw new IllegalStateException(
+            "L'agent n'a pas activé l'option pour permettre de déposer ce véhicule dans un parking");
+      }
     }
 
     LocalDate debutJour = dateDebut.toLocalDate();
@@ -181,7 +201,8 @@ public class LocationService {
   /**
    * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
    * - Le prix de base (prix par jour × nombre de jours) - Une commission proportionnelle de 10% sur
-   * le prix de base - Des frais fixes de 2€ par jour
+   * le prix de base - Des frais fixes de 2€ par jour - Une promotion de 10% si le lieu de dépôt est
+   * un parking
    *
    * @param location la location pour laquelle calculer le prix
    * @return le prix total de la location
@@ -203,7 +224,14 @@ public class LocationService {
     double fraisFixes = 2.0 * nombreJours;
 
     // Prix total = prix de base + commission + frais fixes
-    return prixBase + commissionProportionnelle + fraisFixes;
+    double prixTotal = prixBase + commissionProportionnelle + fraisFixes;
+
+    // Promotion de 10% si le lieu de dépôt est un parking
+    if (location.getLieuDepot() != null && location.getLieuDepot() instanceof Parking) {
+      prixTotal = prixTotal * Parking.DISCOUNT_RATE;
+    }
+
+    return prixTotal;
   }
 
   /**

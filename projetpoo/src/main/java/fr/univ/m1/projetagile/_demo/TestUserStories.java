@@ -58,7 +58,7 @@ public class TestUserStories {
 
       // US.V.2. Je veux pouvoir appliquer des filtres sur les véhicules que je vois. (2)
       List<VehiculeDTO> vehiculesFiltres = vehiculeService.searchVehiculesWithFilters(null, null,
-          "Paris", "Peugeot", "308", null, null, null, TypeV.voiture);
+          "Paris", "Peugeot", "308", null, null, null, TypeV.voiture, null);
       System.out.println("Vehicules avec filtres disponibles: ");
       for (VehiculeDTO vehicule : vehiculesFiltres) {
         System.out.println(" - " + vehicule.getMarque() + " " + vehicule.getModele() + " "
