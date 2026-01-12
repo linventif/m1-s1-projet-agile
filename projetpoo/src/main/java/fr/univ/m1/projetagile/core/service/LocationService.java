@@ -77,8 +77,12 @@ public class LocationService {
   /**
    * Calcule le prix total d'une location en fonction de la durée et du véhicule.
    *
-   * Prix total = prix de base + commission + frais fixes - prix de base = prix par jour × nombre de
-   * jours - commission = 10% du prixBase (ou 5% si LLD) - frais fixes = 2€ par jour
+   * Le prix total est composé de&nbsp;:
+   * <ul>
+   *   <li>un prix de base = prix par jour × nombre de jours ;</li>
+   *   <li>une commission = 10&nbsp;% du prix de base (ou 5&nbsp;% si location de longue durée) ;</li>
+   *   <li>des frais fixes = 2&nbsp;€ par jour.</li>
+   * </ul>
    *
    * ✅ #99 : durée calculée par location.getNombreJours() ✅ #100 : rabais LLD sur la commission
    * (part variable)
