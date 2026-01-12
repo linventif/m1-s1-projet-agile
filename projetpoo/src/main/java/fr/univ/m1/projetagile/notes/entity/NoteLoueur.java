@@ -1,5 +1,6 @@
 package fr.univ.m1.projetagile.notes.entity;
 
+import java.util.List;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import jakarta.persistence.Entity;
@@ -14,8 +15,13 @@ import jakarta.persistence.Table;
  * Note attribuée par un agent à un loueur.
  *
  * <p>
- * Permet aux agents d'évaluer le comportement et le sérieux des loueurs.
+ * Permet aux agents d'évaluer le comportement et le sérieux des loueurs selon plusieurs critères
+ * personnalisables.
  * </p>
+ *
+ * @author Projet Agile M1
+ * @version 2.0
+ * @since 1.0
  */
 @Entity
 @Table(name = "notes_loueurs")
@@ -33,15 +39,26 @@ public class NoteLoueur extends Note {
   @JoinColumn(name = "loueur_id", nullable = false)
   private Loueur loueur;
 
+  /**
+   * Constructeur sans argument pour JPA. Ne pas utiliser directement.
+   */
   protected NoteLoueur() {}
 
-  public NoteLoueur(Agent agent, Loueur loueur, Double note1, Double note2, Double note3) {
-    super(note1, note2, note3);
+  /**
+   * Crée une nouvelle note pour un loueur avec une liste de critères.
+   *
+   * @param agent l'agent qui évalue
+   * @param loueur le loueur évalué
+   * @param criteres la liste des critères d'évaluation
+   * @throws IllegalArgumentException si l'agent, le loueur ou les critères sont invalides
+   */
+  public NoteLoueur(Agent agent, Loueur loueur, List<Critere> criteres) {
+    super(criteres);
     if (agent == null) {
-      throw new IllegalArgumentException("Agent ne peut pas être null");
+      throw new IllegalArgumentException("L'agent ne peut pas être null");
     }
     if (loueur == null) {
-      throw new IllegalArgumentException("Loueur ne peut pas être null");
+      throw new IllegalArgumentException("Le loueur ne peut pas être null");
     }
     this.agent = agent;
     this.loueur = loueur;
@@ -75,6 +92,6 @@ public class NoteLoueur extends Note {
   public String toString() {
     return "NoteLoueur [id=" + id + ", agent=" + (agent != null ? agent.getIdU() : "null")
         + ", loueur=" + (loueur != null ? loueur.getIdU() : "null") + ", moyenne="
-        + getNoteMoyenne() + ", date=" + date + "]";
+        + getNoteMoyenne() + "/10, criteres=" + criteres.size() + ", date=" + date + "]";
   }
 }

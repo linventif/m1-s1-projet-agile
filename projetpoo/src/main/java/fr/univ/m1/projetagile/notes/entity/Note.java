@@ -1,95 +1,129 @@
 package fr.univ.m1.projetagile.notes.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.MappedSuperclass;
 
 /**
  * Classe abstraite représentant une note générique.
  *
  * <p>
- * Une note est composée de 3 notes partielles et d'une date de notation.
+ * Une note est composée d'une liste de critères et d'une date de notation. Chaque critère possède
+ * un nom et une note entre 0 et 10.
  * </p>
+ *
+ * @author Projet Agile M1
+ * @version 2.0
+ * @since 1.0
  */
 @MappedSuperclass
 public abstract class Note {
 
-  @Column(nullable = false)
-  protected Double note1;
+  /**
+   * Liste des critères d'évaluation avec leurs notes.
+   */
+  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinTable(name = "note_criteres", joinColumns = @JoinColumn(name = "note_id"),
+      inverseJoinColumns = @JoinColumn(name = "critere_id"))
+  protected List<Critere> criteres = new ArrayList<>();
 
-  @Column(nullable = false)
-  protected Double note2;
-
-  @Column(nullable = false)
-  protected Double note3;
-
+  /**
+   * Date de la notation.
+   */
   @Column(nullable = false, name = "date_note")
   protected LocalDate date;
 
+  /**
+   * Constructeur sans argument pour JPA. Ne pas utiliser directement.
+   */
   protected Note() {}
 
-  protected Note(Double note1, Double note2, Double note3) {
-    validateNote(note1, "note1");
-    validateNote(note2, "note2");
-    validateNote(note3, "note3");
-
-    this.note1 = note1;
-    this.note2 = note2;
-    this.note3 = note3;
+  /**
+   * Crée une nouvelle note avec une liste de critères. La date est automatiquement définie à
+   * aujourd'hui.
+   *
+   * @param criteres la liste des critères d'évaluation
+   * @throws IllegalArgumentException si la liste de critères est null ou vide
+   */
+  protected Note(List<Critere> criteres) {
+    if (criteres == null || criteres.isEmpty()) {
+      throw new IllegalArgumentException("La liste de critères ne peut pas être vide");
+    }
+    this.criteres = new ArrayList<>(criteres);
     this.date = LocalDate.now();
   }
 
-  private void validateNote(Double note, String nomNote) {
-    if (note == null) {
-      throw new IllegalArgumentException(nomNote + " ne peut pas être null");
+  /**
+   * Retourne la liste des critères d'évaluation (non modifiable).
+   *
+   * @return la liste des critères
+   */
+  public List<Critere> getCriteres() {
+    return Collections.unmodifiableList(criteres);
+  }
+
+  /**
+   * Ajoute un nouveau critère à la note.
+   *
+   * @param critere le critère à ajouter
+   * @throws IllegalArgumentException si le critère est null
+   */
+  public void ajouterCritere(Critere critere) {
+    if (critere == null) {
+      throw new IllegalArgumentException("Le critère ne peut pas être null");
     }
-    if (note < 0.0 || note > 10.0) {
-      throw new IllegalArgumentException(
-          nomNote + " doit être entre 0 et 10 (valeur: " + note + ")");
+    this.criteres.add(critere);
+  }
+
+  /**
+   * Remplace tous les critères par une nouvelle liste.
+   *
+   * @param criteres la nouvelle liste de critères
+   * @throws IllegalArgumentException si la liste est null ou vide
+   */
+  public void setCriteres(List<Critere> criteres) {
+    if (criteres == null || criteres.isEmpty()) {
+      throw new IllegalArgumentException("La liste de critères ne peut pas être vide");
     }
+    this.criteres = new ArrayList<>(criteres);
   }
 
-  public Double getNote1() {
-    return note1;
-  }
-
-  public void setNote1(Double note1) {
-    validateNote(note1, "note1");
-    this.note1 = note1;
-  }
-
-  public Double getNote2() {
-    return note2;
-  }
-
-  public void setNote2(Double note2) {
-    validateNote(note2, "note2");
-    this.note2 = note2;
-  }
-
-  public Double getNote3() {
-    return note3;
-  }
-
-  public void setNote3(Double note3) {
-    validateNote(note3, "note3");
-    this.note3 = note3;
-  }
-
+  /**
+   * Retourne la date de notation.
+   *
+   * @return la date de notation
+   */
   public LocalDate getDate() {
     return date;
   }
 
+  /**
+   * Définit la date de notation.
+   *
+   * @param date la nouvelle date de notation
+   */
   public void setDate(LocalDate date) {
     this.date = date;
   }
 
   /**
-   * Calcule la moyenne des 3 notes.
+   * Calcule la moyenne des notes de tous les critères.
    *
-   * @return la moyenne arrondie à 2 décimales
+   * @return la moyenne arrondie à 2 décimales, ou 0.0 si aucun critère
    */
   public Double getNoteMoyenne() {
-    return Math.round((note1 + note2 + note3) / 3.0 * 100.0) / 100.0;
+    if (criteres.isEmpty()) {
+      return 0.0;
+    }
+    double somme = criteres.stream().mapToDouble(Critere::getNote).sum();
+    double moyenne = somme / criteres.size();
+    return Math.round(moyenne * 100.0) / 100.0;
   }
 }

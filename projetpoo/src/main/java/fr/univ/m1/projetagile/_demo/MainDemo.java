@@ -23,9 +23,11 @@ import fr.univ.m1.projetagile.enums.TypeV;
 import fr.univ.m1.projetagile.messagerie.entity.Message;
 import fr.univ.m1.projetagile.messagerie.persistence.MessageRepository;
 import fr.univ.m1.projetagile.messagerie.service.MessagerieService;
+import fr.univ.m1.projetagile.notes.entity.Critere;
 import fr.univ.m1.projetagile.notes.entity.NoteAgent;
 import fr.univ.m1.projetagile.notes.entity.NoteLoueur;
 import fr.univ.m1.projetagile.notes.entity.NoteVehicule;
+import fr.univ.m1.projetagile.notes.service.CritereService;
 import fr.univ.m1.projetagile.notes.service.NoteService;
 
 public class MainDemo {
@@ -48,6 +50,7 @@ public class MainDemo {
       LocationService locationService = new LocationService(locationRepository);
       DisponibiliteService disponibiliteService = new DisponibiliteService();
       NoteService noteService = new NoteService();
+      CritereService critereService = new CritereService();
 
       // -- // -- // -- // -- // -- // -- // -- //
       // Utilisateurs
@@ -283,39 +286,91 @@ public class MainDemo {
       System.out.println("✓ Message envoyé: " + msg4);
 
       // -- // -- // -- // -- // -- // -- // -- //
+      // Critères
+      // -- // -- // -- // -- // -- // -- // -- //
+      System.out.println("\n=== Initialisation des Critères ===");
+
+      // Afficher les critères existants
+      Long nbCriteres = critereService.countCriteres();
+      System.out.println("Nombre de critères en base: " + nbCriteres);
+
+      if (nbCriteres > 0) {
+        System.out.println("Critères existants:");
+        for (Critere c : critereService.getAllCriteres()) {
+          System.out.println("  - " + c.getNom() + " (ID: " + c.getId() + ")");
+        }
+      }
+
+      // -- // -- // -- // -- // -- // -- // -- //
       // Notes
       // -- // -- // -- // -- // -- // -- // -- //
-      System.out.println("\n=== Tests de notation ===");
+      System.out.println("\n=== Tests de notation avec critères ===");
 
-      // Loueur 1 note Agent Bob
-      NoteAgent noteAgent1 = noteService.noterAgent(L_john, APar_bob, 8.5, 9.0, 8.0);
+      // Loueur 1 note Agent Bob avec critères (réutilisation automatique)
+      List<Critere> criteresAgent1 = critereService.getOrCreateCriteres(
+          new String[] {"Ponctualité", "Professionnalisme", "Communication"},
+          new Double[] {8.5, 9.0, 8.0});
+      NoteAgent noteAgent1 = noteService.noterAgent(L_john, APar_bob, criteresAgent1);
       System.out.println("✓ Note créée: " + noteAgent1);
+      System.out.println("  Critères:");
+      for (Critere c : noteAgent1.getCriteres()) {
+        System.out.println("    - " + c);
+      }
       System.out.println("  Moyenne: " + noteAgent1.getNoteMoyenne() + "/10");
 
-      // Loueur 2 note Agent Alice
-      NoteAgent noteAgent2 = noteService.noterAgent(L_jane, APar_alice, 9.0, 9.5, 8.5);
+      // Loueur 2 note Agent Alice avec d'autres critères
+      List<Critere> criteresAgent2 = critereService.getOrCreateCriteres(
+          new String[] {"Disponibilité", "Qualité du service", "Résolution problèmes"},
+          new Double[] {9.0, 9.5, 8.5});
+      NoteAgent noteAgent2 = noteService.noterAgent(L_jane, APar_alice, criteresAgent2);
       System.out.println("✓ Note créée: " + noteAgent2);
+      System.out.println("  Critères:");
+      for (Critere c : noteAgent2.getCriteres()) {
+        System.out.println("    - " + c);
+      }
       System.out.println("  Moyenne: " + noteAgent2.getNoteMoyenne() + "/10");
 
-      // Agent Bob note Loueur 1
-      NoteLoueur noteLoueur1 = noteService.noterLoueur(APar_bob, L_john, 9.0, 8.5, 9.0);
+      // Agent Bob note Loueur 1 avec critères (réutilise "Ponctualité" et "Communication")
+      List<Critere> criteresLoueur1 = critereService.getOrCreateCriteres(
+          new String[] {"Respect du véhicule", "Ponctualité", "Communication"},
+          new Double[] {9.0, 8.5, 9.0});
+      NoteLoueur noteLoueur1 = noteService.noterLoueur(APar_bob, L_john, criteresLoueur1);
       System.out.println("✓ Note créée: " + noteLoueur1);
+      System.out.println("  Critères:");
+      for (Critere c : noteLoueur1.getCriteres()) {
+        System.out.println("    - " + c);
+      }
       System.out.println("  Moyenne: " + noteLoueur1.getNoteMoyenne() + "/10");
 
-      // Agent Alice note Loueur 2
+      // Agent Alice note Loueur 2 - Méthode classique (backward compatible)
       NoteLoueur noteLoueur2 = noteService.noterLoueur(APar_alice, L_jane, 8.0, 8.5, 7.5);
-      System.out.println("✓ Note créée: " + noteLoueur2);
+      System.out.println("✓ Note créée (méthode classique): " + noteLoueur2);
       System.out.println("  Moyenne: " + noteLoueur2.getNoteMoyenne() + "/10");
 
-      // Loueur 1 note Véhicule 3 (Camion)
-      NoteVehicule noteVehicule1 = noteService.noterVehicule(L_john, V3, 8.0, 9.0, 8.5);
+      // Loueur 1 note Véhicule 3 (Camion) avec critères
+      List<Critere> criteresVehicule1 = critereService.getOrCreateCriteres(
+          new String[] {"Propreté", "État mécanique", "Confort", "Consommation"},
+          new Double[] {8.0, 9.0, 8.5, 7.5});
+      NoteVehicule noteVehicule1 = noteService.noterVehicule(L_john, V3, criteresVehicule1);
       System.out.println("✓ Note créée: " + noteVehicule1);
+      System.out.println("  Critères:");
+      for (Critere c : noteVehicule1.getCriteres()) {
+        System.out.println("    - " + c);
+      }
       System.out.println("  Moyenne: " + noteVehicule1.getNoteMoyenne() + "/10");
 
-      // Loueur 2 note Véhicule 1 (Peugeot)
+      // Loueur 2 note Véhicule 1 (Peugeot) - Méthode classique
       NoteVehicule noteVehicule2 = noteService.noterVehicule(L_jane, V1, 9.5, 9.0, 9.0);
-      System.out.println("✓ Note créée: " + noteVehicule2);
+      System.out.println("✓ Note créée (méthode classique): " + noteVehicule2);
       System.out.println("  Moyenne: " + noteVehicule2.getNoteMoyenne() + "/10");
+
+      // Affichage des critères créés
+      System.out.println("\n=== Statistiques des critères ===");
+      System.out.println("Nombre total de critères uniques: " + critereService.countCriteres());
+      System.out.println("Liste des critères:");
+      for (Critere c : critereService.getAllCriteres()) {
+        System.out.println("  - " + c.getNom() + " (utilisé dans les notes)");
+      }
 
       // Affichage des moyennes générales
       System.out.println("\n=== Statistiques des notes ===");
