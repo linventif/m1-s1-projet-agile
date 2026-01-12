@@ -205,16 +205,18 @@ public class VerificationService {
   }
 
   /**
-   * Met à jour le kilométrage de fin et la photo d'une vérification existante.
+   * Vérifie la fin d'une location en enregistrant le kilométrage de fin et la photo. Le kilométrage
+   * de fin doit être strictement supérieur au kilométrage de début.
    *
    * @param verificationId l'identifiant de la vérification
    * @param kilometrageFin le kilométrage de fin
    * @param photo la nouvelle photo (peut être null)
    * @return la vérification mise à jour
-   * @throws IllegalArgumentException si l'identifiant est nul, si le kilométrage est invalide, ou
-   *         si la vérification n'existe pas
+   * @throws IllegalArgumentException si l'identifiant est nul, si le kilométrage est invalide, si
+   *         le kilométrage de fin n'est pas strictement supérieur au kilométrage de début, ou si la
+   *         vérification n'existe pas
    */
-  public Verification modifierVerificationFin(Long verificationId, Integer kilometrageFin,
+  public Verification verifierFinLocation(Long verificationId, Integer kilometrageFin,
       String photo) {
     if (verificationId == null) {
       throw new IllegalArgumentException("L'identifiant de la vérification ne peut pas être nul.");
@@ -228,6 +230,20 @@ public class VerificationService {
     if (verification == null) {
       throw new IllegalArgumentException(
           "Aucune vérification trouvée avec l'identifiant " + verificationId);
+    }
+
+    // Vérifier que le kilométrage de début existe
+    Integer kilometrageDebut = verification.getKilometrageDebut();
+    if (kilometrageDebut == null) {
+      throw new IllegalStateException(
+          "Le kilométrage de début n'est pas défini pour cette vérification.");
+    }
+
+    // Vérifier que le kilométrage de fin est strictement supérieur au kilométrage de début
+    if (kilometrageFin <= kilometrageDebut) {
+      throw new IllegalArgumentException("Le kilométrage de fin (" + kilometrageFin
+          + ") doit être strictement supérieur au kilométrage de début (" + kilometrageDebut
+          + ").");
     }
 
     verification.setKilometrageFin(kilometrageFin);

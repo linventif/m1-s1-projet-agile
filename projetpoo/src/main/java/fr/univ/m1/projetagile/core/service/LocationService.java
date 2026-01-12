@@ -172,16 +172,8 @@ public class LocationService {
           "Impossible de terminer la location : aucune vérification trouvée pour cette location.");
     }
 
-    // Vérifier que le kilométrage de fin est supérieur ou égal au kilométrage de début
-    if (verification.getKilometrageDebut() != null
-        && kilometrageFin < verification.getKilometrageDebut()) {
-      throw new IllegalArgumentException("Le kilométrage de fin (" + kilometrageFin
-          + ") ne peut pas être inférieur au kilométrage de début ("
-          + verification.getKilometrageDebut() + ").");
-    }
-
     try {
-      verificationService.modifierVerificationFin(verification.getId(), kilometrageFin, photo);
+      verificationService.verifierFinLocation(verification.getId(), kilometrageFin, photo);
     } catch (Exception e) {
       throw new IllegalStateException(
           "Impossible de terminer la location : la vérification n'a pas pu être mise à jour. "
