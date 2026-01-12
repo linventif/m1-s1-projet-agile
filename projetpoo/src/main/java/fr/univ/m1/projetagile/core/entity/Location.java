@@ -7,7 +7,6 @@ import org.hibernate.annotations.AnyDiscriminatorValue;
 import org.hibernate.annotations.AnyKeyJavaClass;
 import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
 import fr.univ.m1.projetagile.enums.StatutLocation;
-import fr.univ.m1.projetagile.parking.entity.Parking;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
@@ -38,9 +37,8 @@ public class Location {
   @AnyDiscriminator(DiscriminatorType.STRING)
   @AnyKeyJavaClass(Long.class)
   @AnyDiscriminatorValue(discriminator = "ADRESSE", entity = Adresse.class)
-  @AnyDiscriminatorValue(discriminator = "PARKING", entity = Parking.class)
-  @Column(name = "lieu_depot_type")
-  @JoinColumn(name = "lieu_depot_id")
+  @Column(name = "lieu_depot_type", nullable = true)
+  @JoinColumn(name = "lieu_depot_id", nullable = true)
   private LieuRestitution lieuDepot;
 
   @Enumerated(EnumType.STRING)
