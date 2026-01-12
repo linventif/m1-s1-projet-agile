@@ -71,6 +71,9 @@ public class Verification {
   }
 
   public void setKilometrageFin(Integer kilometrageFin) {
+    if (kilometrageFin != null && this.kilometrageDebut != null && kilometrageFin < this.kilometrageDebut) {
+      throw new IllegalArgumentException("kilometrageFin must be greater than or equal to kilometrageDebut");
+    }
     this.kilometrageFin = kilometrageFin;
   }
 
