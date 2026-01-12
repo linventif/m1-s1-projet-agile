@@ -153,6 +153,16 @@ public class EntretienTechniqueService {
           "Le nombre de kilomètres recommandés doit être positif ou nul.");
     }
 
+    // Normaliser le nom
+    String nomNormalise = typeTechnique.getNom().trim();
+    typeTechnique.setNom(nomNormalise);
+
+    // Vérifier l'unicité du nom : aucun autre type technique ne doit avoir ce nom
+    TypeTechnique existant = typeTechniqueRepository.findByNom(nomNormalise);
+    if (existant != null && !existant.getId().equals(typeTechnique.getId())) {
+      throw new IllegalArgumentException(
+          "Un type technique avec ce nom existe déjà. Le nom doit être unique.");
+    }
     return typeTechniqueRepository.save(typeTechnique);
   }
 
