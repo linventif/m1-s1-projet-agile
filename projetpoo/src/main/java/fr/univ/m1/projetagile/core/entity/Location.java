@@ -37,8 +37,8 @@ public class Location {
   @AnyDiscriminator(DiscriminatorType.STRING)
   @AnyKeyJavaClass(Long.class)
   @AnyDiscriminatorValue(discriminator = "ADRESSE", entity = Adresse.class)
-  @Column(name = "lieu_depot_type")
-  @JoinColumn(name = "lieu_depot_id")
+  @Column(name = "lieu_depot_type", nullable = true)
+  @JoinColumn(name = "lieu_depot_id", nullable = true)
   private LieuRestitution lieuDepot;
 
   @Enumerated(EnumType.STRING)
