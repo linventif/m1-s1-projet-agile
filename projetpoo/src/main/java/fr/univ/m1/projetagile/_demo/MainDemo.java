@@ -2,6 +2,7 @@ package fr.univ.m1.projetagile._demo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
@@ -10,11 +11,11 @@ import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
-import fr.univ.m1.projetagile.core.persistence.DisponibiliteRepository;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.core.persistence.LoueurRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.core.service.AgentService;
+import fr.univ.m1.projetagile.core.service.DisponibiliteService;
 import fr.univ.m1.projetagile.core.service.LocationService;
 import fr.univ.m1.projetagile.core.service.LoueurService;
 import fr.univ.m1.projetagile.core.service.VehiculeService;
@@ -45,7 +46,7 @@ public class MainDemo {
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
       LocationService locationService = new LocationService(new LocationRepository());
-      DisponibiliteRepository disponibiliteRepository = new DisponibiliteRepository();
+      DisponibiliteService disponibiliteService = new DisponibiliteService();
       NoteService noteService = new NoteService();
 
 
@@ -54,30 +55,63 @@ public class MainDemo {
       // -- // -- // -- // -- // -- // -- // -- //
       System.out.println("\n=== Initialisation des Utilisateurs ===");
       // Particulier
-      AgentParticulier APar_bob = agentService.createAgentParticulier("maurise", "bob",
-          "bob.maurise@gmail.com", "p@ssw0rd", "33601020304");
-      System.out.println("✓ Agent créé: " + APar_bob);
+      AgentParticulier APar_bob =
+          (AgentParticulier) agentService.findByEmail("bob.maurise@gmail.com");
+      if (APar_bob == null) {
+        APar_bob = agentService.createAgentParticulier("maurise", "bob", "bob.maurise@gmail.com",
+            "p@ssw0rd", "33601020304");
+        System.out.println("✓ Agent créé: " + APar_bob);
+      } else {
+        System.out.println("✓ Agent existant récupéré: " + APar_bob);
+      }
 
-      AgentParticulier APar_alice = agentService.createAgentParticulier("dupont", "alice",
-          "alice.dupont@gmail.com", "p@ssw0rd", "33605060708");
-      System.out.println("✓ Agent créé: " + APar_alice);
+      AgentParticulier APar_alice =
+          (AgentParticulier) agentService.findByEmail("alice.dupont@gmail.com");
+      if (APar_alice == null) {
+        APar_alice = agentService.createAgentParticulier("dupont", "alice",
+            "alice.dupont@gmail.com", "p@ssw0rd", "33605060708");
+        System.out.println("✓ Agent créé: " + APar_alice);
+      } else {
+        System.out.println("✓ Agent existant récupéré: " + APar_alice);
+      }
 
       // Professionnel
-      AgentProfessionnel APro_locasmart = agentService.createAgentProfessionnel(
-          "contact@localsmart.fr", "p@ssw0rd", "12345678901234", "LocaSmart");
-      System.out.println("✓ Agent créé: " + APro_locasmart);
+      AgentProfessionnel APro_locasmart =
+          (AgentProfessionnel) agentService.findByEmail("contact@localsmart.fr");
+      if (APro_locasmart == null) {
+        APro_locasmart = agentService.createAgentProfessionnel("contact@localsmart.fr", "p@ssw0rd",
+            "12345678901234", "LocaSmart");
+        System.out.println("✓ Agent créé: " + APro_locasmart);
+      } else {
+        System.out.println("✓ Agent existant récupéré: " + APro_locasmart);
+      }
 
-      AgentProfessionnel APro_habitatplus = agentService.createAgentProfessionnel(
-          "contact@habitatplus.fr", "p@ssw0rd", "98765432109876", "HabitatPlus");
-      System.out.println("✓ Agent créé: " + APro_habitatplus);
+      AgentProfessionnel APro_habitatplus =
+          (AgentProfessionnel) agentService.findByEmail("contact@habitatplus.fr");
+      if (APro_habitatplus == null) {
+        APro_habitatplus = agentService.createAgentProfessionnel("contact@habitatplus.fr",
+            "p@ssw0rd", "98765432109876", "HabitatPlus");
+        System.out.println("✓ Agent créé: " + APro_habitatplus);
+      } else {
+        System.out.println("✓ Agent existant récupéré: " + APro_habitatplus);
+      }
 
       // Loueur
-      Loueur L_john = loueurService.createLoueur("doe", "john", "john.doe@gmail.com", "p@ssw0rd");
-      System.out.println("✓ Loueur créé: " + L_john);
+      Loueur L_john = loueurService.findByEmail("john.doe@gmail.com");
+      if (L_john == null) {
+        L_john = loueurService.createLoueur("doe", "john", "john.doe@gmail.com", "p@ssw0rd");
+        System.out.println("✓ Loueur créé: " + L_john);
+      } else {
+        System.out.println("✓ Loueur existant récupéré: " + L_john);
+      }
 
-      Loueur L_jane =
-          loueurService.createLoueur("smith", "jane", "jane.smith@gmail.com", "p@ssw0rd");
-      System.out.println("✓ Loueur créé: " + L_jane);
+      Loueur L_jane = loueurService.findByEmail("jane.smith@gmail.com");
+      if (L_jane == null) {
+        L_jane = loueurService.createLoueur("smith", "jane", "jane.smith@gmail.com", "p@ssw0rd");
+        System.out.println("✓ Loueur créé: " + L_jane);
+      } else {
+        System.out.println("✓ Loueur existant récupéré: " + L_jane);
+      }
 
       // -- // -- // -- // -- // -- // -- // -- //
       // Vehicules
@@ -114,21 +148,41 @@ public class MainDemo {
       LocalDate aujourdhui = LocalDate.now();
       LocalDate dans6mois = aujourdhui.plusMonths(6);
 
-      Disponibilite dispo1 = new Disponibilite(V1, aujourdhui, dans6mois);
-      disponibiliteRepository.save(dispo1);
+      Disponibilite dispo1 = disponibiliteService.creerDisponibilite(V1, aujourdhui, dans6mois);
       System.out.println("✓ Disponibilité créée pour " + V1.getMarque() + " " + V1.getModele());
 
-      Disponibilite dispo2 = new Disponibilite(V2, aujourdhui, dans6mois);
-      disponibiliteRepository.save(dispo2);
+      Disponibilite dispo2 = disponibiliteService.creerDisponibilite(V2, aujourdhui, dans6mois);
       System.out.println("✓ Disponibilité créée pour " + V2.getMarque() + " " + V2.getModele());
 
-      Disponibilite dispo3 = new Disponibilite(V3, aujourdhui, dans6mois);
-      disponibiliteRepository.save(dispo3);
+      Disponibilite dispo3 = disponibiliteService.creerDisponibilite(V3, aujourdhui, dans6mois);
       System.out.println("✓ Disponibilité créée pour " + V3.getMarque() + " " + V3.getModele());
 
-      Disponibilite dispo4 = new Disponibilite(V4, aujourdhui.minusDays(30), dans6mois);
-      disponibiliteRepository.save(dispo4);
+      Disponibilite dispo4 =
+          disponibiliteService.creerDisponibilite(V4, aujourdhui.minusDays(30), dans6mois);
       System.out.println("✓ Disponibilité créée pour " + V4.getMarque() + " " + V4.getModele());
+
+      // Exemples d'utilisation des disponibilités créées
+      System.out.println("\n=== Informations sur les disponibilités ===");
+      System.out.println("Disponibilité #" + dispo1.getId() + " : " + V1.getMarque() + " "
+          + V1.getModele() + " du " + dispo1.getDateDebut() + " au " + dispo1.getDateFin());
+      System.out.println("Disponibilité #" + dispo2.getId() + " : " + V2.getMarque() + " "
+          + V2.getModele() + " du " + dispo2.getDateDebut() + " au " + dispo2.getDateFin());
+      System.out.println("Disponibilité #" + dispo3.getId() + " : " + V3.getMarque() + " "
+          + V3.getModele() + " du " + dispo3.getDateDebut() + " au " + dispo3.getDateFin());
+      System.out.println("Disponibilité #" + dispo4.getId() + " : " + V4.getMarque() + " "
+          + V4.getModele() + " du " + dispo4.getDateDebut() + " au " + dispo4.getDateFin());
+
+      // Récupération des disponibilités d'un véhicule
+      List<Disponibilite> disponibilitesV1 = disponibiliteService.getDisponibilitesVehicule(V1);
+      System.out.println(
+          "\n✓ Nombre de disponibilités pour " + V1.getMarque() + " : " + disponibilitesV1.size());
+
+      // Vérification de disponibilité (exemple)
+      LocalDate testDebut = LocalDate.now().plusDays(15);
+      LocalDate testFin = testDebut.plusDays(7);
+      boolean v1Dispo = disponibiliteService.estDisponible(V1, testDebut, testFin);
+      System.out.println("✓ Véhicule V1 disponible du " + testDebut + " au " + testFin + " : "
+          + (v1Dispo ? "OUI" : "NON"));
 
 
       // -- // -- // -- // -- // -- // -- // -- //
