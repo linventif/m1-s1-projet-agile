@@ -3,6 +3,8 @@ package fr.univ.m1.projetagile.core.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepository;
+import fr.univ.m1.projetagile.VerificationLocation.service.VerificationService;
 import fr.univ.m1.projetagile.core.dto.LocationDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Location;
@@ -127,20 +129,59 @@ public class LocationService {
   }
 
   /**
-   * Termine une location en cours. Change le statut de la location à TERMINE et la sauvegarde en
-   * base de données.
+   * Termine une location en cours. Met à jour la vérification existante avec le kilométrage de fin
+   * et la photo, vérifie que tout est correct, puis change le statut de la location à TERMINE et la
+   * sauvegarde en base de données.
    *
    * @param location la location à terminer
+   * @param kilometrageFin le kilométrage du véhicule à la fin de la location
+   * @param photo la photo du véhicule (peut être null)
+   * @throws IllegalArgumentException si la location est nulle, si le kilométrage est invalide, ou
+   *         si la vérification n'existe pas
+   * @throws IllegalStateException si la location ne peut pas être terminée (statut incorrect ou
+   *         vérification échouée)
    */
-  public void terminer(Location location) {
+  public void terminer(Location location, Integer kilometrageFin, String photo) {
     if (location == null) {
       throw new IllegalArgumentException("La location ne peut pas être nulle.");
     }
+    if (location.getId() == null) {
+      throw new IllegalArgumentException("La location doit avoir un identifiant.");
+    }
+    if (kilometrageFin == null || kilometrageFin < 0) {
+      throw new IllegalArgumentException(
+          "Le kilométrage de fin doit être un entier positif ou nul.");
+    }
+
     StatutLocation statutActuel = location.getStatut();
     if (statutActuel != StatutLocation.ACCEPTE) {
       throw new IllegalStateException(
           "Terminaison impossible : la location ne peut être terminée que si son statut est ACCEPTE.");
     }
+
+    // Récupérer et mettre à jour la vérification existante
+    VerificationRepository verificationRepository = new VerificationRepository();
+    VerificationService verificationService =
+        new VerificationService(verificationRepository, locationRepository);
+
+    // Vérifier que la vérification existe
+    fr.univ.m1.projetagile.VerificationLocation.entity.Verification verification =
+        verificationService.getVerificationByLocationId(location.getId());
+    if (verification == null) {
+      throw new IllegalStateException(
+          "Impossible de terminer la location : aucune vérification trouvée pour cette location.");
+    }
+
+    try {
+      verificationService.verifierFinLocation(verification.getId(), kilometrageFin, photo);
+    } catch (Exception e) {
+      throw new IllegalStateException(
+          "Impossible de terminer la location : la vérification n'a pas pu être mise à jour. "
+              + e.getMessage(),
+          e);
+    }
+
+    // Si la vérification a été mise à jour avec succès, terminer la location
     location.setStatut(StatutLocation.TERMINE);
     locationRepository.save(location);
   }
