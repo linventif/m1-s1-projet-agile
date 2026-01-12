@@ -1,6 +1,5 @@
 package fr.univ.m1.projetagile.parrainage.entity;
 
-import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -125,26 +124,6 @@ public class Parrainage {
   }
 
   /**
-   * Retourne l'utilisateur parrain. Charge l'utilisateur depuis la base de données.
-   *
-   * @return l'utilisateur parrain, ou null si non trouvé
-   */
-  public Utilisateur getParrain() {
-    if (parrainId == null) {
-      return null;
-    }
-    var em = DatabaseConnection.getEntityManager();
-    // Essayer de charger comme Loueur d'abord
-    var loueur = em.find(fr.univ.m1.projetagile.core.entity.Loueur.class, parrainId);
-    if (loueur != null) {
-      return loueur;
-    }
-    // Sinon, essayer comme Agent
-    var agent = em.find(fr.univ.m1.projetagile.core.entity.Agent.class, parrainId);
-    return agent;
-  }
-
-  /**
    * Définit le parrain du parrainage.
    *
    * @param parrain l'utilisateur parrain
@@ -157,26 +136,6 @@ public class Parrainage {
       throw new IllegalArgumentException("Le parrain doit avoir un ID");
     }
     this.parrainId = parrain.getIdU();
-  }
-
-  /**
-   * Retourne l'utilisateur parrainé. Charge l'utilisateur depuis la base de données.
-   *
-   * @return l'utilisateur parrainé, ou null si non trouvé
-   */
-  public Utilisateur getParraine() {
-    if (parraineId == null) {
-      return null;
-    }
-    var em = DatabaseConnection.getEntityManager();
-    // Essayer de charger comme Loueur d'abord
-    var loueur = em.find(fr.univ.m1.projetagile.core.entity.Loueur.class, parraineId);
-    if (loueur != null) {
-      return loueur;
-    }
-    // Sinon, essayer comme Agent
-    var agent = em.find(fr.univ.m1.projetagile.core.entity.Agent.class, parraineId);
-    return agent;
   }
 
   /**
