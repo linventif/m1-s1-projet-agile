@@ -65,7 +65,7 @@ public class Vehicule {
   private boolean disponible = true;
 
   // JPA exige un constructeur sans arguments
-  protected Vehicule() {}
+  public Vehicule() {}
 
   public Vehicule(TypeV type, String marque, String modele, String couleur, String ville,
       Double prixJ, Agent proprietaire) {
