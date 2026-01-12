@@ -1,9 +1,12 @@
 package fr.univ.m1.projetagile._demo;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
+import fr.univ.m1.projetagile.core.entity.Disponibilite;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
@@ -40,6 +43,8 @@ public class MainDemo {
       AgentService agentService = new AgentService(new AgentRepository());
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
+      LocationService locationService = new LocationService(new LocationRepository());
+      DisponibiliteService disponibiliteService = new DisponibiliteService();
       NoteService noteService = new NoteService();
 
       // ✅ Location (pour #99 + #100)
@@ -134,6 +139,91 @@ public class MainDemo {
           "Toulouse", 65.0, APro_habitatplus);
       System.out.println("✓ Véhicule créé: " + V4);
 
+
+      // -- // -- // -- // -- // -- // -- // -- //
+      // Disponibilités
+      // -- // -- // -- // -- // -- // -- // -- //
+      System.out.println("\n=== Création des disponibilités ===");
+
+      // Disponibilités pour tous les véhicules (sur les 6 prochains mois)
+      LocalDate aujourdhui = LocalDate.now();
+      LocalDate dans6mois = aujourdhui.plusMonths(6);
+
+      Disponibilite dispo1 = disponibiliteService.creerDisponibilite(V1, aujourdhui, dans6mois);
+      System.out.println("✓ Disponibilité créée: " + dispo1);
+
+      Disponibilite dispo2 = disponibiliteService.creerDisponibilite(V2, aujourdhui, dans6mois);
+      System.out.println("✓ Disponibilité créée: " + dispo2);
+
+      Disponibilite dispo3 = disponibiliteService.creerDisponibilite(V3, aujourdhui, dans6mois);
+      System.out.println("✓ Disponibilité créée: " + dispo3);
+
+      Disponibilite dispo4 =
+          disponibiliteService.creerDisponibilite(V4, aujourdhui.minusDays(30), dans6mois);
+      System.out.println("✓ Disponibilité créée: " + dispo4);
+
+      // Récupération des disponibilités d'un véhicule
+      List<Disponibilite> disponibilitesV1 = disponibiliteService.getDisponibilitesVehicule(V1);
+      System.out.println(
+          "\n✓ Nombre de disponibilités pour " + V1.getMarque() + " : " + disponibilitesV1.size());
+
+      // Vérification de disponibilité (exemple)
+      LocalDate testDebut = LocalDate.now().plusDays(15);
+      LocalDate testFin = testDebut.plusDays(7);
+      boolean v1Dispo = disponibiliteService.estDisponible(V1, testDebut, testFin);
+      System.out.println("✓ Véhicule V1 disponible du " + testDebut + " au " + testFin + " : "
+          + (v1Dispo ? "OUI" : "NON"));
+
+
+      // -- // -- // -- // -- // -- // -- // -- //
+      // Locations
+      // -- // -- // -- // -- // -- // -- // -- //
+      System.out.println("\n=== Création de locations ===");
+
+      // Location 1 : John loue la Peugeot 308 de Bob pour 5 jours
+      LocalDateTime debut1 = LocalDateTime.now().plusDays(1);
+      LocalDateTime fin1 = debut1.plusDays(5);
+      Location loc1 = locationService.creerLocation(debut1, fin1, V1, L_john);
+      System.out.println("✓ Location créée: " + L_john.getNomComplet() + " loue " + V1.getMarque()
+          + " " + V1.getModele() + " du " + debut1.toLocalDate() + " au " + fin1.toLocalDate());
+      System.out.println("  Prix total: " + locationService.getPrixLocation(loc1) + "€");
+
+      // Location 2 : Jane loue la Yamaha MT-07 d'Alice pour 3 jours
+      LocalDateTime debut2 = LocalDateTime.now().plusDays(2);
+      LocalDateTime fin2 = debut2.plusDays(3);
+      Location loc2 = locationService.creerLocation(debut2, fin2, V2, L_jane);
+      System.out.println("✓ Location créée: " + L_jane.getNomComplet() + " loue " + V2.getMarque()
+          + " " + V2.getModele() + " du " + debut2.toLocalDate() + " au " + fin2.toLocalDate());
+      System.out.println("  Prix total: " + locationService.getPrixLocation(loc2) + "€");
+
+      // Location 3 : John loue le Renault Master de LocaSmart pour 7 jours
+      LocalDateTime debut3 = LocalDateTime.now().plusDays(10);
+      LocalDateTime fin3 = debut3.plusDays(7);
+      Location loc3 = locationService.creerLocation(debut3, fin3, V3, L_john);
+      System.out.println("✓ Location créée: " + L_john.getNomComplet() + " loue " + V3.getMarque()
+          + " " + V3.getModele() + " du " + debut3.toLocalDate() + " au " + fin3.toLocalDate());
+      System.out.println("  Prix total: " + locationService.getPrixLocation(loc3) + "€");
+
+      // Location 4 : Jane loue la Mercedes Classe A de HabitatPlus pour 2 jours (passée)
+      LocalDateTime debut4 = LocalDateTime.now().minusDays(10);
+      LocalDateTime fin4 = debut4.plusDays(2);
+      Location loc4 = locationService.creerLocation(debut4, fin4, V4, L_jane);
+      System.out.println("✓ Location créée: " + L_jane.getNomComplet() + " loue " + V4.getMarque()
+          + " " + V4.getModele() + " du " + debut4.toLocalDate() + " au " + fin4.toLocalDate());
+      System.out.println("  Prix total: " + locationService.getPrixLocation(loc4) + "€");
+
+      // Accepter les locations
+      APar_bob.accepterLocation(loc1);
+      APar_alice.accepterLocation(loc2);
+      APro_habitatplus.accepterLocation(loc4); // Accepter avant de terminer
+      System.out.println("\n✓ Locations acceptées par les agents");
+
+      // Terminer la location 4 (historique)
+      locationService.terminer(loc4);
+      System.out.println("✓ Location terminée (historique): " + L_jane.getNomComplet() + " a loué "
+          + V4.getMarque() + " " + V4.getModele());
+
+
       // -- // -- // -- // -- // -- // -- // -- //
       // TEST LLD (#99 + #100)
       // -- // -- // -- // -- // -- // -- // -- //
@@ -173,10 +263,12 @@ public class MainDemo {
       // Messaging
       // -- // -- // -- // -- // -- // -- // -- //
       System.out.println("\n=== Tests de messagerie ===");
+
       // Loueur1 -> Agent Pro
       Message msg1 = messagerieService.envoyerMessage(L_john, APro_locasmart,
           "Bonjour, je suis intéressé par vos services");
       System.out.println("✓ Message envoyé: " + msg1);
+
       // Agent Pro -> Loueur1
       Message msg2 = messagerieService.envoyerMessage(APro_locasmart, L_john,
           "Bonjour, merci pour votre intérêt. Comment puis-je vous aider ?");
