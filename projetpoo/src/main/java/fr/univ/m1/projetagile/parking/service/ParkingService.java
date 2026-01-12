@@ -103,4 +103,24 @@ public class ParkingService {
     }
     return parkingRepository.findByVille(ville);
   }
+
+  /**
+   * Récupère le coût d'un parking par son identifiant
+   *
+   * @param id l'identifiant du parking
+   * @return le coût du parking
+   * @throws IllegalArgumentException si l'identifiant est nul ou si le parking n'existe pas
+   */
+  public Double getCoutParking(Long id) {
+    if (id == null) {
+      throw new IllegalArgumentException("L'identifiant du parking ne peut pas être nul.");
+    }
+
+    Parking parking = parkingRepository.findById(id);
+    if (parking == null) {
+      throw new IllegalArgumentException("Aucun parking trouvé avec l'identifiant " + id);
+    }
+
+    return parking.getCoutSupp();
+  }
 }
