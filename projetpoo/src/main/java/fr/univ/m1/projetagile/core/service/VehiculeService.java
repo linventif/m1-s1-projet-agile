@@ -893,7 +893,7 @@ public class VehiculeService {
   }
 
   // =======================
-  // filterer les véhicules par ville dans une liste donnée
+  // filtrer les véhicules par ville dans une liste donnée
   // =======================
   public List<Vehicule> getVehiculesParVilleDansListe(List<Vehicule> liste, String ville) {
     if (liste == null) {
