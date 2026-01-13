@@ -5,6 +5,7 @@ import fr.univ.m1.projetagile.core.entity.Options;
 import fr.univ.m1.projetagile.core.entity.SouscriptionOption;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
 public class SouscriptionOptionRepository {
 
@@ -66,5 +67,40 @@ public class SouscriptionOptionRepository {
       managed = em.merge(souscription);
     }
     em.remove(managed);
+  }
+
+  /**
+   * Exécute une sauvegarde avec gestion de transaction.
+   */
+  public SouscriptionOption saveTransactional(SouscriptionOption souscription) {
+    EntityTransaction tx = em.getTransaction();
+    try {
+      tx.begin();
+      SouscriptionOption managed = save(souscription);
+      tx.commit();
+      return managed;
+    } catch (RuntimeException e) {
+      if (tx.isActive()) {
+        tx.rollback();
+      }
+      throw e;
+    }
+  }
+
+  /**
+   * Exécute une action en la entourant d’une transaction.
+   */
+  public void runInTransaction(Runnable action) {
+    EntityTransaction tx = em.getTransaction();
+    try {
+      tx.begin();
+      action.run();
+      tx.commit();
+    } catch (RuntimeException e) {
+      if (tx.isActive()) {
+        tx.rollback();
+      }
+      throw e;
+    }
   }
 }

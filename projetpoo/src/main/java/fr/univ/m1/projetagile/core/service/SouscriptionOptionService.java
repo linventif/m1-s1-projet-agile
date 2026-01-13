@@ -5,17 +5,17 @@ import fr.univ.m1.projetagile.core.entity.Options;
 import fr.univ.m1.projetagile.core.entity.SouscriptionOption;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 
 public class SouscriptionOptionService {
 
-  private final EntityManager em;
   private final SouscriptionOptionRepository repository;
 
-  public SouscriptionOptionService(EntityManager em) {
-    this.em = em;
-    this.repository = new SouscriptionOptionRepository(em);
+  public SouscriptionOptionService(SouscriptionOptionRepository repository) {
+    this.repository = repository;
+  }
+
+  public SouscriptionOptionService(jakarta.persistence.EntityManager em) {
+    this(new SouscriptionOptionRepository(em));
   }
 
   /**
@@ -35,24 +35,8 @@ public class SouscriptionOptionService {
       throw new IllegalArgumentException("Utilisateur ou option introuvable");
     }
 
-    EntityTransaction tx = em.getTransaction();
-    try {
-      tx.begin();
-
-      SouscriptionOption souscription =
-          new SouscriptionOption(utilisateur, option, periodicite, renouvellement);
-
-      repository.save(souscription);
-
-      tx.commit();
-      return souscription;
-
-    } catch (RuntimeException e) {
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-      throw e;
-    }
+    return repository.saveTransactional(
+        new SouscriptionOption(utilisateur, option, periodicite, renouvellement));
   }
 
   /**
@@ -73,26 +57,14 @@ public class SouscriptionOptionService {
       throw new IllegalArgumentException("L'identifiant de la souscription est obligatoire");
     }
 
-    EntityTransaction tx = em.getTransaction();
-    try {
-      tx.begin();
-
+    repository.runInTransaction(() -> {
       SouscriptionOption souscription = repository.findById(souscriptionId);
       if (souscription == null) {
         throw new IllegalArgumentException("Souscription introuvable");
       }
 
       souscription.annulerOption();
-
       repository.save(souscription);
-
-      tx.commit();
-
-    } catch (RuntimeException e) {
-      if (tx.isActive()) {
-        tx.rollback();
-      }
-      throw e;
-    }
+    });
   }
 }
