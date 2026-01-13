@@ -29,7 +29,7 @@ public abstract class Note {
   /**
    * Liste des critères d'évaluation avec leurs notes.
    */
-  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @ManyToMany(cascade = {CascadeType.MERGE})
   @JoinTable(name = "note_criteres", joinColumns = @JoinColumn(name = "note_id"),
       inverseJoinColumns = @JoinColumn(name = "critere_id"))
   protected List<Critere> criteres = new ArrayList<>();
