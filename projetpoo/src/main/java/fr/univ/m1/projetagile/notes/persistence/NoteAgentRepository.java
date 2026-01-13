@@ -2,6 +2,7 @@ package fr.univ.m1.projetagile.notes.persistence;
 
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
+import fr.univ.m1.projetagile.notes.entity.Critere;
 import fr.univ.m1.projetagile.notes.entity.NoteAgent;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
@@ -18,6 +19,13 @@ public class NoteAgentRepository {
     try {
       transaction = em.getTransaction();
       transaction.begin();
+
+      // Merger les critères pour s'assurer qu'ils sont dans le contexte de persistance
+      List<Critere> criteresMerged = new java.util.ArrayList<>();
+      for (Critere critere : note.getCriteres()) {
+        criteresMerged.add(em.merge(critere));
+      }
+      note.setCriteres(criteresMerged);
 
       if (note.getId() == null) {
         em.persist(note);

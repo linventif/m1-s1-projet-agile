@@ -19,6 +19,14 @@ public class NoteVehiculeRepository {
       transaction = em.getTransaction();
       transaction.begin();
 
+      // Merger les critères pour s'assurer qu'ils sont dans le contexte de persistance
+      List<fr.univ.m1.projetagile.notes.entity.Critere> criteresMerged =
+          new java.util.ArrayList<>();
+      for (fr.univ.m1.projetagile.notes.entity.Critere critere : note.getCriteres()) {
+        criteresMerged.add(em.merge(critere));
+      }
+      note.setCriteres(criteresMerged);
+
       if (note.getId() == null) {
         em.persist(note);
       } else {
