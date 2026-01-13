@@ -3,6 +3,9 @@ package fr.univ.m1.projetagile._demo;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import fr.univ.m1.projetagile.VerificationLocation.entity.Verification;
+import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepository;
+import fr.univ.m1.projetagile.VerificationLocation.service.VerificationService;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
@@ -52,6 +55,9 @@ public class MainDemo {
       DisponibiliteService disponibiliteService = new DisponibiliteService();
       NoteService noteService = new NoteService();
       CritereService critereService = new CritereService();
+      VerificationRepository verificationRepository = new VerificationRepository();
+      VerificationService verificationService =
+          new VerificationService(verificationRepository, locationRepository);
 
       // -- // -- // -- // -- // -- // -- // -- //
       // Utilisateurs
@@ -220,10 +226,14 @@ public class MainDemo {
       APro_habitatplus.accepterLocation(loc4); // Accepter avant de terminer
       System.out.println("\n✓ Locations acceptées par les agents");
 
-      // Terminer la location 4 (historique)
-      locationService.terminer(loc4, 1000, "photo.jpg");
+      // Créer la vérification pour la location 4 avant de la terminer
+      Verification verif4 = verificationService.creerVerification(loc4.getId(), 1000);
+      System.out.println("✓ Vérification créée: " + verif4);
+
+      // Terminer la location 4 (historique) avec kilométrage fin > début
+      locationService.terminer(loc4, 1150, "photo.jpg");
       System.out.println("✓ Location terminée (historique): " + L_jane.getNomComplet() + " a loué "
-          + V4.getMarque() + " " + V4.getModele());
+          + V4.getMarque() + " " + V4.getModele() + " (1000 km → 1150 km)");
 
 
       // -- // -- // -- // -- // -- // -- // -- //
