@@ -892,9 +892,13 @@ public class VehiculeService {
     return vehiculeRepository.findByVille(ville);
   }
 
-  // =======================
-  // filtrer les véhicules par ville dans une liste donnée
-  // =======================
+  /**
+   * Filtre les véhicules par ville dans une liste donnée.
+   *
+   * @param liste la liste de véhicules à filtrer
+   * @param ville la ville utilisée comme critère de filtrage
+   * @return la liste des véhicules de la liste initiale dont la ville correspond au paramètre fourni
+   */
   public List<Vehicule> getVehiculesParVilleDansListe(List<Vehicule> liste, String ville) {
     if (liste == null) {
       throw new IllegalArgumentException("La liste de véhicules ne peut pas être null.");
