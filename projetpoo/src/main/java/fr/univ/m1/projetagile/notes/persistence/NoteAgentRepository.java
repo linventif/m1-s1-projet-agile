@@ -20,19 +20,20 @@ public class NoteAgentRepository {
       transaction = em.getTransaction();
       transaction.begin();
 
-      // Recharger les critères existants pour obtenir des instances gérées
+      // Recharger tous les critères depuis la base pour avoir des instances gérées
       List<Critere> criteresManagedList = new java.util.ArrayList<>();
       for (Critere critere : note.getCriteres()) {
         if (critere.getId() != null) {
-          // Recharger depuis la base pour avoir une instance gérée
+          // Les critères doivent déjà exister en base
           Critere managed = em.find(Critere.class, critere.getId());
-          if (managed != null) {
-            criteresManagedList.add(managed);
+          if (managed == null) {
+            throw new IllegalStateException(
+                "Le critère avec l'ID " + critere.getId() + " n'existe pas en base");
           }
+          criteresManagedList.add(managed);
         } else {
-          // Nouveau critère, persister
-          em.persist(critere);
-          criteresManagedList.add(critere);
+          throw new IllegalStateException(
+              "Tous les critères doivent être persistés avant de créer une note");
         }
       }
 

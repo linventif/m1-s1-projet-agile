@@ -27,13 +27,14 @@ public class NoteLoueurRepository {
           // Recharger depuis la base pour avoir une instance gérée
           fr.univ.m1.projetagile.notes.entity.Critere managed =
               em.find(fr.univ.m1.projetagile.notes.entity.Critere.class, critere.getId());
-          if (managed != null) {
-            criteresManagedList.add(managed);
+          if (managed == null) {
+            throw new IllegalStateException(
+                "Le critère avec l'ID " + critere.getId() + " n'existe pas en base");
           }
+          criteresManagedList.add(managed);
         } else {
-          // Nouveau critère, persister
-          em.persist(critere);
-          criteresManagedList.add(critere);
+          throw new IllegalStateException(
+              "Tous les critères doivent être persistés avant de créer une note");
         }
       }
 
