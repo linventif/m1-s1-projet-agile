@@ -902,6 +902,6 @@ public class VehiculeService {
     if (ville == null) {
       throw new IllegalArgumentException("La ville ne peut pas être null.");
     }
-    return liste.stream().filter(v -> ville.equals(v.getVille())).toList();
+    return liste.stream().filter(v -> ville.equalsIgnoreCase(v.getVille())).toList();
   }
 }
