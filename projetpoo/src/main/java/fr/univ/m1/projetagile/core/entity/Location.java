@@ -24,6 +24,9 @@ import jakarta.persistence.Table;
 @Table(name = "locations")
 public class Location {
 
+  // Délai d'acceptation en heures (6 heures)
+  public static final long DELAI_ACCEPTATION_HEURES = 6L;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -33,6 +36,9 @@ public class Location {
 
   @Column(nullable = false)
   private LocalDateTime dateFin;
+
+  @Column(nullable = false)
+  private LocalDateTime dateCreation;
 
   @Any
   @AnyDiscriminator(DiscriminatorType.STRING)
@@ -56,7 +62,9 @@ public class Location {
 
   // ===== Constructeurs =====
 
-  protected Location() {}
+  protected Location() {
+    this.dateCreation = LocalDateTime.now();
+  }
 
   public Location(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule,
       Loueur loueur) {
@@ -64,6 +72,7 @@ public class Location {
     this.dateFin = dateFin;
     this.vehicule = vehicule;
     this.loueur = loueur;
+    this.dateCreation = LocalDateTime.now();
   }
 
   public Location(LocalDateTime dateDebut, LocalDateTime dateFin, LieuRestitution lieuDepot,
@@ -73,6 +82,7 @@ public class Location {
     this.lieuDepot = lieuDepot;
     this.vehicule = vehicule;
     this.loueur = loueur;
+    this.dateCreation = LocalDateTime.now();
   }
 
   // ===== Getters / Setters =====
@@ -129,6 +139,14 @@ public class Location {
     this.loueur = loueur;
   }
 
+  public LocalDateTime getDateCreation() {
+    return dateCreation;
+  }
+
+  public void setDateCreation(LocalDateTime dateCreation) {
+    this.dateCreation = dateCreation;
+  }
+
   // ======================================================
   // ================== MÉTIER LOCATION ===================
   // ======================================================
@@ -146,5 +164,37 @@ public class Location {
    */
   public boolean estLongueDuree() {
     return getNombreJours() >= 7;
+  }
+
+  /**
+   * Vérifie si le délai d'acceptation de 6 heures a expiré pour cette location. Le délai commence à
+   * partir de la dateCreation.
+   *
+   * @return true si le délai d'acceptation a expiré, false sinon
+   */
+  public boolean delaiAcceptationExpire() {
+    if (dateCreation == null) {
+      return false;
+    }
+    LocalDateTime dateExpiration = dateCreation.plusHours(DELAI_ACCEPTATION_HEURES);
+    return LocalDateTime.now().isAfter(dateExpiration);
+  }
+
+  /**
+   * Retourne le temps restant en heures avant l'expiration du délai d'acceptation. Retourne 0 si le
+   * délai est déjà expiré.
+   *
+   * @return le nombre d'heures restantes (peut être fractionnaire)
+   */
+  public long getHeuresRestantesAvantExpiration() {
+    if (dateCreation == null) {
+      return 0;
+    }
+    LocalDateTime dateExpiration = dateCreation.plusHours(DELAI_ACCEPTATION_HEURES);
+    LocalDateTime maintenant = LocalDateTime.now();
+    if (maintenant.isAfter(dateExpiration)) {
+      return 0;
+    }
+    return ChronoUnit.HOURS.between(maintenant, dateExpiration);
   }
 }

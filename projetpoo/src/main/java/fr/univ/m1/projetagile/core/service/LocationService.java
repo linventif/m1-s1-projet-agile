@@ -288,7 +288,8 @@ public class LocationService {
    * @param agent l'agent qui accepte la location
    * @throws IllegalArgumentException si l'identifiant de la location ou l'agent est null
    * @throws IllegalStateException si la location n'existe pas, si l'agent n'est pas le propriétaire
-   *         du véhicule, ou si la location n'est pas en attente d'acceptation
+   *         du véhicule, si la location n'est pas en attente d'acceptation, ou si le délai
+   *         d'acceptation a expiré
    */
   public void accepterLocationManuellement(Long locationId, Agent agent) {
     if (locationId == null) {
@@ -317,6 +318,15 @@ public class LocationService {
               + "Statut actuel : " + location.getStatut());
     }
 
+    // Vérifier que le délai d'acceptation n'a pas expiré
+    if (location.delaiAcceptationExpire()) {
+      // Le délai a expiré, annuler automatiquement la location
+      location.setStatut(StatutLocation.ANNULE);
+      locationRepository.save(location);
+      throw new IllegalStateException(
+          "Le délai d'acceptation de 6 heures a expiré. La location a été automatiquement annulée.");
+    }
+
     // Accepter la location
     location.setStatut(StatutLocation.ACCEPTE);
     locationRepository.save(location);
@@ -329,7 +339,8 @@ public class LocationService {
    * @param agent l'agent qui refuse la location
    * @throws IllegalArgumentException si l'identifiant de la location ou l'agent est null
    * @throws IllegalStateException si la location n'existe pas, si l'agent n'est pas le propriétaire
-   *         du véhicule, ou si la location n'est pas en attente d'acceptation
+   *         du véhicule, si la location n'est pas en attente d'acceptation, ou si le délai
+   *         d'acceptation a expiré
    */
   public void refuserLocationManuellement(Long locationId, Agent agent) {
     if (locationId == null) {
@@ -356,6 +367,13 @@ public class LocationService {
       throw new IllegalStateException(
           "La location ne peut être refusée que si son statut est EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT. "
               + "Statut actuel : " + location.getStatut());
+    }
+
+    // Vérifier que le délai d'acceptation n'a pas expiré (bien que refuser une location expirée
+    // soit moins critique)
+    if (location.delaiAcceptationExpire()) {
+      throw new IllegalStateException(
+          "Le délai d'acceptation de 6 heures a expiré. La location est déjà considérée comme annulée.");
     }
 
     // Refuser la location (annuler)
@@ -574,5 +592,57 @@ public class LocationService {
     }
 
     return pendingLocations;
+  }
+
+  /**
+   * Annule automatiquement toutes les locations en attente d'acceptation dont le délai de 6 heures
+   * a expiré. Cette méthode peut être appelée périodiquement pour nettoyer les locations expirées.
+   *
+   * @return le nombre de locations automatiquement annulées
+   */
+  public int annulerLocationsExpirees() {
+    List<Location> locationsPendantes = locationRepository.findAllPendingLocations();
+    int nombreAnnulations = 0;
+
+    for (Location location : locationsPendantes) {
+      if (location.delaiAcceptationExpire()) {
+        location.setStatut(StatutLocation.ANNULE);
+        locationRepository.save(location);
+        nombreAnnulations++;
+      }
+    }
+
+    return nombreAnnulations;
+  }
+
+  /**
+   * Vérifie si une location spécifique a expiré et l'annule automatiquement si c'est le cas.
+   *
+   * @param locationId l'identifiant de la location à vérifier
+   * @return true si la location a été annulée car expirée, false sinon
+   * @throws IllegalArgumentException si l'identifiant de la location est null
+   */
+  public boolean verifierEtAnnulerSiExpiree(Long locationId) {
+    if (locationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la location ne peut pas être nul.");
+    }
+
+    Location location = locationRepository.findById(locationId);
+    if (location == null) {
+      return false;
+    }
+
+    // Vérifier seulement les locations en attente
+    if (location.getStatut() != StatutLocation.EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT) {
+      return false;
+    }
+
+    if (location.delaiAcceptationExpire()) {
+      location.setStatut(StatutLocation.ANNULE);
+      locationRepository.save(location);
+      return true;
+    }
+
+    return false;
   }
 }

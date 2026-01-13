@@ -319,4 +319,26 @@ public class LocationRepository {
     }
   }
 
+  /**
+   * Récupère toutes les locations en attente d'acceptation (tous agents confondus). Utile pour le
+   * nettoyage automatique des locations expirées.
+   *
+   * @return la liste de toutes les locations en attente d'acceptation
+   */
+  public List<Location> findAllPendingLocations() {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      TypedQuery<Location> query = em.createQuery("SELECT l FROM Location l "
+          + "LEFT JOIN FETCH l.vehicule v " + "LEFT JOIN FETCH v.proprietaire "
+          + "LEFT JOIN FETCH l.loueur " + "WHERE l.statut = :statutEnAttente "
+          + "ORDER BY l.dateCreation ASC", Location.class);
+
+      query.setParameter("statutEnAttente", StatutLocation.EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT);
+
+      return query.getResultList();
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Erreur lors de la récupération de toutes les locations en attente", e);
+    }
+  }
+
 }
