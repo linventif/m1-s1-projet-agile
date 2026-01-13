@@ -6,48 +6,48 @@ import java.util.List;
 import fr.univ.m1.projetagile.enums.TypeV;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 
+/**
+ * Entretien represents a maintenance company that can log in to the system and manage maintenance
+ * prices for different vehicle types.
+ */
 @Entity
 @Table(name = "entretiens")
-public class Entretien {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+@PrimaryKeyJoinColumn(name = "idU")
+@DiscriminatorValue("ENTRETIEN")
+public class Entretien extends Utilisateur {
 
   @Column(nullable = false)
-  private String nom;
+  private String nomEntreprise;
 
-  @OneToMany(mappedBy = "entretien", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "entretien", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<PrixEntretien> prixEntretiens = new ArrayList<>();
 
-  @OneToMany(mappedBy = "entretien", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "entretien", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<EntretienVehicule> entretienVehicules = new ArrayList<>();
 
   // Constructeur sans argument pour JPA
-  protected Entretien() {}
+  protected Entretien() {
+    super();
+  }
 
-  public Entretien(String nom) {
-    this.nom = nom;
+  public Entretien(String email, String motDePasse, String nomEntreprise) {
+    super(email, motDePasse);
+    this.nomEntreprise = nomEntreprise;
   }
 
   // Getters et Setters
-  public Long getId() {
-    return id;
+  public String getNomEntreprise() {
+    return nomEntreprise;
   }
 
-  public String getNom() {
-    return nom;
-  }
-
-  public void setNom(String nom) {
-    this.nom = nom;
+  public void setNomEntreprise(String nomEntreprise) {
+    this.nomEntreprise = nomEntreprise;
   }
 
   public List<PrixEntretien> getPrixEntretiens() {
@@ -56,6 +56,38 @@ public class Entretien {
 
   public List<EntretienVehicule> getEntretienVehicules() {
     return Collections.unmodifiableList(entretienVehicules);
+  }
+
+  // Méthodes de gestion des prix
+  public PrixEntretien ajouterPrixEntretien(PrixEntretien prixEntretien) {
+    if (prixEntretien != null && !prixEntretiens.contains(prixEntretien)) {
+      prixEntretiens.add(prixEntretien);
+      prixEntretien.setEntretien(this);
+    }
+    return prixEntretien;
+  }
+
+  public void supprimerPrixEntretien(PrixEntretien prixEntretien) {
+    if (prixEntretien != null) {
+      prixEntretiens.remove(prixEntretien);
+      prixEntretien.setEntretien(null);
+    }
+  }
+
+  // Méthodes de gestion des entretiens de véhicules
+  public EntretienVehicule ajouterEntretienVehicule(EntretienVehicule entretienVehicule) {
+    if (entretienVehicule != null && !entretienVehicules.contains(entretienVehicule)) {
+      entretienVehicules.add(entretienVehicule);
+      entretienVehicule.setEntretien(this);
+    }
+    return entretienVehicule;
+  }
+
+  public void supprimerEntretienVehicule(EntretienVehicule entretienVehicule) {
+    if (entretienVehicule != null) {
+      entretienVehicules.remove(entretienVehicule);
+      entretienVehicule.setEntretien(null);
+    }
   }
 
   // Méthodes selon UML
