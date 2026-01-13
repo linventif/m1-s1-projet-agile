@@ -1,7 +1,6 @@
 package fr.univ.m1.projetagile.core.entity;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -59,9 +58,6 @@ public class Vehicule {
 
   @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL)
   private List<Location> locations = new ArrayList<>();
-
-  @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL)
-  private List<SouscriptionOption> souscriptionOptions = new ArrayList<>();
 
   @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL)
   private List<EntretienVehicule> entretienVehicules = new ArrayList<>();
@@ -189,10 +185,6 @@ public class Vehicule {
 
   public List<Location> getLocations() {
     return Collections.unmodifiableList(locations);
-  }
-
-  public List<SouscriptionOption> getSouscriptionOptions() {
-    return Collections.unmodifiableList(souscriptionOptions);
   }
 
   public List<EntretienVehicule> getEntretienVehicules() {
