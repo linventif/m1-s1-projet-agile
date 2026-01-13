@@ -15,10 +15,12 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "agents")
+@PrimaryKeyJoinColumn(name = "idU")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "type_agent", discriminatorType = DiscriminatorType.STRING)
 public abstract class Agent extends Utilisateur {
@@ -29,9 +31,6 @@ public abstract class Agent extends Utilisateur {
 
   @OneToMany(mappedBy = "proprietaire", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Vehicule> vehicules = new ArrayList<>();
-
-  @OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<SouscriptionOption> souscriptionOptions = new ArrayList<>();
 
   // Constructeur sans argument pour JPA
   protected Agent() {
@@ -92,11 +91,20 @@ public abstract class Agent extends Utilisateur {
     if (option == null) {
       return false;
     }
-    return souscriptionOptions.stream().anyMatch(so -> option.equals(so.getOption()));
+    // Récupérer les souscriptions via repository
+    fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository repo =
+        new fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository(
+            fr.univ.m1.projetagile.core.DatabaseConnection.getEntityManager());
+    return repo.findByUtilisateur(this.getIdU()).stream()
+        .anyMatch(so -> option.equals(so.getOption()));
   }
 
   public List<SouscriptionOption> getOptionsActives() {
-    return Collections.unmodifiableList(souscriptionOptions);
+    // Récupérer les souscriptions via repository
+    fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository repo =
+        new fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository(
+            fr.univ.m1.projetagile.core.DatabaseConnection.getEntityManager());
+    return repo.findByUtilisateur(this.getIdU());
   }
 
   public void accepterLocation(Location location) {
