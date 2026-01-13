@@ -36,7 +36,7 @@ import fr.univ.m1.projetagile.notes.entity.NoteVehicule;
 import fr.univ.m1.projetagile.notes.service.CritereService;
 import fr.univ.m1.projetagile.notes.service.NoteService;
 
-public class MainDemo {
+public class _MainDemo {
   public static void main(String[] args) {
 
     try {
