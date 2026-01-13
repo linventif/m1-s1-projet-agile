@@ -81,6 +81,12 @@ public class Loueur extends Utilisateur {
     return getLocations();
   }
 
+  public Double calculerNote() {
+    // Calcule la note moyenne du loueur
+    // TODO: Récupérer toutes les NoteLoueur pour ce loueur et calculer la moyenne
+    return 0.0; // Placeholder
+  }
+
   @Override
   public String toString() {
     return "Loueur [id=" + getIdU() + ", nom=" + nom + ", prenom=" + prenom + ", email="
