@@ -11,6 +11,7 @@ import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.core.entity.Options;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
@@ -102,6 +103,22 @@ public class LocationService {
     }
 
     Location location = new Location(dateDebut, dateFin, lieuDepot, vehicule, loueur);
+    
+    // Vérifier si le propriétaire a l'option "Accepter les contrats manuellement" (ID 5)
+    Agent proprietaire = vehicule.getProprietaire();
+    if (proprietaire == null) {
+      throw new IllegalStateException("Le véhicule n'a pas de propriétaire associé.");
+    }
+    
+    boolean acceptationManuelle = proprietaire.getOptionsActives().stream()
+        .anyMatch(so -> so.getOption() != null && so.getOption().getId() != null
+            && so.getOption().getId().equals(Options.ACCEPTATION_MANUELLE_OPTION_ID));
+    
+    // Si le propriétaire a l'option, le statut reste EN_ATTENTE, sinon on l'accepte automatiquement
+    if (!acceptationManuelle) {
+      location.setStatut(StatutLocation.ACCEPTE);
+    }
+    
     Location locationSauvegardee = locationRepository.save(location);
 
     // Vérifier et gérer le parrainage du loueur
@@ -260,6 +277,107 @@ public class LocationService {
           "Annulation impossible : la location ne peut être annulée que si son statut est "
               + "EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT ou ACCEPTE.");
     }
+    location.setStatut(StatutLocation.ANNULE);
+    locationRepository.save(location);
+  }
+
+  /**
+   * Permet à un agent d'accepter manuellement une location en attente.
+   *
+   * @param locationId l'identifiant de la location à accepter
+   * @param agent l'agent qui accepte la location
+   * @throws IllegalArgumentException si l'identifiant de la location ou l'agent est null
+   * @throws IllegalStateException si la location n'existe pas, si l'agent n'est pas le propriétaire
+   *         du véhicule, si la location n'est pas en attente d'acceptation, ou si le délai
+   *         d'acceptation a expiré
+   */
+  public void accepterLocationManuellement(Long locationId, Agent agent) {
+    if (locationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la location ne peut pas être nul.");
+    }
+    if (agent == null || agent.getIdU() == null) {
+      throw new IllegalArgumentException("L'agent doit être spécifié et avoir un identifiant.");
+    }
+
+    Location location = locationRepository.findById(locationId);
+    if (location == null) {
+      throw new IllegalStateException("Aucune location trouvée avec l'identifiant " + locationId);
+    }
+
+    // Vérifier que l'agent est bien le propriétaire du véhicule
+    Agent proprietaire = location.getVehicule().getProprietaire();
+    if (proprietaire == null || !proprietaire.getIdU().equals(agent.getIdU())) {
+      throw new IllegalStateException(
+          "Seul le propriétaire du véhicule peut accepter cette location.");
+    }
+
+    // Vérifier que la location est en attente d'acceptation
+    if (location.getStatut() != StatutLocation.EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT) {
+      throw new IllegalStateException(
+          "La location ne peut être acceptée que si son statut est EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT. "
+              + "Statut actuel : " + location.getStatut());
+    }
+
+    // Vérifier que le délai d'acceptation n'a pas expiré
+    if (location.delaiAcceptationExpire()) {
+      // Le délai a expiré, annuler automatiquement la location
+      location.setStatut(StatutLocation.ANNULE);
+      locationRepository.save(location);
+      throw new IllegalStateException(
+          "Le délai d'acceptation de 6 heures a expiré. La location a été automatiquement annulée.");
+    }
+
+    // Accepter la location
+    location.setStatut(StatutLocation.ACCEPTE);
+    locationRepository.save(location);
+  }
+
+  /**
+   * Permet à un agent de refuser manuellement une location en attente. Si le délai d'acceptation a
+   * expiré, la location est automatiquement annulée.
+   *
+   * @param locationId l'identifiant de la location à refuser
+   * @param agent l'agent qui refuse la location
+   * @throws IllegalArgumentException si l'identifiant de la location ou l'agent est null
+   * @throws IllegalStateException si la location n'existe pas, si l'agent n'est pas le propriétaire
+   *         du véhicule, ou si la location n'est pas en attente d'acceptation
+   */
+  public void refuserLocationManuellement(Long locationId, Agent agent) {
+    if (locationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la location ne peut pas être nul.");
+    }
+    if (agent == null || agent.getIdU() == null) {
+      throw new IllegalArgumentException("L'agent doit être spécifié et avoir un identifiant.");
+    }
+
+    Location location = locationRepository.findById(locationId);
+    if (location == null) {
+      throw new IllegalStateException("Aucune location trouvée avec l'identifiant " + locationId);
+    }
+
+    // Vérifier que l'agent est bien le propriétaire du véhicule
+    Agent proprietaire = location.getVehicule().getProprietaire();
+    if (proprietaire == null || !proprietaire.getIdU().equals(agent.getIdU())) {
+      throw new IllegalStateException(
+          "Seul le propriétaire du véhicule peut refuser cette location.");
+    }
+
+    // Vérifier que la location est en attente d'acceptation
+    if (location.getStatut() != StatutLocation.EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT) {
+      throw new IllegalStateException(
+          "La location ne peut être refusée que si son statut est EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT. "
+              + "Statut actuel : " + location.getStatut());
+    }
+
+    // Si le délai a expiré, annuler automatiquement (même comportement que accepterLocationManuellement)
+    if (location.delaiAcceptationExpire()) {
+      location.setStatut(StatutLocation.ANNULE);
+      locationRepository.save(location);
+      throw new IllegalStateException(
+          "Le délai d'acceptation de 6 heures a expiré. La location a été automatiquement annulée.");
+    }
+
+    // Refuser la location (annuler)
     location.setStatut(StatutLocation.ANNULE);
     locationRepository.save(location);
   }
@@ -448,5 +566,93 @@ public class LocationService {
     }
 
     return previousLocations;
+  }
+
+  /**
+   * Récupère toutes les locations en attente d'acceptation pour un agent donné. Ces locations
+   * concernent les véhicules dont l'agent est propriétaire. Les locations dont le délai d'acceptation
+   * a expiré sont automatiquement annulées.
+   *
+   * @param agentId l'identifiant de l'agent
+   * @return la liste des LocationDTO en attente d'acceptation pour cet agent
+   * @throws IllegalArgumentException si l'identifiant de l'agent est null
+   */
+  public List<LocationDTO> getLocationsPendingAcceptanceForAgent(Long agentId) {
+    if (agentId == null) {
+      throw new IllegalArgumentException("L'identifiant de l'agent ne peut pas être nul.");
+    }
+
+    // Récupérer les locations en attente depuis le repository
+    List<Location> locations =
+        locationRepository.findPendingLocationsByAgentId(agentId);
+
+    List<LocationDTO> pendingLocations = new ArrayList<>();
+
+    for (Location location : locations) {
+      // Vérifier et annuler automatiquement si le délai a expiré
+      if (location.delaiAcceptationExpire()) {
+        location.setStatut(StatutLocation.ANNULE);
+        locationRepository.save(location);
+        // Ne pas inclure cette location dans le résultat
+        continue;
+      }
+
+      LocationDTO locationDTO = convertLocationToDTO(location);
+      pendingLocations.add(locationDTO);
+    }
+
+    return pendingLocations;
+  }
+
+  /**
+   * Annule automatiquement toutes les locations en attente d'acceptation dont le délai de 6 heures
+   * a expiré. Cette méthode peut être appelée périodiquement pour nettoyer les locations expirées.
+   *
+   * @return le nombre de locations automatiquement annulées
+   */
+  public int annulerLocationsExpirees() {
+    List<Location> locationsPendantes = locationRepository.findAllPendingLocations();
+    int nombreAnnulations = 0;
+
+    for (Location location : locationsPendantes) {
+      if (location.delaiAcceptationExpire()) {
+        location.setStatut(StatutLocation.ANNULE);
+        locationRepository.save(location);
+        nombreAnnulations++;
+      }
+    }
+
+    return nombreAnnulations;
+  }
+
+  /**
+   * Vérifie si une location spécifique a expiré et l'annule automatiquement si c'est le cas.
+   *
+   * @param locationId l'identifiant de la location à vérifier
+   * @return true si la location a été annulée car expirée, false sinon
+   * @throws IllegalArgumentException si l'identifiant de la location est null
+   */
+  public boolean verifierEtAnnulerSiExpiree(Long locationId) {
+    if (locationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la location ne peut pas être nul.");
+    }
+
+    Location location = locationRepository.findById(locationId);
+    if (location == null) {
+      return false;
+    }
+
+    // Vérifier seulement les locations en attente
+    if (location.getStatut() != StatutLocation.EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT) {
+      return false;
+    }
+
+    if (location.delaiAcceptationExpire()) {
+      location.setStatut(StatutLocation.ANNULE);
+      locationRepository.save(location);
+      return true;
+    }
+
+    return false;
   }
 }
