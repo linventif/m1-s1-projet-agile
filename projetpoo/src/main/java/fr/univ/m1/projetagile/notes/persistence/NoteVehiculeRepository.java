@@ -89,13 +89,13 @@ public class NoteVehiculeRepository {
   }
 
   public Double getMoyenneByVehiculeId(Long vehiculeId) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    TypedQuery<Double> query = em.createQuery(
-        "SELECT AVG((n.note1 + n.note2 + n.note3) / 3.0) FROM NoteVehicule n WHERE n.vehicule.id = :vehiculeId",
-        Double.class);
-    query.setParameter("vehiculeId", vehiculeId);
-    Double result = query.getSingleResult();
-    return result != null ? Math.round(result * 100.0) / 100.0 : 0.0;
+    List<NoteVehicule> notes = findByVehiculeId(vehiculeId);
+    if (notes.isEmpty()) {
+      return 0.0;
+    }
+    double somme = notes.stream().mapToDouble(NoteVehicule::getNoteMoyenne).sum();
+    double moyenne = somme / notes.size();
+    return Math.round(moyenne * 100.0) / 100.0;
   }
 
   public void delete(Long id) {

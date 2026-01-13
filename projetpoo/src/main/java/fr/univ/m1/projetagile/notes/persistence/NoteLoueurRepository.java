@@ -89,13 +89,13 @@ public class NoteLoueurRepository {
   }
 
   public Double getMoyenneByLoueurId(Long loueurId) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    TypedQuery<Double> query = em.createQuery(
-        "SELECT AVG((n.note1 + n.note2 + n.note3) / 3.0) FROM NoteLoueur n WHERE n.loueur.idU = :loueurId",
-        Double.class);
-    query.setParameter("loueurId", loueurId);
-    Double result = query.getSingleResult();
-    return result != null ? Math.round(result * 100.0) / 100.0 : 0.0;
+    List<NoteLoueur> notes = findByLoueurId(loueurId);
+    if (notes.isEmpty()) {
+      return 0.0;
+    }
+    double somme = notes.stream().mapToDouble(NoteLoueur::getNoteMoyenne).sum();
+    double moyenne = somme / notes.size();
+    return Math.round(moyenne * 100.0) / 100.0;
   }
 
   public void delete(Long id) {

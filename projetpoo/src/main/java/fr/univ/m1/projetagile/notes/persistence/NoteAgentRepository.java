@@ -90,13 +90,13 @@ public class NoteAgentRepository {
   }
 
   public Double getMoyenneByAgentId(Long agentId) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    TypedQuery<Double> query = em.createQuery(
-        "SELECT AVG((n.note1 + n.note2 + n.note3) / 3.0) FROM NoteAgent n WHERE n.agent.idU = :agentId",
-        Double.class);
-    query.setParameter("agentId", agentId);
-    Double result = query.getSingleResult();
-    return result != null ? Math.round(result * 100.0) / 100.0 : 0.0;
+    List<NoteAgent> notes = findByAgentId(agentId);
+    if (notes.isEmpty()) {
+      return 0.0;
+    }
+    double somme = notes.stream().mapToDouble(NoteAgent::getNoteMoyenne).sum();
+    double moyenne = somme / notes.size();
+    return Math.round(moyenne * 100.0) / 100.0;
   }
 
   public void delete(Long id) {
