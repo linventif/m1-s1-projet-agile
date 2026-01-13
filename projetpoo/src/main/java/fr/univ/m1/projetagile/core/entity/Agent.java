@@ -88,28 +88,6 @@ public abstract class Agent extends Utilisateur {
     deleteVehicule(v);
   }
 
-  public void contracterOption(SouscriptionOption souscriptionOption) {
-    if (souscriptionOption != null) {
-      souscriptionOptions.add(souscriptionOption);
-      souscriptionOption.setAgent(this);
-    }
-  }
-
-  public void annulerOption(SouscriptionOption souscriptionOption) {
-    if (souscriptionOption != null && souscriptionOptions.remove(souscriptionOption)) {
-      souscriptionOption.setAgent(null);
-    }
-  }
-
-  // Alias pour compatibilité
-  public void activerOption(SouscriptionOption souscriptionOption) {
-    contracterOption(souscriptionOption);
-  }
-
-  public void desactiverOption(SouscriptionOption souscriptionOption) {
-    annulerOption(souscriptionOption);
-  }
-
   public boolean aOption(Options option) {
     if (option == null) {
       return false;
