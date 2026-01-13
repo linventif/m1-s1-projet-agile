@@ -123,8 +123,14 @@ public class EntretienVehicule {
 
   /**
    * Marque l'entretien comme réalisé.
+   *
+   * @throws IllegalStateException si l'entretien n'a pas été planifié avant d'être marqué comme réalisé
    */
   public void marquerRealise() {
+    if (this.statut != StatutEntretien.PLANIFIE) {
+      throw new IllegalStateException(
+          "L'entretien doit être planifié (statut PLANIFIE) avant de pouvoir être marqué comme réalisé");
+    }
     this.dateRealisation = LocalDate.now();
     this.statut = StatutEntretien.REALISE;
   }
