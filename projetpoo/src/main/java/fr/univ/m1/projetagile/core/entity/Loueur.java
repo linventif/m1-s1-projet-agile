@@ -19,9 +19,6 @@ public class Loueur extends Utilisateur {
   @Column(nullable = false)
   private String prenom;
 
-  @Column(name = "telephone", length = 20)
-  private String telephone;
-
   @Column(name = "adresse", length = 200)
   private String adresse;
 
@@ -58,16 +55,6 @@ public class Loueur extends Utilisateur {
   @Override
   public void setPrenom(String prenom) {
     this.prenom = prenom;
-  }
-
-  @Override
-  public String getTelephone() {
-    return telephone;
-  }
-
-  @Override
-  public void setTelephone(String telephone) {
-    this.telephone = telephone;
   }
 
   @Override

@@ -14,7 +14,6 @@ public class AgentDTO {
   private TypeAgent typeAgent; // PARTICULIER ou PROFESSIONNEL
   private String nom;
   private String prenom; // Seulement pour AgentParticulier
-  private String telephone; // Seulement pour AgentParticulier
   private String siret; // Seulement pour AgentProfessionnel
   private List<VehiculeDTO> vehicules; // Liste des véhicules disponibles
   private Double noteMoyenne; // Note moyenne de l'agent
@@ -24,13 +23,12 @@ public class AgentDTO {
   }
 
   public AgentDTO(Long idU, String email, TypeAgent typeAgent, String nom, String prenom,
-      String telephone, String siret, List<VehiculeDTO> vehicules, Double noteMoyenne) {
+      String siret, List<VehiculeDTO> vehicules, Double noteMoyenne) {
     this.idU = idU;
     this.email = email;
     this.typeAgent = typeAgent;
     this.nom = nom;
     this.prenom = prenom;
-    this.telephone = telephone;
     this.siret = siret;
     this.vehicules = vehicules != null ? vehicules : new ArrayList<>();
     this.noteMoyenne = noteMoyenne;
@@ -75,14 +73,6 @@ public class AgentDTO {
 
   public void setPrenom(String prenom) {
     this.prenom = prenom;
-  }
-
-  public String getTelephone() {
-    return telephone;
-  }
-
-  public void setTelephone(String telephone) {
-    this.telephone = telephone;
   }
 
   public String getSiret() {

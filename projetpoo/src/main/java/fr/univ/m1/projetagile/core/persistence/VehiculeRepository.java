@@ -17,6 +17,7 @@ import jakarta.persistence.TypedQuery;
  * Repository pour gérer la persistance des véhicules
  */
 public class VehiculeRepository {
+<<<<<<< HEAD
 
   private final EntityManager em;
 
@@ -24,6 +25,8 @@ public class VehiculeRepository {
     this.em = em;
   }
 
+=======
+>>>>>>> 9caf91c0e27c2be0e595669bf178dbcead29e98b
   /**
    * Enregistre un véhicule dans la base de données (création ou mise à jour)
    *
@@ -204,14 +207,19 @@ public class VehiculeRepository {
   }
 
   /**
-   * Récupère un véhicule par son ID
+   * Récupère un véhicule par son ID avec son propriétaire
    *
    * @param id l'identifiant du véhicule
    * @return le véhicule trouvé ou null
    */
   public Vehicule findById(Long id) {
     try (EntityManager em = DatabaseConnection.getEntityManager()) {
-      return em.find(Vehicule.class, id);
+      TypedQuery<Vehicule> query =
+          em.createQuery("SELECT v FROM Vehicule v LEFT JOIN FETCH v.proprietaire WHERE v.id = :id",
+              Vehicule.class);
+      query.setParameter("id", id);
+      List<Vehicule> results = query.getResultList();
+      return results.isEmpty() ? null : results.get(0);
     } catch (Exception e) {
       throw new RuntimeException("Erreur lors de la récupération du véhicule", e);
     }
@@ -290,6 +298,7 @@ public class VehiculeRepository {
 
   }
 
+<<<<<<< HEAD
   // consulter les véhicules d'une ville donnée
   public List<Vehicule> findByVille(String ville) {
     return em.createQuery("SELECT v FROM Vehicule v WHERE v.ville = :ville", Vehicule.class)
@@ -298,4 +307,18 @@ public class VehiculeRepository {
 
 
 
+=======
+  // =======================
+  // consulter les véhicules par ville
+  // =======================
+  public List<Vehicule> findByVille(String ville) {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      return em
+          .createQuery("SELECT v FROM Vehicule v WHERE v.adresse.ville = :ville", Vehicule.class)
+          .setParameter("ville", ville).getResultList();
+    } catch (Exception e) {
+      throw new RuntimeException("Erreur lors de la récupération des véhicules par ville", e);
+    }
+  }
+>>>>>>> 9caf91c0e27c2be0e595669bf178dbcead29e98b
 }

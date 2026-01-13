@@ -4,9 +4,6 @@ import java.util.List;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -26,10 +23,6 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "notes_loueurs")
 public class NoteLoueur extends Note {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
 
   @ManyToOne
   @JoinColumn(name = "agent_id", nullable = false)
@@ -64,14 +57,6 @@ public class NoteLoueur extends Note {
     this.loueur = loueur;
   }
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
   public Agent getAgent() {
     return agent;
   }
@@ -90,8 +75,8 @@ public class NoteLoueur extends Note {
 
   @Override
   public String toString() {
-    return "NoteLoueur [id=" + id + ", agent=" + (agent != null ? agent.getIdU() : "null")
+    return "NoteLoueur [id=" + getId() + ", agent=" + (agent != null ? agent.getIdU() : "null")
         + ", loueur=" + (loueur != null ? loueur.getIdU() : "null") + ", moyenne="
-        + getNoteMoyenne() + "/10, criteres=" + criteres.size() + ", date=" + date + "]";
+        + getNoteMoyenne() + "/10, criteres=" + getCriteres().size() + ", date=" + getDate() + "]";
   }
 }

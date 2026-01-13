@@ -11,7 +11,6 @@ public class ProfilInfo {
   private String nom;
   private String prenom;
   private String email;
-  private String telephone;
   private String adresse;
   private String bio;
   private String nomCommercial;
@@ -51,14 +50,6 @@ public class ProfilInfo {
 
   public void setEmail(String email) {
     this.email = email;
-  }
-
-  public String getTelephone() {
-    return telephone;
-  }
-
-  public void setTelephone(String telephone) {
-    this.telephone = telephone;
   }
 
   public String getAdresse() {
@@ -128,9 +119,6 @@ public class ProfilInfo {
       sb.append("Nom commercial: ").append(nomCommercial).append("\n");
     }
     sb.append("Email: ").append(email).append("\n");
-    if (telephone != null) {
-      sb.append("Téléphone: ").append(telephone).append("\n");
-    }
     if (adresse != null) {
       sb.append("Adresse: ").append(adresse).append("\n");
     }

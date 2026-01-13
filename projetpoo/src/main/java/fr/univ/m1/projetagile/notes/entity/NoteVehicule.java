@@ -4,9 +4,6 @@ import java.util.List;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -26,10 +23,6 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "notes_vehicules")
 public class NoteVehicule extends Note {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
 
   @ManyToOne
   @JoinColumn(name = "vehicule_id", nullable = false)
@@ -64,14 +57,6 @@ public class NoteVehicule extends Note {
     this.loueur = loueur;
   }
 
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
   public Vehicule getVehicule() {
     return vehicule;
   }
@@ -90,8 +75,9 @@ public class NoteVehicule extends Note {
 
   @Override
   public String toString() {
-    return "NoteVehicule [id=" + id + ", vehicule=" + (vehicule != null ? vehicule.getId() : "null")
-        + ", loueur=" + (loueur != null ? loueur.getIdU() : "null") + ", moyenne="
-        + getNoteMoyenne() + "/10, criteres=" + criteres.size() + ", date=" + date + "]";
+    return "NoteVehicule [id=" + getId() + ", vehicule="
+        + (vehicule != null ? vehicule.getId() : "null") + ", loueur="
+        + (loueur != null ? loueur.getIdU() : "null") + ", moyenne=" + getNoteMoyenne()
+        + "/10, criteres=" + getCriteres().size() + ", date=" + getDate() + "]";
   }
 }

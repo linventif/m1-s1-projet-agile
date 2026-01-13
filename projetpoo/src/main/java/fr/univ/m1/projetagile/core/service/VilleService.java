@@ -30,6 +30,12 @@ public class VilleService {
   // retourner la liste des villes dans un rayon de X km autour d'une ville donnée
   // =======================
   public List<Ville> getVillesAutour(String villeDepartNom, double xKm) {
+    if (villeDepartNom == null || villeDepartNom.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le nom de la ville de départ ne peut pas être nul ou vide");
+    }
+    if (xKm <= 0) {
+      throw new IllegalArgumentException("Le rayon en kilomètres doit être strictement positif: " + xKm);
+    }
     Ville villeDepart = null;
 
     // trouver l'objet ville de départ

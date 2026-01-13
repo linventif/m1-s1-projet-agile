@@ -1,8 +1,8 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import fr.univ.m1.projetagile.commentaire.service.CommentaireService;
 import fr.univ.m1.projetagile.core.dto.ProfilInfo;
 import jakarta.persistence.Column;
@@ -78,15 +78,11 @@ public abstract class Utilisateur {
 
   public abstract String getPrenom();
 
-  public abstract String getTelephone();
-
   public abstract String getAdresse();
 
   public abstract void setNom(String nom);
 
   public abstract void setPrenom(String prenom);
-
-  public abstract void setTelephone(String telephone);
 
   public abstract void setAdresse(String adresse);
 
@@ -210,7 +206,6 @@ public abstract class Utilisateur {
     profil.setNom(getNom());
     profil.setPrenom(getPrenom());
     profil.setEmail(this.email);
-    profil.setTelephone(getTelephone());
     profil.setAdresse(getAdresse());
     profil.setBio(this.bio);
 
@@ -219,10 +214,18 @@ public abstract class Utilisateur {
       Agent agent = (Agent) this;
       profil.setNomCommercial(agent.getNomCommercial());
 
-      // Récupérer les véhicules disponibles
-      List<Vehicule> vehiculesDisponibles =
-          agent.getVehicules().stream().filter(Vehicule::isDisponible).collect(Collectors.toList());
-      profil.setVehiculesDisponibles(vehiculesDisponibles);
+      // Récupérer les véhicules disponibles via une requête JPQL pour éviter
+      // LazyInitializationException
+      if (em != null) {
+        try {
+          List<Vehicule> vehiculesDisponibles = em.createQuery(
+              "SELECT v FROM Vehicule v WHERE v.proprietaire.idU = :agentId AND v.disponible = true",
+              Vehicule.class).setParameter("agentId", agent.getIdU()).getResultList();
+          profil.setVehiculesDisponibles(vehiculesDisponibles);
+        } catch (Exception e) {
+          profil.setVehiculesDisponibles(new ArrayList<>());
+        }
+      }
     }
 
     // Récupérer les commentaires
@@ -239,16 +242,12 @@ public abstract class Utilisateur {
   /**
    * Modifier les informations du profil
    */
-  public void modifierProfil(String nom, String prenom, String telephone, String adresse,
-      String bio) {
+  public void modifierProfil(String nom, String prenom, String adresse, String bio) {
     if (nom != null && !nom.trim().isEmpty()) {
       setNom(nom);
     }
     if (prenom != null && !prenom.trim().isEmpty()) {
       setPrenom(prenom);
-    }
-    if (telephone != null) {
-      setTelephone(telephone);
     }
     if (adresse != null) {
       setAdresse(adresse);
