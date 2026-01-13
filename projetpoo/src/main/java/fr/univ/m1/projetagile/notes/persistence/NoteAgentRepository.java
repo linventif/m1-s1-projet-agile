@@ -20,12 +20,18 @@ public class NoteAgentRepository {
       transaction = em.getTransaction();
       transaction.begin();
 
-      // Merger les critères pour s'assurer qu'ils sont dans le contexte de persistance
-      List<Critere> criteresMerged = new java.util.ArrayList<>();
+      // Recharger les critères depuis la base de données pour s'assurer qu'ils sont dans le
+      // contexte de persistance
+      List<Critere> criteresReloaded = new java.util.ArrayList<>();
       for (Critere critere : note.getCriteres()) {
-        criteresMerged.add(em.merge(critere));
+        if (critere.getId() != null) {
+          Critere reloaded = em.find(Critere.class, critere.getId());
+          if (reloaded != null) {
+            criteresReloaded.add(reloaded);
+          }
+        }
       }
-      note.setCriteres(criteresMerged);
+      note.setCriteres(criteresReloaded);
 
       if (note.getId() == null) {
         em.persist(note);

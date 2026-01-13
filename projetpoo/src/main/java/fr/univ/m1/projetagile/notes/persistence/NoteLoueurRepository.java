@@ -19,13 +19,20 @@ public class NoteLoueurRepository {
       transaction = em.getTransaction();
       transaction.begin();
 
-      // Merger les critères pour s'assurer qu'ils sont dans le contexte de persistance
-      List<fr.univ.m1.projetagile.notes.entity.Critere> criteresMerged =
+      // Recharger les critères depuis la base de données pour s'assurer qu'ils sont dans le
+      // contexte de persistance
+      List<fr.univ.m1.projetagile.notes.entity.Critere> criteresReloaded =
           new java.util.ArrayList<>();
       for (fr.univ.m1.projetagile.notes.entity.Critere critere : note.getCriteres()) {
-        criteresMerged.add(em.merge(critere));
+        if (critere.getId() != null) {
+          fr.univ.m1.projetagile.notes.entity.Critere reloaded =
+              em.find(fr.univ.m1.projetagile.notes.entity.Critere.class, critere.getId());
+          if (reloaded != null) {
+            criteresReloaded.add(reloaded);
+          }
+        }
       }
-      note.setCriteres(criteresMerged);
+      note.setCriteres(criteresReloaded);
 
       if (note.getId() == null) {
         em.persist(note);
