@@ -217,4 +217,83 @@ public class LocationRepository {
     }
   }
 
+  /**
+   * Récupère toutes les locations d'un véhicule avec eager loading pour éviter
+   * LazyInitializationException. Exclut les locations annulées et trie par date de début
+   * décroissante.
+   *
+   * @param vehiculeId l'identifiant du véhicule
+   * @return la liste des locations non annulées, triées par date décroissante
+   */
+  public List<Location> findLocationsByVehiculeId(Long vehiculeId) {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      TypedQuery<Location> query = em.createQuery(
+          "SELECT l FROM Location l " + "LEFT JOIN FETCH l.vehicule v "
+              + "LEFT JOIN FETCH l.loueur " + "WHERE l.vehicule.id = :vehiculeId "
+              + "AND l.statut != :statutAnnule " + "ORDER BY l.dateDebut DESC",
+          Location.class);
+
+      query.setParameter("vehiculeId", vehiculeId);
+      query.setParameter("statutAnnule", StatutLocation.ANNULE);
+
+      return query.getResultList();
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Erreur lors de la récupération des locations du véhicule " + vehiculeId, e);
+    }
+  }
+
+  /**
+   * Récupère toutes les locations actuelles (non terminées) d'un véhicule avec eager loading.
+   * Exclut les locations annulées et terminées et trie par date de début décroissante.
+   *
+   * @param vehiculeId l'identifiant du véhicule
+   * @return la liste des locations actuelles, triées par date décroissante
+   */
+  public List<Location> getCurrentLocationsByVehiculeId(Long vehiculeId) {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      TypedQuery<Location> query = em.createQuery(
+          "SELECT l FROM Location l " + "LEFT JOIN FETCH l.vehicule v "
+              + "LEFT JOIN FETCH l.loueur " + "WHERE l.vehicule.id = :vehiculeId "
+              + "AND l.statut != :statutAnnule " + "AND l.statut != :statutTermine "
+              + "ORDER BY l.dateDebut DESC",
+          Location.class);
+
+      query.setParameter("vehiculeId", vehiculeId);
+      query.setParameter("statutAnnule", StatutLocation.ANNULE);
+      query.setParameter("statutTermine", StatutLocation.TERMINE);
+
+      return query.getResultList();
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Erreur lors de la récupération des locations actuelles du véhicule " + vehiculeId, e);
+    }
+  }
+
+  /**
+   * Récupère toutes les locations terminées (historique) d'un véhicule avec eager loading. Trie
+   * par date de début décroissante.
+   *
+   * @param vehiculeId l'identifiant du véhicule
+   * @return la liste des locations terminées, triées par date décroissante
+   */
+  public List<Location> getPreviousLocationsByVehiculeId(Long vehiculeId) {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      TypedQuery<Location> query = em.createQuery(
+          "SELECT l FROM Location l " + "LEFT JOIN FETCH l.vehicule v "
+              + "LEFT JOIN FETCH l.loueur " + "WHERE l.vehicule.id = :vehiculeId "
+              + "AND l.statut = :statutTermine " + "ORDER BY l.dateDebut DESC",
+          Location.class);
+
+      query.setParameter("vehiculeId", vehiculeId);
+      query.setParameter("statutTermine", StatutLocation.TERMINE);
+
+      return query.getResultList();
+    } catch (Exception e) {
+      throw new RuntimeException(
+          "Erreur lors de la récupération de l'historique des locations du véhicule " + vehiculeId,
+          e);
+    }
+  }
+
 }

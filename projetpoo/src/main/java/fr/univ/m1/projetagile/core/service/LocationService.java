@@ -3,6 +3,8 @@ package fr.univ.m1.projetagile.core.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepository;
 import fr.univ.m1.projetagile.VerificationLocation.service.VerificationService;
 import fr.univ.m1.projetagile.core.dto.LocationDTO;
@@ -377,5 +379,55 @@ public class LocationService {
     }
 
     return dto;
+  }
+
+  /**
+   * Récupère toutes les locations actuelles (non terminées) pour un véhicule donné.
+   *
+   * @param vehiculeId l'identifiant du véhicule
+   * @return la liste des LocationDTO non terminées pour ce véhicule
+   * @throws IllegalArgumentException si l'identifiant du véhicule est null
+   */
+  public List<LocationDTO> getCurrentLocationsForVehicule(Long vehiculeId) {
+    if (vehiculeId == null) {
+      throw new IllegalArgumentException("L'identifiant du véhicule ne peut pas être nul.");
+    }
+
+    // Récupérer les locations actuelles depuis le repository avec eager loading
+    List<Location> locations = locationRepository.getCurrentLocationsByVehiculeId(vehiculeId);
+
+    List<LocationDTO> currentLocations = new ArrayList<>();
+
+    for (Location location : locations) {
+      LocationDTO locationDTO = convertLocationToDTO(location);
+      currentLocations.add(locationDTO);
+    }
+
+    return currentLocations;
+  }
+
+  /**
+   * Récupère toutes les locations terminées (historique) pour un véhicule donné.
+   *
+   * @param vehiculeId l'identifiant du véhicule
+   * @return la liste des LocationDTO terminées pour ce véhicule
+   * @throws IllegalArgumentException si l'identifiant du véhicule est null
+   */
+  public List<LocationDTO> getPreviousLocationsForVehicule(Long vehiculeId) {
+    if (vehiculeId == null) {
+      throw new IllegalArgumentException("L'identifiant du véhicule ne peut pas être nul.");
+    }
+
+    // Récupérer les locations terminées depuis le repository avec eager loading
+    List<Location> locations = locationRepository.getPreviousLocationsByVehiculeId(vehiculeId);
+
+    List<LocationDTO> previousLocations = new ArrayList<>();
+
+    for (Location location : locations) {
+      LocationDTO locationDTO = convertLocationToDTO(location);
+      previousLocations.add(locationDTO);
+    }
+
+    return previousLocations;
   }
 }
