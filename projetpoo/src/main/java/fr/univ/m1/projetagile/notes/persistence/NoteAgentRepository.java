@@ -20,16 +20,26 @@ public class NoteAgentRepository {
       transaction = em.getTransaction();
       transaction.begin();
 
-      // Persister ou fusionner chaque critère individuellement
+      // Recharger les critères existants pour obtenir des instances gérées
+      List<Critere> criteresManagedList = new java.util.ArrayList<>();
       for (Critere critere : note.getCriteres()) {
-        if (critere.getId() == null) {
+        if (critere.getId() != null) {
+          // Recharger depuis la base pour avoir une instance gérée
+          Critere managed = em.find(Critere.class, critere.getId());
+          if (managed != null) {
+            criteresManagedList.add(managed);
+          }
+        } else {
+          // Nouveau critère, persister
           em.persist(critere);
-        } else if (!em.contains(critere)) {
-          em.merge(critere);
+          criteresManagedList.add(critere);
         }
       }
 
-      // Persister ou fusionner la note (le cascade gère la relation)
+      // Remplacer les critères par les instances gérées
+      note.setCriteres(criteresManagedList);
+
+      // Persister ou fusionner la note
       if (note.getId() == null) {
         em.persist(note);
       } else {
