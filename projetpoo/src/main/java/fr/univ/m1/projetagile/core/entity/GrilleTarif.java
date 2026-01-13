@@ -24,7 +24,7 @@ public class GrilleTarif {
   private final List<TarifVehicule> tarifVehi = new ArrayList<>();
 
   @OneToMany(mappedBy = "grilleTarif", cascade = CascadeType.ALL, orphanRemoval = true)
-  private final List<TarifOption> tarifOptions = new ArrayList<>();
+  private final List<TarifOptionAssurance> tarifOptions = new ArrayList<>();
 
   @OneToMany(mappedBy = "grille", cascade = CascadeType.ALL, orphanRemoval = true)
   private final List<Assurance> assurances = new ArrayList<>();
@@ -85,11 +85,11 @@ public class GrilleTarif {
   // Tarifs options
   // =========================
 
-  public List<TarifOption> getTarifOptions() {
+  public List<TarifOptionAssurance> getTarifOptions() {
     return Collections.unmodifiableList(tarifOptions);
   }
 
-  public void ajouterTarifOption(TarifOption tarif) {
+  public void ajouterTarifOption(TarifOptionAssurance tarif) {
     if (tarif == null)
       return;
 
@@ -105,18 +105,18 @@ public class GrilleTarif {
   /**
    * IMPORTANT (nullable=false) : - on retire de la liste - on NE met PAS grilleTarif à null
    */
-  public void retirerTarifOption(TarifOption tarif) {
+  public void retirerTarifOption(TarifOptionAssurance tarif) {
     if (tarif == null)
       return;
     tarifOptions.remove(tarif);
   }
 
-  public TarifOption trouverTarifOption(String nomOption) {
+  public TarifOptionAssurance trouverTarifOption(String nomOption) {
     if (nomOption == null)
       return null;
 
     String nomClean = nomOption.trim();
-    for (TarifOption to : tarifOptions) {
+    for (TarifOptionAssurance to : tarifOptions) {
       if (nomClean.equalsIgnoreCase(to.getNomOption().trim())) {
         return to;
       }

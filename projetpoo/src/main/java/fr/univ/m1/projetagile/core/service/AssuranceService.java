@@ -7,7 +7,7 @@ import fr.univ.m1.projetagile.core.entity.Assurance;
 import fr.univ.m1.projetagile.core.entity.GrilleTarif;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.SouscriptionAssurance;
-import fr.univ.m1.projetagile.core.entity.TarifOption;
+import fr.univ.m1.projetagile.core.entity.TarifOptionAssurance;
 import fr.univ.m1.projetagile.core.entity.TarifVehicule;
 import fr.univ.m1.projetagile.enums.TypeV;
 
@@ -43,7 +43,7 @@ public class AssuranceService {
   /**
    * Ajoute un tarif option dans la grille.
    */
-  public TarifOption ajouterTarifOption(GrilleTarif grille, String nomOption, String description,
+  public TarifOptionAssurance ajouterTarifOption(GrilleTarif grille, String nomOption, String description,
       double prixParJour) {
     if (grille == null)
       throw new IllegalArgumentException("grille null");
@@ -52,7 +52,7 @@ public class AssuranceService {
     if (prixParJour < 0)
       throw new IllegalArgumentException("prixParJour < 0");
 
-    TarifOption to = new TarifOption(nomOption, description, prixParJour, grille);
+    TarifOptionAssurance to = new TarifOptionAssurance(nomOption, description, prixParJour, grille);
     grille.ajouterTarifOption(to);
     return to;
   }
@@ -128,7 +128,7 @@ public class AssuranceService {
         if (opt == null || opt.isBlank())
           continue;
 
-        TarifOption to = assurance.getGrille().trouverTarifOption(opt);
+        TarifOptionAssurance to = assurance.getGrille().trouverTarifOption(opt);
         if (to == null) {
           throw new IllegalArgumentException("Option inconnue dans la grille: " + opt);
         }

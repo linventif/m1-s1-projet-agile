@@ -140,7 +140,7 @@ public class SouscriptionAssurance {
     // 4) Options par jour
     double prixOptionsParJour = 0.0;
     for (String opt : options) {
-      TarifOption tarifOpt = assurance.getGrille().trouverTarifOption(opt);
+      TarifOptionAssurance tarifOpt = assurance.getGrille().trouverTarifOption(opt);
       if (tarifOpt == null) {
         throw new IllegalArgumentException("Option inconnue dans la grille: " + opt);
       }
