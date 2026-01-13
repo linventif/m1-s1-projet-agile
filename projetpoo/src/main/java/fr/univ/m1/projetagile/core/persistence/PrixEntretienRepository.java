@@ -14,12 +14,6 @@ import java.util.List;
  */
 public class PrixEntretienRepository {
 
-  private final EntityManager em;
-
-  public PrixEntretienRepository() {
-    this.em = DatabaseConnection.getEntityManager();
-  }
-
   /**
    * Saves (creates or updates) a PrixEntretien entity.
    *
@@ -32,7 +26,7 @@ public class PrixEntretienRepository {
       throw new IllegalArgumentException("PrixEntretien ne peut pas être null");
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       em.getTransaction().begin();
       PrixEntretien result;
       if (prixEntretien.getId() == null) {
@@ -44,9 +38,6 @@ public class PrixEntretienRepository {
       em.getTransaction().commit();
       return result;
     } catch (Exception e) {
-      if (em.getTransaction().isActive()) {
-        em.getTransaction().rollback();
-      }
       throw new RuntimeException("Erreur lors de la sauvegarde du prix d'entretien", e);
     }
   }
@@ -62,7 +53,7 @@ public class PrixEntretienRepository {
       return null;
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.find(PrixEntretien.class, id);
     } catch (Exception e) {
       return null;
@@ -80,7 +71,7 @@ public class PrixEntretienRepository {
       return Collections.emptyList();
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.createQuery("SELECT p FROM PrixEntretien p WHERE p.entretien.idU = :entretienId",
           PrixEntretien.class).setParameter("entretienId", entretien.getIdU()).getResultList();
     } catch (Exception e) {
@@ -103,7 +94,7 @@ public class PrixEntretienRepository {
       return null;
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.createQuery(
           "SELECT p FROM PrixEntretien p WHERE p.entretien.idU = :entretienId "
               + "AND p.typeVehi = :type AND p.modeleVehi = :modele",
@@ -125,7 +116,7 @@ public class PrixEntretienRepository {
       return Collections.emptyList();
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.createQuery("SELECT p FROM PrixEntretien p WHERE p.typeVehi = :type",
           PrixEntretien.class).setParameter("type", typeVehi).getResultList();
     } catch (Exception e) {
@@ -139,7 +130,7 @@ public class PrixEntretienRepository {
    * @return list of all pricing entries
    */
   public List<PrixEntretien> findAll() {
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.createQuery("SELECT p FROM PrixEntretien p", PrixEntretien.class).getResultList();
     } catch (Exception e) {
       return Collections.emptyList();
@@ -157,7 +148,7 @@ public class PrixEntretienRepository {
       throw new IllegalArgumentException("L'id ne peut pas être null");
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       em.getTransaction().begin();
       PrixEntretien prixEntretien = em.find(PrixEntretien.class, id);
       if (prixEntretien != null) {
@@ -165,9 +156,6 @@ public class PrixEntretienRepository {
       }
       em.getTransaction().commit();
     } catch (Exception e) {
-      if (em.getTransaction().isActive()) {
-        em.getTransaction().rollback();
-      }
       throw new RuntimeException("Erreur lors de la suppression du prix d'entretien", e);
     }
   }

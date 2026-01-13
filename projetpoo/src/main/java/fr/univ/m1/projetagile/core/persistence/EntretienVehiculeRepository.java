@@ -14,12 +14,6 @@ import java.util.List;
  */
 public class EntretienVehiculeRepository {
 
-  private final EntityManager em;
-
-  public EntretienVehiculeRepository() {
-    this.em = DatabaseConnection.getEntityManager();
-  }
-
   /**
    * Saves (creates or updates) an EntretienVehicule entity.
    *
@@ -40,7 +34,7 @@ public class EntretienVehiculeRepository {
       throw new IllegalArgumentException("L'entretien ne peut pas être null");
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       em.getTransaction().begin();
       EntretienVehicule result;
       if (entretienVehicule.getId() == null) {
@@ -52,9 +46,6 @@ public class EntretienVehiculeRepository {
       em.getTransaction().commit();
       return result;
     } catch (Exception e) {
-      if (em.getTransaction().isActive()) {
-        em.getTransaction().rollback();
-      }
       throw new RuntimeException("Erreur lors de la sauvegarde de l'entretien véhicule", e);
     }
   }
@@ -70,7 +61,7 @@ public class EntretienVehiculeRepository {
       return null;
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.find(EntretienVehicule.class, id);
     } catch (Exception e) {
       return null;
@@ -88,7 +79,7 @@ public class EntretienVehiculeRepository {
       return Collections.emptyList();
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.createQuery(
           "SELECT ev FROM EntretienVehicule ev WHERE ev.vehicule.id = :vehiculeId",
           EntretienVehicule.class).setParameter("vehiculeId", vehicule.getId()).getResultList();
@@ -108,7 +99,7 @@ public class EntretienVehiculeRepository {
       return Collections.emptyList();
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.createQuery(
           "SELECT ev FROM EntretienVehicule ev WHERE ev.entretien.idU = :entretienId",
           EntretienVehicule.class).setParameter("entretienId", entretien.getIdU()).getResultList();
@@ -123,7 +114,7 @@ public class EntretienVehiculeRepository {
    * @return list of automatic maintenance records
    */
   public List<EntretienVehicule> findByAutomatique() {
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.createQuery("SELECT ev FROM EntretienVehicule ev WHERE ev.automatique = true",
           EntretienVehicule.class).getResultList();
     } catch (Exception e) {
@@ -137,7 +128,7 @@ public class EntretienVehiculeRepository {
    * @return list of manual maintenance records
    */
   public List<EntretienVehicule> findByManuel() {
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.createQuery("SELECT ev FROM EntretienVehicule ev WHERE ev.automatique = false",
           EntretienVehicule.class).getResultList();
     } catch (Exception e) {
@@ -159,7 +150,7 @@ public class EntretienVehiculeRepository {
       return Collections.emptyList();
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.createQuery("SELECT ev FROM EntretienVehicule ev "
           + "WHERE ev.vehicule.id = :vehiculeId AND ev.entretien.idU = :entretienId",
           EntretienVehicule.class).setParameter("vehiculeId", vehicule.getId())
@@ -180,7 +171,7 @@ public class EntretienVehiculeRepository {
       return Collections.emptyList();
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.createQuery("SELECT ev FROM EntretienVehicule ev WHERE ev.statut = :statut",
           EntretienVehicule.class).setParameter("statut", statut).getResultList();
     } catch (Exception e) {
@@ -194,7 +185,7 @@ public class EntretienVehiculeRepository {
    * @return list of all maintenance records
    */
   public List<EntretienVehicule> findAll() {
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       return em.createQuery("SELECT ev FROM EntretienVehicule ev", EntretienVehicule.class)
           .getResultList();
     } catch (Exception e) {
@@ -213,7 +204,7 @@ public class EntretienVehiculeRepository {
       throw new IllegalArgumentException("L'id ne peut pas être null");
     }
 
-    try {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
       em.getTransaction().begin();
       EntretienVehicule entretienVehicule = em.find(EntretienVehicule.class, id);
       if (entretienVehicule != null) {
@@ -221,9 +212,6 @@ public class EntretienVehiculeRepository {
       }
       em.getTransaction().commit();
     } catch (Exception e) {
-      if (em.getTransaction().isActive()) {
-        em.getTransaction().rollback();
-      }
       throw new RuntimeException("Erreur lors de la suppression de l'entretien véhicule", e);
     }
   }
