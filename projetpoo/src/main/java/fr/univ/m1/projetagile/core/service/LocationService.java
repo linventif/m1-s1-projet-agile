@@ -569,7 +569,8 @@ public class LocationService {
 
   /**
    * Récupère toutes les locations en attente d'acceptation pour un agent donné. Ces locations
-   * concernent les véhicules dont l'agent est propriétaire.
+   * concernent les véhicules dont l'agent est propriétaire. Les locations dont le délai d'acceptation
+   * a expiré sont automatiquement annulées.
    *
    * @param agentId l'identifiant de l'agent
    * @return la liste des LocationDTO en attente d'acceptation pour cet agent
@@ -587,6 +588,14 @@ public class LocationService {
     List<LocationDTO> pendingLocations = new ArrayList<>();
 
     for (Location location : locations) {
+      // Vérifier et annuler automatiquement si le délai a expiré
+      if (location.delaiAcceptationExpire()) {
+        location.setStatut(StatutLocation.ANNULE);
+        locationRepository.save(location);
+        // Ne pas inclure cette location dans le résultat
+        continue;
+      }
+
       LocationDTO locationDTO = convertLocationToDTO(location);
       pendingLocations.add(locationDTO);
     }
