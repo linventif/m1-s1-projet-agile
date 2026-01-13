@@ -137,8 +137,14 @@ public class EntretienVehicule {
 
   /**
    * Annule l'entretien planifié.
+   *
+   * @throws IllegalStateException si l'entretien a déjà été marqué comme réalisé
    */
   public void annuler() {
+    if (this.statut == StatutEntretien.REALISE) {
+      throw new IllegalStateException(
+          "Impossible d'annuler un entretien déjà marqué comme réalisé");
+    }
     this.statut = StatutEntretien.ANNULE;
   }
 }
