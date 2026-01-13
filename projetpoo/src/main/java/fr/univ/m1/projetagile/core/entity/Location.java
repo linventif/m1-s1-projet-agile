@@ -147,4 +147,14 @@ public class Location {
   public boolean estLongueDuree() {
     return getNombreJours() >= 7;
   }
+
+  @Override
+  public String toString() {
+    String loueurNom = loueur != null ? loueur.getPrenom() + " " + loueur.getNom() : "?";
+    String vehiculeInfo =
+        vehicule != null ? vehicule.getMarque() + " " + vehicule.getModele() : "?";
+    String dateDebutStr = dateDebut != null ? dateDebut.toLocalDate().toString() : "?";
+    String dateFinStr = dateFin != null ? dateFin.toLocalDate().toString() : "?";
+    return loueurNom + " loue " + vehiculeInfo + " du " + dateDebutStr + " au " + dateFinStr;
+  }
 }
