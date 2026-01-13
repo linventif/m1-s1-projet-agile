@@ -1,6 +1,7 @@
 package fr.univ.m1.projetagile.core.entity;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -50,6 +51,24 @@ public class Vehicule {
   @Column(nullable = false, name = "prixJ")
   private Double prixJ; // prix journalier
 
+  @Column(name = "date_mise_en_circulation")
+  private LocalDate dateMiseEnCirculation; // première mise en circulation
+
+  @Column(name = "date_dernier_controle")
+  private LocalDate dateDernierControle; // dernier contrôle technique
+
+  @Column(name = "kilometrage_actuel")
+  private Integer kilometrageActuel; // mileage actuel
+
+  @Column(name = "kilometrage_dernier_controle")
+  private Integer kilometrageDernierControle; // mileage au dernier contrôle
+
+  @Column(name = "date_prochain_controle")
+  private LocalDate dateProchainControle; // prochain contrôle technique(calculer automatiquement)
+
+  @Column(name = "date_dernier_entretien")
+  private LocalDate dateDernierEntretien; // dernier entretien
+
   @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Disponibilite> datesDispo = new ArrayList<>();
 
@@ -82,6 +101,10 @@ public class Vehicule {
   // Getters et Setters
   public Long getId() {
     return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
   }
 
   public TypeV getType() {
@@ -130,6 +153,54 @@ public class Vehicule {
 
   public void setPrixJ(Double prixJ) {
     this.prixJ = prixJ;
+  }
+
+  public LocalDate getDateMiseEnCirculation() {
+    return dateMiseEnCirculation;
+  }
+
+  public void setDateMiseEnCirculation(LocalDate dateMiseEnCirculation) {
+    this.dateMiseEnCirculation = dateMiseEnCirculation;
+  }
+
+  public LocalDate getDateDernierControle() {
+    return dateDernierControle;
+  }
+
+  public void setDateDernierControle(LocalDate dateDernierControle) {
+    this.dateDernierControle = dateDernierControle;
+  }
+
+  public Integer getKilometrageActuel() {
+    return kilometrageActuel;
+  }
+
+  public void setKilometrageActuel(Integer kilometrageActuel) {
+    this.kilometrageActuel = kilometrageActuel;
+  }
+
+  public Integer getKilometrageDernierControle() {
+    return kilometrageDernierControle;
+  }
+
+  public void setKilometrageDernierControle(Integer kilometrageDernierControle) {
+    this.kilometrageDernierControle = kilometrageDernierControle;
+  }
+
+  public LocalDate getDateProchainControle() {
+    return dateProchainControle;
+  }
+
+  public void setDateProchainControle(LocalDate dateProchainControle) {
+    this.dateProchainControle = dateProchainControle;
+  }
+
+  public LocalDate getDateDernierEntretien() {
+    return dateDernierEntretien;
+  }
+
+  public void setDateDernierEntretien(LocalDate dateDernierEntretien) {
+    this.dateDernierEntretien = dateDernierEntretien;
   }
 
   public boolean isDisponible() {
@@ -232,13 +303,20 @@ public class Vehicule {
     return Collections.unmodifiableList(locations);
   }
 
+  // calcul de l'age du vehicule
+  public int getAgeVehicule() {
+    if (dateMiseEnCirculation == null) {
+      return 0;
+    }
+    return Period.between(dateMiseEnCirculation, LocalDate.now()).getYears();
+  }
+
   @Override
   public String toString() {
     return "Vehicule [id=" + id + ", type=" + type + ", marque=" + marque + ", modele=" + modele
         + ", couleur=" + couleur + ", ville=" + ville + ", prix=" + prixJ + "€/j"
         + ", proprietaire=" + (proprietaire != null ? proprietaire.getIdU() : "null") + "]";
   }
-
-  // Méthode filter serait typiquement dans un service/repository, pas dans l'entité
-  // public static List<Vehicule> filter(...) { ... }
 }
+// Méthode filter serait typiquement dans un service/repository, pas dans l'entité
+// public static List<Vehicule> filter(...) { ... }

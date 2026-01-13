@@ -20,6 +20,12 @@ public class VehiculeDTO {
   private boolean disponible;
   private Double noteMoyenne; // Note moyenne calculée
   private List<LocalDate[]> datesDispo; // Dates de disponibilités (début/fin)
+  private LocalDate dateMiseEnCirculation;
+  private LocalDate dateDernierControle;
+  private LocalDate dateProchainControle;
+  private LocalDate dateDernierEntretien;
+  private Integer kilometrageActuel;
+  private Integer kilometrageDernierControle;
 
   public VehiculeDTO() {
     this.datesDispo = new ArrayList<>();
@@ -27,7 +33,9 @@ public class VehiculeDTO {
 
   public VehiculeDTO(Long id, TypeV type, String marque, String modele, String couleur,
       String ville, Double prixJ, boolean disponible, Double noteMoyenne,
-      List<LocalDate[]> datesDispo) {
+      List<LocalDate[]> datesDispo, LocalDate dateMiseEnCirculation, LocalDate dateDernierControle,
+      LocalDate dateProchainControle, LocalDate dateDernierEntretien, Integer kilometrageActuel,
+      Integer kilometrageDernierControle) {
     this.id = id;
     this.type = type;
     this.marque = marque;
@@ -38,6 +46,12 @@ public class VehiculeDTO {
     this.disponible = disponible;
     this.noteMoyenne = noteMoyenne;
     this.datesDispo = datesDispo != null ? datesDispo : new ArrayList<>();
+    this.dateMiseEnCirculation = dateMiseEnCirculation;
+    this.dateDernierControle = dateDernierControle;
+    this.dateProchainControle = dateProchainControle;
+    this.dateDernierEntretien = dateDernierEntretien;
+    this.kilometrageActuel = kilometrageActuel;
+    this.kilometrageDernierControle = kilometrageDernierControle;
   }
 
   // Getters et Setters
@@ -119,5 +133,53 @@ public class VehiculeDTO {
 
   public void setDatesDispo(List<LocalDate[]> datesDispo) {
     this.datesDispo = datesDispo;
+  }
+
+  public LocalDate getDateMiseEnCirculation() {
+    return dateMiseEnCirculation;
+  }
+
+  public void setDateMiseEnCirculation(LocalDate dateMiseEnCirculation) {
+    this.dateMiseEnCirculation = dateMiseEnCirculation;
+  }
+
+  public LocalDate getDateDernierControle() {
+    return dateDernierControle;
+  }
+
+  public void setDateDernierControle(LocalDate dateDernierControle) {
+    this.dateDernierControle = dateDernierControle;
+  }
+
+  public LocalDate getDateProchainControle() {
+    return dateProchainControle;
+  }
+
+  public void setDateProchainControle(LocalDate dateProchainControle) {
+    this.dateProchainControle = dateProchainControle;
+  }
+
+  public LocalDate getDateDernierEntretien() {
+    return dateDernierEntretien;
+  }
+
+  public void setDateDernierEntretien(LocalDate dateDernierEntretien) {
+    this.dateDernierEntretien = dateDernierEntretien;
+  }
+
+  public Integer getKilometrageActuel() {
+    return kilometrageActuel;
+  }
+
+  public void setKilometrageActuel(Integer kilometrageActuel) {
+    this.kilometrageActuel = kilometrageActuel;
+  }
+
+  public Integer getKilometrageDernierControle() {
+    return kilometrageDernierControle;
+  }
+
+  public void setKilometrageDernierControle(Integer kilometrageDernierControle) {
+    this.kilometrageDernierControle = kilometrageDernierControle;
   }
 }

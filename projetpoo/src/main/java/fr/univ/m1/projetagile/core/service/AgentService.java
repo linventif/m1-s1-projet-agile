@@ -1,5 +1,7 @@
 package fr.univ.m1.projetagile.core.service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import fr.univ.m1.projetagile.core.dto.AgentDTO;
@@ -7,6 +9,7 @@ import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
+import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 
@@ -16,11 +19,102 @@ import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
  */
 public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
-  private VehiculeService vehiculeService;
+  private final VehiculeService vehiculeService;
+  private final ControlTechniqueService controlTechniqueService;
+
+
+  public AgentService(AgentRepository agentRepository, VehiculeRepository vehiculeRepository) {
+    super(agentRepository);
+
+    if (vehiculeRepository == null) {
+      throw new IllegalArgumentException("VehiculeRepository ne peut pas être nul.");
+    }
+
+    this.vehiculeService = new VehiculeService(vehiculeRepository);
+    this.controlTechniqueService = new ControlTechniqueService(vehiculeRepository);
+  }
+
 
   public AgentService(AgentRepository agentRepository) {
     super(agentRepository);
-    vehiculeService = new VehiculeService(new VehiculeRepository());
+
+    // 创建临时的内存VehiculeRepository
+    VehiculeRepository tempRepository = createTemporaryVehiculeRepository();
+    this.vehiculeService = new VehiculeService(tempRepository);
+    this.controlTechniqueService = new ControlTechniqueService(tempRepository);
+  }
+
+  private VehiculeRepository createTemporaryVehiculeRepository() {
+    return new VehiculeRepository() {
+      private java.util.Map<Long, Vehicule> storage = new java.util.HashMap<>();
+      private long nextId = 1;
+
+      @Override
+      public Vehicule findById(Long id) {
+        return storage.get(id);
+      }
+
+      @Override
+      public Vehicule save(Vehicule vehicule) {
+        if (vehicule.getId() == null) {
+          Vehicule vehiculeWithId = createVehiculeWithId(vehicule, nextId++);
+          storage.put(vehiculeWithId.getId(), vehiculeWithId);
+          return vehiculeWithId;
+        }
+        storage.put(vehicule.getId(), vehicule);
+        return vehicule;
+      }
+
+      private Vehicule createVehiculeWithId(Vehicule original, Long id) {
+        Vehicule newVehicule = new Vehicule(original.getType(), original.getMarque(),
+            original.getModele(), original.getCouleur(), original.getVille(), original.getPrixJ(),
+            original.getProprietaire());
+
+
+        try {
+          java.lang.reflect.Field idField = Vehicule.class.getDeclaredField("id");
+          idField.setAccessible(true);
+          idField.set(newVehicule, id);
+          idField.setAccessible(false);
+        } catch (Exception e) {
+          System.err.println("无法设置ID: " + e.getMessage());
+          return original;
+        }
+
+
+        newVehicule.setDateMiseEnCirculation(original.getDateMiseEnCirculation());
+        newVehicule.setDateDernierControle(original.getDateDernierControle());
+        newVehicule.setKilometrageActuel(original.getKilometrageActuel());
+        newVehicule.setKilometrageDernierControle(original.getKilometrageDernierControle());
+        newVehicule.setDateProchainControle(original.getDateProchainControle());
+        newVehicule.setDateDernierEntretien(original.getDateDernierEntretien());
+        newVehicule.setDisponible(original.isDisponible());
+
+        return newVehicule;
+      }
+
+
+      @Override
+      public List<Vehicule> findAll() {
+        return new ArrayList<>(storage.values());
+      }
+
+      @Override
+      public void delete(Long id) {
+        storage.remove(id);
+      }
+
+      @Override
+      public List<Vehicule> findByAgentId(Long agentId) {
+        List<Vehicule> result = new ArrayList<>();
+        for (Vehicule v : storage.values()) {
+          if (v.getProprietaire() != null && v.getProprietaire().getIdU().equals(agentId)) {
+            result.add(v);
+          }
+        }
+        return result;
+      }
+    };
   }
 
   /**
@@ -251,5 +345,410 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
     agent.setSiret(nouveauSiret);
     return (AgentProfessionnel) repository.save(agent);
+  }
+
+  // ==================== 技术检查相关方法 ====================
+
+  /**
+   * Correspond au US.A.9：reminder le contrôle technique pour tous les véhicules d'un agent
+   *
+   * @param agentId
+   * @return
+   */
+  public String verifierControlesTechniquesAgent(int agentId) {
+
+    Agent agent = findById(agentId);
+    if (agent == null) {
+      return "❌ Agent non trouvé";
+    }
+
+
+    List<Vehicule> vehicules = getVehiculesEntityByAgent(agent);
+    if (vehicules == null || vehicules.isEmpty()) {
+      return " Cet agent n'a aucun véhicule";
+    }
+
+    return controlTechniqueService.genererRapportPourAgent(vehicules);
+  }
+
+  /**
+   *
+   *
+   * @param vehiculeId
+   * @return 车
+   */
+  public String getInfoControleVehicule(Long vehiculeId) {
+    // Obtenir le véhicule
+    Vehicule vehicule = findVehiculeById(vehiculeId);
+
+    if (vehicule == null) {
+      return "❌ Véhicule non trouvé";
+    }
+
+    return controlTechniqueService.genererRapportControle(vehicule);
+  }
+
+  /**
+   *
+   *
+   * @param vehiculeId
+   * @return
+   */
+  public String verifierControleVehicule(Long vehiculeId) {
+
+    Vehicule vehicule = findVehiculeById(vehiculeId);
+
+    if (vehicule == null) {
+      return "❌ Véhicule non trouvé";
+    }
+
+    boolean doitControle = controlTechniqueService.doitFaireControleProchainement(vehicule);
+    String statut = controlTechniqueService.getStatutControleDetaille(vehicule);
+
+    StringBuilder resultat = new StringBuilder();
+    resultat.append("🔍 Vérification du contrôle technique\n");
+    resultat.append("Véhicule: ").append(vehicule.getMarque()).append(" ")
+        .append(vehicule.getModele()).append("\n");
+    resultat.append("Résultat: ");
+
+    if (doitControle) {
+      resultat.append("⚠️ Il faut faire un contrôle technique\n");
+    } else {
+      resultat.append("✅ Pas besoin de contrôle technique pour le moment\n");
+    }
+
+    resultat.append("Détails: ").append(statut);
+
+    return resultat.toString();
+  }
+
+  /**
+   * obtenir la liste des véhicules nécessitant un contrôle technique urgent
+   *
+   * @param agentId
+   * @return
+   */
+  public List<Vehicule> getVehiculesUrgents(int agentId) {
+    Agent agent = findById(agentId);
+    if (agent == null) {
+      return new ArrayList<>();
+    }
+
+    List<Vehicule> vehicules = getVehiculesEntityByAgent(agent);
+    List<Vehicule> vehiculesUrgents = new ArrayList<>();
+
+    if (vehicules == null || vehicules.isEmpty()) {
+      return vehiculesUrgents;
+    }
+
+    for (Vehicule vehicule : vehicules) {
+      if (controlTechniqueService.doitFaireControleProchainement(vehicule)) {
+        vehiculesUrgents.add(vehicule);
+      }
+    }
+
+    return vehiculesUrgents;
+  }
+
+  /**
+   * obtenir la liste des véhicules nécessitant un contrôle technique urgent DTO
+   *
+   * @param agentId
+   * @return
+   */
+  public List<VehiculeDTO> getVehiculesUrgentsDTO(int agentId) {
+    List<Vehicule> vehiculesUrgents = getVehiculesUrgents(agentId);
+    List<VehiculeDTO> dtos = new ArrayList<>();
+
+    for (Vehicule vehicule : vehiculesUrgents) {
+      dtos.add(convertToDTO(vehicule));
+    }
+
+    return dtos;
+  }
+
+  /**
+   * correspond au US.A.8
+   *
+   * @param vehiculeId
+   * @param dateControle
+   * @param kilometrage
+   * @param resultat
+   * @param commentaires
+   * @return
+   */
+  public String enregistrerControleTechnique(Long vehiculeId, LocalDate dateControle,
+      Integer kilometrage, String resultat, String commentaires) {
+    try {
+      controlTechniqueService.enregistrerNouveauControle(vehiculeId, dateControle, kilometrage,
+          resultat, commentaires);
+
+
+      Vehicule vehicule = findVehiculeById(vehiculeId);
+      if (vehicule == null) {
+        return "❌ Véhicule non trouvé après l'enregistrement";
+      }
+
+      return String.format(
+          "✅ Contrôle technique enregistré pour %s %s\n" + "Date: %s\n" + "Prochain contrôle: %s",
+          vehicule.getMarque(), vehicule.getModele(), dateControle,
+          vehicule.getDateProchainControle());
+    } catch (Exception e) {
+      return "❌ Erreur lors de l'enregistrement: " + e.getMessage();
+    }
+  }
+
+  /**
+   * obtenir le statut détaillé du contrôle technique d'un véhicule
+   *
+   * @param vehiculeId
+   * @return
+   */
+  public String getStatutControleVehicule(Long vehiculeId) {
+    Vehicule vehicule = findVehiculeById(vehiculeId);
+
+    if (vehicule == null) {
+      return "❌ Véhicule non trouvé";
+    }
+
+    return controlTechniqueService.getStatutControleDetaille(vehicule);
+  }
+
+  /**
+   * calculer la date du prochain contrôle technique Correspond au US.A.10：calcular la fecha del
+   * próximo control técnico
+   *
+   * @param vehiculeId
+   * @return
+   */
+  public LocalDate calculerDateProchainControle(Long vehiculeId) {
+    Vehicule vehicule = findVehiculeById(vehiculeId);
+
+    if (vehicule == null) {
+      return null;
+    }
+
+    return controlTechniqueService.calculerDateProchainControle(vehicule);
+  }
+
+  /**
+   * verifier si un véhicule doit faire un contrôle technique prochainement
+   *
+   * @param vehiculeId
+   * @return
+   */
+  public boolean doitFaireControleProchainement(Long vehiculeId) {
+    Vehicule vehicule = findVehiculeById(vehiculeId);
+
+    if (vehicule == null) {
+      return false;
+    }
+
+    return controlTechniqueService.doitFaireControleProchainement(vehicule);
+  }
+
+  /**
+   * correspond au US.A.11
+   *
+   * @param vehiculeId
+   * @return
+   */
+  public List<String> getRecommandationsEntretien(Long vehiculeId) {
+    Vehicule vehicule = findVehiculeById(vehiculeId);
+
+    if (vehicule == null) {
+      return new ArrayList<>();
+    }
+
+    return controlTechniqueService.getRecommandationsEntretienParKilometrage(vehicule);
+  }
+
+  // ==================== methode ====================
+
+  /**
+   * obtenir la liste des véhicules d'un agent en tant qu'entités
+   */
+  private List<Vehicule> getVehiculesEntityByAgent(Agent agent) {
+
+    List<VehiculeDTO> vehiculeDTOs = vehiculeService.getVehiculesByAgent(agent);
+
+
+    List<Vehicule> vehicules = new ArrayList<>();
+    if (vehiculeDTOs != null) {
+      for (VehiculeDTO dto : vehiculeDTOs) {
+        Vehicule vehicule = convertDtoToEntity(dto);
+        if (vehicule != null) {
+          vehicules.add(vehicule);
+        }
+      }
+    }
+
+    return vehicules;
+  }
+
+
+
+  private VehiculeDTO convertToDTO(Vehicule vehicule) {
+    if (vehicule == null) {
+      return null;
+    }
+
+    VehiculeDTO dto = new VehiculeDTO();
+
+
+    dto.setId(vehicule.getId());
+
+    dto.setType(vehicule.getType());
+    dto.setMarque(vehicule.getMarque());
+    dto.setModele(vehicule.getModele());
+    dto.setCouleur(vehicule.getCouleur());
+    dto.setVille(vehicule.getVille());
+    dto.setPrixJ(vehicule.getPrixJ());
+
+
+    dto.setDateMiseEnCirculation(vehicule.getDateMiseEnCirculation());
+    dto.setDateDernierControle(vehicule.getDateDernierControle());
+    dto.setKilometrageActuel(vehicule.getKilometrageActuel());
+    dto.setKilometrageDernierControle(vehicule.getKilometrageDernierControle());
+    dto.setDateProchainControle(vehicule.getDateProchainControle());
+    dto.setDateDernierEntretien(vehicule.getDateDernierEntretien());
+    dto.setDisponible(vehicule.isDisponible());
+
+    return dto;
+  }
+
+  private Vehicule convertDtoToEntity(VehiculeDTO dto) {
+    if (dto == null) {
+      return null;
+    }
+
+    Vehicule vehicule = new Vehicule(dto.getType(), dto.getMarque(), dto.getModele(),
+        dto.getCouleur(), dto.getVille(), dto.getPrixJ(), null);
+
+
+    vehicule.setIdV(dto.getId());
+    vehicule.setType(dto.getType());
+    vehicule.setMarque(dto.getMarque());
+    vehicule.setModele(dto.getModele());
+    vehicule.setCouleur(dto.getCouleur());
+    vehicule.setVille(dto.getVille());
+    vehicule.setPrixJ(dto.getPrixJ());
+    vehicule.setDisponible(dto.isDisponible());
+
+
+
+    return vehicule;
+  }
+
+  /**
+   * consulter un agent par son ID
+   */
+  public Agent findById(int agentId) {
+    return super.findById((long) agentId);
+  }
+
+  /**
+   * consulter un véhicule par son ID
+   */
+  public Vehicule findVehiculeById(Long vehiculeId) {
+    if (vehiculeId == null) {
+      return null;
+    }
+    return vehiculeService.findById(vehiculeId);
+  }
+
+  /**
+   * obtenir le rapport de contrôle technique pour tous les agents
+   *
+   * @return
+   */
+  public String genererRapportTousAgents(List<Integer> agentIds) {
+
+    if (agentIds == null || agentIds.isEmpty()) {
+      return "Aucun agent trouvé";
+    }
+
+    StringBuilder rapport = new StringBuilder();
+    rapport.append("📊 RAPPORT CONTRÔLE TECHNIQUE - TOUS LES AGENTS\n");
+    rapport.append("═".repeat(70)).append("\n");
+    rapport.append("Nombre total d'agents: ").append(agentIds.size()).append("\n\n");
+
+    int totalVehicules = 0;
+    int totalUrgents = 0;
+
+    for (Integer agentId : agentIds) {
+      Agent agent = findById(agentId);
+      if (agent == null) {
+        rapport.append("❌ Agent ID ").append(agentId).append(" non trouvé\n\n");
+        continue;
+      }
+      List<Vehicule> vehicules = getVehiculesEntityByAgent(agent);
+      int vehiculesCount = vehicules != null ? vehicules.size() : 0;
+      totalVehicules += vehiculesCount;
+
+      rapport.append("👤 Agent: ");
+      if (agent instanceof AgentParticulier) {
+        AgentParticulier particulier = (AgentParticulier) agent;
+        rapport.append(particulier.getPrenom()).append(" ").append(particulier.getNom());
+      } else if (agent instanceof AgentProfessionnel) {
+        AgentProfessionnel pro = (AgentProfessionnel) agent;
+        rapport.append(pro.getNom()).append(" (Entreprise)");
+      }
+      rapport.append("\n");
+
+      rapport.append("   Email: ").append(agent.getEmail()).append("\n");
+      rapport.append("   Véhicules: ").append(vehiculesCount).append("\n");
+
+      if (vehiculesCount > 0) {
+        List<Vehicule> urgents = new ArrayList<>();
+        for (Vehicule v : vehicules) {
+          if (controlTechniqueService.doitFaireControleProchainement(v)) {
+            urgents.add(v);
+          }
+        }
+
+        totalUrgents += urgents.size();
+        rapport.append("   Contrôles urgents: ").append(urgents.size()).append("\n");
+
+        if (!urgents.isEmpty()) {
+          for (Vehicule urgent : urgents) {
+            rapport.append("     - ").append(urgent.getMarque()).append(" ")
+                .append(urgent.getModele()).append("\n");
+          }
+        }
+      }
+
+      rapport.append("\n");
+    }
+
+    // 总结
+    rapport.append("📈 RÉSUMÉ GÉNÉRAL\n");
+    rapport.append("═".repeat(30)).append("\n");
+    rapport.append("Agents totaux: ").append(agentIds.size()).append("\n");
+    rapport.append("Véhicules totaux: ").append(totalVehicules).append("\n");
+    rapport.append("Contrôles urgents: ").append(totalUrgents).append("\n");
+
+    if (totalUrgents > 0) {
+      rapport.append("🔴 ATTENTION: ").append(totalUrgents)
+          .append(" véhicules nécessitent un contrôle urgent!\n");
+    }
+
+    rapport.append("═".repeat(70));
+
+    return rapport.toString();
+  }
+
+  /**
+   *
+   */
+  public ControlTechniqueService getControlTechniqueService() {
+    return controlTechniqueService;
+  }
+
+  /**
+   * obtenir le service de véhicule
+   */
+  public VehiculeService getVehiculeService() {
+    return vehiculeService;
   }
 }
