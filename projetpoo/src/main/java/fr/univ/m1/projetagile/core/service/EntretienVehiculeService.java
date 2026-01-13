@@ -24,7 +24,7 @@ public class EntretienVehiculeService {
    * Creates a new vehicle maintenance record.
    *
    * @param vehicule the vehicle to maintain
-   * @param entretien the maintenance company
+   * @param entretien the Entretien entity representing the maintenance company
    * @param automatique whether the maintenance is automatic or manual
    * @return the created EntretienVehicule entity
    * @throws IllegalArgumentException if validation fails
