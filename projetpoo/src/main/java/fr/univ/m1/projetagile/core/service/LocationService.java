@@ -3,6 +3,8 @@ package fr.univ.m1.projetagile.core.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.stream.Collectors;
 import fr.univ.m1.projetagile.core.dto.LocationDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Location;
@@ -13,8 +15,7 @@ import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 
 /**
- * Service métier pour la gestion des locations de véhicules. Fournit les opérations CRUD et les
- * fonctionnalités métier liées aux locations.
+ * Service métier pour la gestion des locations de véhicules.
  */
 public class LocationService {
 
@@ -26,13 +27,6 @@ public class LocationService {
 
   /**
    * Crée et enregistre une nouvelle location après validation métier basique.
-   *
-   * @param dateDebut date et heure de début souhaitées
-   * @param dateFin date et heure de fin souhaitées
-   * @param lieuDepot lieu de dépôt du véhicule (facultatif, peut être null)
-   * @param vehicule véhicule concerné (doit être déjà persisté)
-   * @param loueur loueur effectuant la réservation
-   * @return la location sauvegardée
    */
   public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin,
       LieuRestitution lieuDepot, Vehicule vehicule, Loueur loueur) {
@@ -53,6 +47,7 @@ public class LocationService {
 
     LocalDate debutJour = dateDebut.toLocalDate();
     LocalDate finJour = dateFin.toLocalDate();
+
     boolean disponible =
         locationRepository.isVehicleAvailable(vehicule.getId(), debutJour, finJour);
     if (!disponible) {
@@ -65,12 +60,6 @@ public class LocationService {
 
   /**
    * Crée et enregistre une nouvelle location sans lieu de dépôt spécifié.
-   *
-   * @param dateDebut date et heure de début souhaitées
-   * @param dateFin date et heure de fin souhaitées
-   * @param vehicule véhicule concerné (doit être déjà persisté)
-   * @param loueur loueur effectuant la réservation
-   * @return la location sauvegardée
    */
   public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule,
       Loueur loueur) {
@@ -78,38 +67,54 @@ public class LocationService {
   }
 
   /**
-   * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
-   * - Le prix de base (prix par jour × nombre de jours) - Une commission proportionnelle de 10% sur
-   * le prix de base - Des frais fixes de 2€ par jour
-   *
-   * @param location la location pour laquelle calculer le prix
-   * @return le prix total de la location
+   * ✅ Utilitaire : nombre de jours d'une location. (Tu peux l'utiliser dans MainDemo pour afficher
+   * "Jours: X")
+   */
+  public long getNombreJours(Location location) {
+    if (location == null) {
+      throw new IllegalArgumentException("La location ne peut pas être nulle.");
+    }
+    long jours = ChronoUnit.DAYS.between(location.getDateDebut(), location.getDateFin());
+    return jours;
+  }
+
+  /**
+   * ✅ #42 - Historique des locations d’un véhicule (du plus récent au plus ancien).
+   */
+  public List<Location> getHistoriqueLocationsVehicule(Long vehiculeId) {
+    if (vehiculeId == null) {
+      throw new IllegalArgumentException("L'identifiant du véhicule ne peut pas être nul.");
+    }
+    return locationRepository.getHistoriqueLocations(vehiculeId);
+  }
+
+  /**
+   * ✅ #42 - Historique des locations d’un véhicule en DTO (pratique pour affichage).
+   */
+  public List<LocationDTO> getHistoriqueLocationsVehiculeDTO(Long vehiculeId) {
+    return getHistoriqueLocationsVehicule(vehiculeId).stream().map(this::convertLocationToDTO)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Calcule le prix total d'une location. Base = prix/jour × jours + commission 10% + 2€ par jour
    */
   public double getPrixLocation(Location location) {
     if (location == null) {
       throw new IllegalArgumentException("La location ne peut pas être nulle.");
     }
-    // Calcul du nombre de jours de location
+
     long nombreJours = ChronoUnit.DAYS.between(location.getDateDebut(), location.getDateFin());
 
-    // Prix de base = prix par jour × nombre de jours
     double prixBase = location.getVehicule().getPrixJ() * nombreJours;
-
-    // Commission de 10% sur le prix de base
     double commissionProportionnelle = prixBase * 0.1;
-
-    // Frais fixes de 2€ par jour
     double fraisFixes = 2.0 * nombreJours;
 
-    // Prix total = prix de base + commission + frais fixes
     return prixBase + commissionProportionnelle + fraisFixes;
   }
 
   /**
-   * Annule une location en cours. Change le statut de la location à ANNULER et la sauvegarde en
-   * base de données.
-   *
-   * @param location la location à annuler
+   * Annule une location en cours.
    */
   public void annuler(Location location) {
     if (location == null) {
@@ -127,10 +132,7 @@ public class LocationService {
   }
 
   /**
-   * Termine une location en cours. Change le statut de la location à TERMINE et la sauvegarde en
-   * base de données.
-   *
-   * @param location la location à terminer
+   * Termine une location en cours.
    */
   public void terminer(Location location) {
     if (location == null) {
@@ -146,11 +148,7 @@ public class LocationService {
   }
 
   /**
-   * Récupère une location par son identifiant et la convertit en LocationDTO
-   *
-   * @param id l'identifiant de la location
-   * @return le LocationDTO correspondant avec le prix total calculé, ou null si la location
-   *         n'existe pas
+   * Récupère une location par son identifiant et la convertit en LocationDTO.
    */
   public LocationDTO getLocation(Long id) {
     if (id == null) {
@@ -166,10 +164,7 @@ public class LocationService {
   }
 
   /**
-   * Convertit une entité Location en LocationDTO
-   *
-   * @param location l'entité Location à convertir
-   * @return le DTO correspondant avec toutes les informations incluant le prix total
+   * Convertit une entité Location en LocationDTO.
    */
   private LocationDTO convertLocationToDTO(Location location) {
     LocationDTO dto = new LocationDTO();
@@ -179,11 +174,8 @@ public class LocationService {
     dto.setDateFin(location.getDateFin());
     dto.setLieuDepot(location.getLieuDepot());
     dto.setStatut(location.getStatut());
-
-    // Calculer et définir le prix total
     dto.setPrixTotal(getPrixLocation(location));
 
-    // Convertir le véhicule en VehiculeDTO
     if (location.getVehicule() != null) {
       Vehicule vehicule = location.getVehicule();
       VehiculeDTO vehiculeDTO = new VehiculeDTO();

@@ -7,6 +7,7 @@ import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
+import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 
@@ -146,7 +147,21 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     }
 
     // Récupérer les véhicules de l'agent et filtrer uniquement ceux qui sont disponibles
-    List<VehiculeDTO> tousLesVehicules = vehiculeService.getVehiculesByAgent(agent);
+    VehiculeRepository vehiculeRepository = new VehiculeRepository();
+    List<Vehicule> vehicules = vehiculeRepository.findByAgentId(agent.getIdU());
+    List<VehiculeDTO> tousLesVehicules = vehicules.stream().map(v -> {
+      VehiculeDTO vehiculeDto = new VehiculeDTO();
+      vehiculeDto.setId(v.getId());
+      vehiculeDto.setType(v.getType());
+      vehiculeDto.setMarque(v.getMarque());
+      vehiculeDto.setModele(v.getModele());
+      vehiculeDto.setCouleur(v.getCouleur());
+      vehiculeDto.setVille(v.getVille());
+      vehiculeDto.setPrixJ(v.getPrixJ());
+      vehiculeDto.setDisponible(v.isDisponible());
+      vehiculeDto.setDatesDispo(v.getDatesDispo());
+      return vehiculeDto;
+    }).collect(Collectors.toList());
     List<VehiculeDTO> vehiculesDisponibles =
         tousLesVehicules.stream().filter(VehiculeDTO::isDisponible).collect(Collectors.toList());
 
