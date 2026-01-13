@@ -17,9 +17,6 @@ public class AgentProfessionnel extends Agent {
   @Column(nullable = false, name = "nom_entreprise")
   private String nomEntreprise;
 
-  @Column(name = "telephone", length = 20)
-  private String telephone;
-
   @Column(name = "adresse", length = 200)
   private String adresse;
 
@@ -70,16 +67,6 @@ public class AgentProfessionnel extends Agent {
   @Override
   public void setPrenom(String prenom) {
     // Les professionnels n'ont pas de prénom
-  }
-
-  @Override
-  public String getTelephone() {
-    return telephone;
-  }
-
-  @Override
-  public void setTelephone(String telephone) {
-    this.telephone = telephone;
   }
 
   @Override
