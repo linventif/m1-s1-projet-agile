@@ -84,7 +84,7 @@ public abstract class UtilisateurRepository<T extends Utilisateur> {
       List<T> results = query.getResultList();
 
       if (results.isEmpty()) {
-        throw new IllegalArgumentException("Aucun utilisateur trouvé avec l'email " + email);
+        return null;
       }
 
       if (results.size() > 1) {
@@ -94,6 +94,8 @@ public abstract class UtilisateurRepository<T extends Utilisateur> {
 
       return results.get(0);
 
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException("Erreur lors de la récupération de l'utilisateur par email", e);
     }
