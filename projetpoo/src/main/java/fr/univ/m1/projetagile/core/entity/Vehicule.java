@@ -1,7 +1,6 @@
 package fr.univ.m1.projetagile.core.entity;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
