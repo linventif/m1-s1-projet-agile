@@ -885,4 +885,27 @@ public class VehiculeService {
     return vehiculeRepository.findById(id);
   }
 
+  // =======================
+  // obtenir les véhicules par ville
+  // =======================
+  public List<Vehicule> getVehiculesParVille(String ville) {
+    return vehiculeRepository.findByVille(ville);
+  }
+
+  /**
+   * Filtre les véhicules par ville dans une liste donnée.
+   *
+   * @param liste la liste de véhicules à filtrer
+   * @param ville la ville utilisée comme critère de filtrage
+   * @return la liste des véhicules de la liste initiale dont la ville correspond au paramètre fourni
+   */
+  public List<Vehicule> getVehiculesParVilleDansListe(List<Vehicule> liste, String ville) {
+    if (liste == null) {
+      throw new IllegalArgumentException("La liste de véhicules ne peut pas être null.");
+    }
+    if (ville == null) {
+      throw new IllegalArgumentException("La ville ne peut pas être null.");
+    }
+    return liste.stream().filter(v -> ville.equalsIgnoreCase(v.getVille())).toList();
+  }
 }

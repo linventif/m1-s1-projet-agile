@@ -17,7 +17,6 @@ import jakarta.persistence.TypedQuery;
  * Repository pour gérer la persistance des véhicules
  */
 public class VehiculeRepository {
-
   /**
    * Enregistre un véhicule dans la base de données (création ou mise à jour)
    *
@@ -205,9 +204,9 @@ public class VehiculeRepository {
    */
   public Vehicule findById(Long id) {
     try (EntityManager em = DatabaseConnection.getEntityManager()) {
-      TypedQuery<Vehicule> query = em.createQuery(
-          "SELECT v FROM Vehicule v LEFT JOIN FETCH v.proprietaire WHERE v.id = :id",
-          Vehicule.class);
+      TypedQuery<Vehicule> query =
+          em.createQuery("SELECT v FROM Vehicule v LEFT JOIN FETCH v.proprietaire WHERE v.id = :id",
+              Vehicule.class);
       query.setParameter("id", id);
       List<Vehicule> results = query.getResultList();
       return results.isEmpty() ? null : results.get(0);
@@ -287,5 +286,18 @@ public class VehiculeRepository {
           "Erreur lors de la récupération des véhicules de l'agent " + agentId, e);
     }
 
+  }
+
+  // =======================
+  // consulter les véhicules par ville
+  // =======================
+  public List<Vehicule> findByVille(String ville) {
+    try (EntityManager em = DatabaseConnection.getEntityManager()) {
+      return em
+          .createQuery("SELECT v FROM Vehicule v WHERE v.adresse.ville = :ville", Vehicule.class)
+          .setParameter("ville", ville).getResultList();
+    } catch (Exception e) {
+      throw new RuntimeException("Erreur lors de la récupération des véhicules par ville", e);
+    }
   }
 }
