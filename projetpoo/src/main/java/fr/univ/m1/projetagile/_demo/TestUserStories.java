@@ -71,7 +71,7 @@ public class TestUserStories {
       AgentDTO agent = agentService.getAgentProfile(agentService.findByEmail("asmith@example.com"));
       System.out.println("Profil de l'agent: ");
       System.out.println(" - " + agent.getNom() + " " + agent.getPrenom() + " " + agent.getEmail()
-          + " " + agent.getTelephone() + " " + agent.getSiret() + " " + agent.getVehicules());
+          + " " + agent.getSiret() + " " + agent.getVehicules());
       System.out.println(" - Véhicules disponibles: ");
       for (VehiculeDTO vehicule : agent.getVehicules()) {
         System.out.println("   - " + vehicule.getMarque() + " " + vehicule.getModele() + " "

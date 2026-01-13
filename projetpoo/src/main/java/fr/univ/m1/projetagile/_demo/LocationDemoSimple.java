@@ -30,7 +30,7 @@ public class LocationDemoSimple {
       LocationService locationService = new LocationService(locationRepository);
 
       AgentParticulier agent = agentService.createAgentParticulier("Loc", "Owner",
-          "locowner" + suffix + "@demo", "pass", "340" + String.format("%08d", suffix));
+          "locowner" + suffix + "@demo", "pass");
       Loueur loueur =
           loueurService.createLoueur("Loc", "User", "locuser" + suffix + "@demo", "pass");
       Vehicule vehicule = vehiculeService.createVehicule(TypeV.voiture, "Ford", "Focus", "Noir",

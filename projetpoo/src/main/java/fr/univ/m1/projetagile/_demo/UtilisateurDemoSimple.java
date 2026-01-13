@@ -21,7 +21,7 @@ public class UtilisateurDemoSimple {
 
       // 2 agents + 2 loueurs = 4 utilisateurs
       AgentParticulier agent1 = agentService.createAgentParticulier("NomA1", "PrenomA1",
-          "agentp" + suffix + "@demo.test", "pass", "336" + String.format("%08d", suffix));
+          "agentp" + suffix + "@demo.test", "pass");
       AgentProfessionnel agent2 =
           agentService.createAgentProfessionnel("agentpro" + suffix + "@demo.test", "pass",
               "" + (10_000_000_000_000L + suffix), "Entreprise" + suffix);

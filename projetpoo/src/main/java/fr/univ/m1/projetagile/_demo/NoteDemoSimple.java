@@ -33,7 +33,7 @@ public class NoteDemoSimple {
       NoteService noteService = new NoteService();
 
       AgentParticulier agent = agentService.createAgentParticulier("Note", "Agent",
-          "noteagent" + suffix + "@demo", "pass", "341" + String.format("%08d", suffix));
+          "noteagent" + suffix + "@demo", "pass");
       Loueur loueur =
           loueurService.createLoueur("Note", "Loueur", "noteloueur" + suffix + "@demo", "pass");
       Vehicule vehicule = vehiculeService.createVehicule(TypeV.voiture, "Opel", "Corsa", "Blanc",

@@ -17,9 +17,9 @@ public class AgentDemoSimple {
 
       // 4 agents (2 particuliers, 2 professionnels)
       AgentParticulier a1 = agentService.createAgentParticulier("Martin", "Lena",
-          "lena" + suffix + "@agent.demo", "pass", "336" + String.format("%08d", suffix));
+          "lena" + suffix + "@agent.demo", "pass");
       AgentParticulier a2 = agentService.createAgentParticulier("Durand", "Paul",
-          "paul" + suffix + "@agent.demo", "pass", "337" + String.format("%08d", suffix));
+          "paul" + suffix + "@agent.demo", "pass");
 
       AgentProfessionnel p1 = agentService.createAgentProfessionnel("pro1" + suffix + "@agent.demo",
           "pass", "" + (11_000_000_000_000L + suffix), "AgencePro" + suffix);

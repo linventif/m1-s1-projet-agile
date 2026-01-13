@@ -78,15 +78,11 @@ public abstract class Utilisateur {
 
   public abstract String getPrenom();
 
-  public abstract String getTelephone();
-
   public abstract String getAdresse();
 
   public abstract void setNom(String nom);
 
   public abstract void setPrenom(String prenom);
-
-  public abstract void setTelephone(String telephone);
 
   public abstract void setAdresse(String adresse);
 
@@ -210,7 +206,6 @@ public abstract class Utilisateur {
     profil.setNom(getNom());
     profil.setPrenom(getPrenom());
     profil.setEmail(this.email);
-    profil.setTelephone(getTelephone());
     profil.setAdresse(getAdresse());
     profil.setBio(this.bio);
 
@@ -239,16 +234,12 @@ public abstract class Utilisateur {
   /**
    * Modifier les informations du profil
    */
-  public void modifierProfil(String nom, String prenom, String telephone, String adresse,
-      String bio) {
+  public void modifierProfil(String nom, String prenom, String adresse, String bio) {
     if (nom != null && !nom.trim().isEmpty()) {
       setNom(nom);
     }
     if (prenom != null && !prenom.trim().isEmpty()) {
       setPrenom(prenom);
-    }
-    if (telephone != null) {
-      setTelephone(telephone);
     }
     if (adresse != null) {
       setAdresse(adresse);

@@ -71,7 +71,7 @@ public class _MainDemo {
           (AgentParticulier) agentService.findByEmail("bob.maurise@gmail.com");
       if (APar_bob == null) {
         APar_bob = agentService.createAgentParticulier("maurise", "bob", "bob.maurise@gmail.com",
-            "p@ssw0rd", "33601020304");
+            "p@ssw0rd");
         System.out.println("✓ Agent créé: " + APar_bob);
       } else {
         System.out.println("✓ Agent existant récupéré: " + APar_bob);
@@ -81,7 +81,7 @@ public class _MainDemo {
           (AgentParticulier) agentService.findByEmail("alice.dupont@gmail.com");
       if (APar_alice == null) {
         APar_alice = agentService.createAgentParticulier("dupont", "alice",
-            "alice.dupont@gmail.com", "p@ssw0rd", "33605060708");
+            "alice.dupont@gmail.com", "p@ssw0rd");
         System.out.println("✓ Agent créé: " + APar_alice);
       } else {
         System.out.println("✓ Agent existant récupéré: " + APar_alice);
@@ -468,21 +468,21 @@ public class _MainDemo {
       System.out.println("\n=== Mise à jour des profils ===");
 
       // Bob met à jour son profil
-      APar_bob.modifierProfil("Maurise", "Bob", "06 01 02 03 04", "12 rue de la Location, Paris",
+      APar_bob.modifierProfil("Maurise", "Bob", "12 rue de la Location, Paris",
           "Agent de location particulier passionné par l'automobile depuis 10 ans.");
       APar_bob.setNomCommercial("Bob's Cars");
       agentService.save(APar_bob);
       System.out.println("✓ Profil de Bob mis à jour");
 
       // Alice met à jour son profil
-      APar_alice.modifierProfil("Dupont", "Alice", "06 05 06 07 08",
-          "45 avenue des Véhicules, Lyon", "Spécialisée dans la location de véhicules premium.");
+      APar_alice.modifierProfil("Dupont", "Alice", "45 avenue des Véhicules, Lyon",
+          "Spécialisée dans la location de véhicules premium.");
       APar_alice.setNomCommercial("Alice Premium Cars");
       agentService.save(APar_alice);
       System.out.println("✓ Profil d'Alice mis à jour");
 
       // John met à jour son profil
-      L_john.modifierProfil("Doe", "John", "06 12 34 56 78", "10 rue du Locataire, Marseille",
+      L_john.modifierProfil("Doe", "John", "10 rue du Locataire, Marseille",
           "Loueur régulier, je prends soin des véhicules.");
       loueurService.save(L_john);
       System.out.println("✓ Profil de John mis à jour");

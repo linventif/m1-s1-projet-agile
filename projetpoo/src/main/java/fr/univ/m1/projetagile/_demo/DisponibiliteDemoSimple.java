@@ -23,8 +23,8 @@ public class DisponibiliteDemoSimple {
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
       DisponibiliteService dispoService = new DisponibiliteService();
 
-      AgentParticulier agent = agentService.createAgentParticulier("Dispo", "Owner",
-          "dispo" + suffix + "@demo", "pass", "339" + String.format("%08d", suffix));
+      AgentParticulier agent =
+          agentService.createAgentParticulier("Dispo", "Owner", "dispo" + suffix + "@demo", "pass");
       Vehicule vehicule = vehiculeService.createVehicule(TypeV.voiture, "Citroen", "C3", "Rouge",
           "Lille", 28.0, agent);
 

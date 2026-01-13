@@ -46,6 +46,37 @@ public class Entretien extends Utilisateur {
     this.nomEntreprise = nomEntreprise;
   }
 
+  // Implémentation des méthodes abstraites de Utilisateur
+  @Override
+  public String getNom() {
+    return nomEntreprise;
+  }
+
+  @Override
+  public void setNom(String nom) {
+    this.nomEntreprise = nom;
+  }
+
+  @Override
+  public String getPrenom() {
+    return null; // Les entreprises d'entretien n'ont pas de prénom
+  }
+
+  @Override
+  public void setPrenom(String prenom) {
+    // Les entreprises d'entretien n'ont pas de prénom
+  }
+
+  @Override
+  public String getAdresse() {
+    return null; // Adresse à ajouter si nécessaire
+  }
+
+  @Override
+  public void setAdresse(String adresse) {
+    // Adresse à ajouter si nécessaire
+  }
+
   public List<PrixEntretien> getPrixEntretiens() {
     return Collections.unmodifiableList(prixEntretiens);
   }

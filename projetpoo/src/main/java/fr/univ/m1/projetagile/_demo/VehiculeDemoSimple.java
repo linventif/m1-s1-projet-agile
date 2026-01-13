@@ -20,7 +20,7 @@ public class VehiculeDemoSimple {
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
 
       AgentParticulier proprietaire = agentService.createAgentParticulier("Auto", "Owner",
-          "owner" + suffix + "@vehicule.demo", "pass", "338" + String.format("%08d", suffix));
+          "owner" + suffix + "@vehicule.demo", "pass");
 
       Vehicule v1 = vehiculeService.createVehicule(TypeV.voiture, "Peugeot", "208", "Bleu", "Paris",
           40.0, proprietaire);

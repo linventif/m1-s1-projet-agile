@@ -36,7 +36,7 @@ public class VerificationDemoSimple {
           new VerificationService(verificationRepository, locationRepository);
 
       AgentParticulier agent = agentService.createAgentParticulier("Verif", "Agent",
-          "verifagent" + suffix + "@demo", "pass", "342" + String.format("%08d", suffix));
+          "verifagent" + suffix + "@demo", "pass");
       Loueur loueur =
           loueurService.createLoueur("Verif", "Loueur", "verifloueur" + suffix + "@demo", "pass");
 

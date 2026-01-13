@@ -40,45 +40,18 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   }
 
   /**
-   * Valide le format d'un numéro de téléphone Le format attendu est: 11 chiffres commençant par un
-   * code pays (ex: 33638472527)
-   *
-   * @param telephone le numéro de téléphone à valider
-   * @throws IllegalArgumentException si le format est invalide
-   */
-  private void validateTelephone(String telephone) {
-    if (telephone == null || telephone.trim().isEmpty()) {
-      throw new IllegalArgumentException("Le numéro de téléphone ne peut pas être vide.");
-    }
-
-    // Vérifier que le numéro ne contient que des chiffres
-    if (!telephone.matches("\\d+")) {
-      throw new IllegalArgumentException(
-          "Le numéro de téléphone ne doit contenir que des chiffres.");
-    }
-
-    // Vérifier que le numéro a exactement 11 chiffres
-    if (telephone.length() != 11) {
-      throw new IllegalArgumentException(
-          "Le numéro de téléphone doit contenir exactement 11 chiffres (ex: 33638472527).");
-    }
-  }
-
-  /**
    * Crée un nouvel agent particulier
    *
    * @param nom le nom de l'agent
    * @param prenom le prénom de l'agent
    * @param email l'email de l'agent
    * @param motDePasse le mot de passe de l'agent
-   * @param telephone le numéro de téléphone de l'agent
    * @return l'agent créé et enregistré
    */
   public AgentParticulier createAgentParticulier(String nom, String prenom, String email,
-      String motDePasse, String telephone) {
+      String motDePasse) {
 
     validateCommonFields(email, motDePasse);
-    validateTelephone(telephone);
 
     if (nom == null || nom.trim().isEmpty()) {
       throw new IllegalArgumentException("Le nom ne peut pas être vide.");
@@ -92,7 +65,7 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
       throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà.");
     }
 
-    AgentParticulier agent = new AgentParticulier(nom, prenom, email, motDePasse, telephone);
+    AgentParticulier agent = new AgentParticulier(nom, prenom, email, motDePasse);
     return (AgentParticulier) repository.save(agent);
   }
 
@@ -154,7 +127,6 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
       AgentParticulier particulier = (AgentParticulier) agent;
       dto.setNom(particulier.getNom());
       dto.setPrenom(particulier.getPrenom());
-      dto.setTelephone(particulier.getTelephone());
     } else if (agent instanceof AgentProfessionnel) {
       AgentProfessionnel professionnel = (AgentProfessionnel) agent;
       dto.setNom(professionnel.getNom());
@@ -207,25 +179,6 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     }
 
     agent.setPrenom(nouveauPrenom);
-    return (AgentParticulier) repository.save(agent);
-  }
-
-  /**
-   * Modifie le téléphone d'un agent particulier
-   *
-   * @param agent l'agent particulier à modifier
-   * @param nouveauTelephone le nouveau numéro de téléphone
-   * @return l'agent modifié
-   */
-  public AgentParticulier updateAgentParticulierTelephone(AgentParticulier agent,
-      String nouveauTelephone) {
-    if (agent == null) {
-      throw new IllegalArgumentException("L'agent ne peut pas être nul.");
-    }
-
-    validateTelephone(nouveauTelephone);
-
-    agent.setTelephone(nouveauTelephone);
     return (AgentParticulier) repository.save(agent);
   }
 
@@ -529,7 +482,8 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     dto.setPrixJ(vehicule.getPrixJ());
 
     // Get technical control data via service
-    ControleTechnique ct = controlTechniqueService.getControleTechniqueByVehiculeId(vehicule.getId());
+    ControleTechnique ct =
+        controlTechniqueService.getControleTechniqueByVehiculeId(vehicule.getId());
     if (ct != null) {
       dto.setDateMiseEnCirculation(ct.getDateMiseEnCirculation());
       dto.setDateDernierControle(ct.getDate());
@@ -562,8 +516,8 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
     // Set control technique fields via service if vehicule has an ID
     if (dto.getId() != null) {
-      controlTechniqueService.updateControleTechnique(dto.getId(),
-          dto.getDateMiseEnCirculation(), dto.getDateDernierControle(), dto.getKilometrageActuel(),
+      controlTechniqueService.updateControleTechnique(dto.getId(), dto.getDateMiseEnCirculation(),
+          dto.getDateDernierControle(), dto.getKilometrageActuel(),
           dto.getKilometrageDernierControle(), dto.getDateProchainControle(),
           dto.getDateDernierEntretien(), null);
     }

@@ -18,8 +18,7 @@ public class MessagerieDemoSimple {
       // Création d’utilisateurs légers (IDs requis par MessagerieService)
       Loueur loueur = new Loueur("Doe", "John", "john@example.com", "pass");
       loueur.setIdU(1L);
-      AgentParticulier agent =
-          new AgentParticulier("Smith", "Alice", "alice@example.com", "pass", "0600000000");
+      AgentParticulier agent = new AgentParticulier("Smith", "Alice", "alice@example.com", "pass");
       agent.setIdU(2L);
 
       // 4 exemples simples
