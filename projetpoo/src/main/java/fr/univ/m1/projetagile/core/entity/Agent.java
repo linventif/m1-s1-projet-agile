@@ -170,8 +170,24 @@ public abstract class Agent extends Utilisateur {
 
   public Double calculerNote() {
     // Calcule la note moyenne de l'agent
-    // TODO: Récupérer toutes les NoteA pour cet agent et calculer la moyenne
-    return 0.0; // Placeholder
+    try {
+      fr.univ.m1.projetagile.notes.persistence.NoteAgentRepository repo =
+          new fr.univ.m1.projetagile.notes.persistence.NoteAgentRepository();
+      List<fr.univ.m1.projetagile.notes.entity.NoteAgent> notes = repo.findByAgentId(this.idU);
+
+      if (notes == null || notes.isEmpty()) {
+        return 0.0;
+      }
+
+      double somme = 0.0;
+      for (fr.univ.m1.projetagile.notes.entity.NoteAgent note : notes) {
+        somme += note.getNoteMoyenne();
+      }
+
+      return somme / notes.size();
+    } catch (Exception e) {
+      return 0.0;
+    }
   }
 
   // Méthode abstraite que les sous-classes doivent implémenter

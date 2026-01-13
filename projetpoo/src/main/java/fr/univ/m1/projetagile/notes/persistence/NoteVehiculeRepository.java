@@ -19,26 +19,33 @@ public class NoteVehiculeRepository {
       transaction = em.getTransaction();
       transaction.begin();
 
-      // Recharger les critères depuis la base de données pour s'assurer qu'ils sont dans le
-      // contexte de persistance
-      List<fr.univ.m1.projetagile.notes.entity.Critere> criteresReloaded =
-          new java.util.ArrayList<>();
-      for (fr.univ.m1.projetagile.notes.entity.Critere critere : note.getCriteres()) {
+      // Sauvegarder temporairement les critères
+      List<fr.univ.m1.projetagile.notes.entity.Critere> criteresOriginaux =
+          new java.util.ArrayList<>(note.getCriteres());
+
+      // Vider les critères avant la persistance initiale
+      note.getCriteres().clear();
+
+      if (note.getId() == null) {
+        em.persist(note);
+        em.flush(); // Générer l'ID
+      } else {
+        note = em.merge(note);
+      }
+
+      // Recharger et ajouter les critères
+      for (fr.univ.m1.projetagile.notes.entity.Critere critere : criteresOriginaux) {
         if (critere.getId() != null) {
           fr.univ.m1.projetagile.notes.entity.Critere reloaded =
               em.find(fr.univ.m1.projetagile.notes.entity.Critere.class, critere.getId());
           if (reloaded != null) {
-            criteresReloaded.add(reloaded);
+            note.getCriteres().add(reloaded);
           }
         }
       }
-      note.setCriteres(criteresReloaded);
 
-      if (note.getId() == null) {
-        em.persist(note);
-      } else {
-        note = em.merge(note);
-      }
+      // Merger pour sauvegarder les relations
+      note = em.merge(note);
 
       transaction.commit();
       return note;

@@ -83,8 +83,24 @@ public class Loueur extends Utilisateur {
 
   public Double calculerNote() {
     // Calcule la note moyenne du loueur
-    // TODO: Récupérer toutes les NoteLoueur pour ce loueur et calculer la moyenne
-    return 0.0; // Placeholder
+    try {
+      fr.univ.m1.projetagile.notes.persistence.NoteLoueurRepository repo =
+          new fr.univ.m1.projetagile.notes.persistence.NoteLoueurRepository();
+      List<fr.univ.m1.projetagile.notes.entity.NoteLoueur> notes = repo.findByLoueurId(this.idU);
+
+      if (notes == null || notes.isEmpty()) {
+        return 0.0;
+      }
+
+      double somme = 0.0;
+      for (fr.univ.m1.projetagile.notes.entity.NoteLoueur note : notes) {
+        somme += note.getNoteMoyenne();
+      }
+
+      return somme / notes.size();
+    } catch (Exception e) {
+      return 0.0;
+    }
   }
 
   @Override
