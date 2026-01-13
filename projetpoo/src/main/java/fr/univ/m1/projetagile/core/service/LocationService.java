@@ -2,7 +2,6 @@ package fr.univ.m1.projetagile.core.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepository;
@@ -207,10 +206,10 @@ public class LocationService {
   /**
    * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
    * - Le prix de base (prix par jour × nombre de jours) - Une commission proportionnelle de 10% sur
-   * le prix de base (ou 5% si location de longue durée) - Des frais fixes de 2€ par jour - 
-   * Une promotion de 10% si le lieu de dépôt est un parking
+   * le prix de base (ou 5% si location de longue durée) - Des frais fixes de 2€ par jour - Une
+   * promotion de 10% si le lieu de dépôt est un parking
    *
-   * le prix de base - Des frais fixes de 2€ par jour 
+   * le prix de base - Des frais fixes de 2€ par jour
    *
    * @param location la location pour laquelle calculer le prix
    * @return le prix total de la location
@@ -341,6 +340,26 @@ public class LocationService {
     }
 
     return convertLocationToDTO(location);
+  }
+
+  /**
+   * Récupère une location par son identifiant
+   *
+   * @param id l'identifiant de la location
+   * @return la location correspondante, ou null si la location n'existe pas
+   */
+  public Location findLocationById(Long id) {
+    if (id == null) {
+      throw new IllegalArgumentException("L'identifiant de la location ne peut pas être nul.");
+    }
+
+    Location location = locationRepository.findById(id);
+
+    if (location == null) {
+      return null;
+    }
+
+    return location;
   }
 
   /**
