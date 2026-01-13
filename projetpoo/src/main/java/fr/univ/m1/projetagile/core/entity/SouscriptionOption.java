@@ -18,63 +18,70 @@ public class SouscriptionOption {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(nullable = false)
+  private LocalDateTime dateDebut;
+
+  @Column(nullable = false)
+  private boolean renouvellement;
+
+  @Column(nullable = false)
+  private int periodicite; // en mois
+
+  // 🔗 Lien avec l'utilisateur
+  @ManyToOne
+  @JoinColumn(name = "utilisateur_id", nullable = false)
+  private Utilisateur utilisateur;
+
+  // 🔗 Lien avec l'option
   @ManyToOne
   @JoinColumn(name = "option_id", nullable = false)
   private Options option;
 
-  @ManyToOne
-  @JoinColumn(name = "location_id", nullable = false)
-  private Location location;
-
-  @Column(name = "annulee", nullable = false)
-  private boolean annulee = false;
-
-  @Column(name = "date_annulation")
-  private LocalDateTime dateAnnulation;
-
-  // Constructeur sans argument pour JPA
+  // Constructeur JPA
   protected SouscriptionOption() {}
 
-  // constructeur métier
-  public SouscriptionOption(Options option, Location location) {
+  public SouscriptionOption(Utilisateur utilisateur, Options option, int periodicite,
+      boolean renouvellement) {
+    this.utilisateur = utilisateur;
     this.option = option;
-    this.location = location;
+    this.periodicite = periodicite;
+    this.renouvellement = renouvellement;
+    this.dateDebut = LocalDateTime.now();
   }
 
-  // Getters / Setters
+  // =======================
+  // Méthodes métier (UML)
+  // =======================
+
+  public void annulerOption() {
+    this.renouvellement = false;
+  }
+
+  // =======================
+  // Getters
+  // =======================
+
   public Long getId() {
     return id;
   }
 
+  public LocalDateTime getDateDebut() {
+    return dateDebut;
+  }
+
+  public boolean isRenouvellement() {
+    return renouvellement;
+  }
+
+  public int getPeriodicite() {
+    return periodicite;
+  }
+
+  public Utilisateur getUtilisateur() {
+    return utilisateur;
+  }
+
   public Options getOption() {
     return option;
-  }
-
-  public void setOption(Options option) {
-    this.option = option;
-  }
-
-  public Location getLocation() {
-    return location;
-  }
-
-  public void setLocation(Location location) {
-    this.location = location;
-  }
-
-  public boolean isAnnulee() {
-    return annulee;
-  }
-
-  public LocalDateTime getDateAnnulation() {
-    return dateAnnulation;
-  }
-
-  // Méthode métier d'annulation
-  public void annulerOption() {
-    if (!this.annulee) {
-      this.annulee = true;
-      this.dateAnnulation = LocalDateTime.now();
-    }
   }
 }

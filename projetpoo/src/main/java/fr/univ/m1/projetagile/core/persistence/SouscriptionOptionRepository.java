@@ -1,10 +1,9 @@
 package fr.univ.m1.projetagile.core.persistence;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Options;
 import fr.univ.m1.projetagile.core.entity.SouscriptionOption;
+import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import jakarta.persistence.EntityManager;
 
 public class SouscriptionOptionRepository {
@@ -42,24 +41,24 @@ public class SouscriptionOptionRepository {
   }
 
   /**
-   * Recherche une location par son identifiant.
+   * Recherche un utilisateur par son identifiant.
    */
-  public Location findLocationById(Long locationId) {
-    return em.find(Location.class, locationId);
+  public Utilisateur findUtilisateurById(Long utilisateurId) {
+    return em.find(Utilisateur.class, utilisateurId);
   }
 
   /**
-   * Liste toutes les souscriptions NON ANNULEES associées à une location.
+   * Liste toutes les souscriptions ACTIVES d’un utilisateur.
    */
-  public List<SouscriptionOption> findByLocation(Long locationId) {
+  public List<SouscriptionOption> findByUtilisateur(Long utilisateurId) {
     return em
         .createQuery("SELECT s FROM SouscriptionOption s "
-            + "WHERE s.location.id = :id AND s.annulee = false", SouscriptionOption.class)
-        .setParameter("id", locationId).getResultList();
+            + "WHERE s.utilisateur.idU = :id AND s.annulee = false", SouscriptionOption.class)
+        .setParameter("id", utilisateurId).getResultList();
   }
 
   /**
-   * Supprime physiquement une souscription d’option (optionnel, si tu en as besoin).
+   * Supprime physiquement une souscription d’option.
    */
   public void delete(SouscriptionOption souscription) {
     SouscriptionOption managed = souscription;
@@ -67,19 +66,5 @@ public class SouscriptionOptionRepository {
       managed = em.merge(souscription);
     }
     em.remove(managed);
-  }
-
-  /**
-   * Récupère toutes les souscriptions NON ANNULEES dont la location commence dans une période.
-   */
-  public List<SouscriptionOption> findByLocationDateBetween(LocalDateTime debutInclus,
-      LocalDateTime finExclu) {
-
-    return em
-        .createQuery(
-            "SELECT s FROM SouscriptionOption s " + "WHERE s.location.dateDebut >= :debut "
-                + "AND s.location.dateDebut < :fin " + "AND s.annulee = false",
-            SouscriptionOption.class)
-        .setParameter("debut", debutInclus).setParameter("fin", finExclu).getResultList();
   }
 }
