@@ -878,4 +878,11 @@ public class VehiculeService {
     return disponibiliteRepository.save(mergedDisponibilite);
   }
 
+  public Vehicule findById(Long id) {
+    if (id == null) {
+      return null;
+    }
+    return vehiculeRepository.findById(id);
+  }
+
 }
