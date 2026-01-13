@@ -4,6 +4,7 @@ import fr.univ.m1.projetagile.core.entity.Entretien;
 import fr.univ.m1.projetagile.core.entity.EntretienVehicule;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.EntretienVehiculeRepository;
+import fr.univ.m1.projetagile.enums.StatutEntretien;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -231,9 +232,9 @@ public class EntretienVehiculeService {
    * @param statut the status (EN_ATTENTE, PLANIFIE, REALISE, ANNULE)
    * @return list of maintenance records with the given status
    */
-  public List<EntretienVehicule> getEntretiensByStatut(String statut) {
-    if (statut == null || statut.trim().isEmpty()) {
-      throw new IllegalArgumentException("Le statut ne peut pas être vide");
+  public List<EntretienVehicule> getEntretiensByStatut(StatutEntretien statut) {
+    if (statut == null) {
+      throw new IllegalArgumentException("Le statut ne peut pas être null");
     }
     return repository.findByStatut(statut);
   }

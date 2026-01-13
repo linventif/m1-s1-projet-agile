@@ -1,8 +1,11 @@
 package fr.univ.m1.projetagile.core.entity;
 
 import java.time.LocalDate;
+import fr.univ.m1.projetagile.enums.StatutEntretien;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -27,8 +30,9 @@ public class EntretienVehicule {
   @Column(name = "date_realisation")
   private LocalDate dateRealisation;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "statut", length = 50)
-  private String statut; // EN_ATTENTE, PLANIFIE, REALISE, ANNULE
+  private StatutEntretien statut;
 
   @ManyToOne
   @JoinColumn(name = "vehicule_id", nullable = false)
@@ -45,7 +49,7 @@ public class EntretienVehicule {
     this.automatique = automatique;
     this.vehicule = vehicule;
     this.entretien = entretien;
-    this.statut = "EN_ATTENTE";
+    this.statut = StatutEntretien.EN_ATTENTE;
   }
 
   // Getters et Setters
@@ -77,11 +81,11 @@ public class EntretienVehicule {
     this.dateRealisation = dateRealisation;
   }
 
-  public String getStatut() {
+  public StatutEntretien getStatut() {
     return statut;
   }
 
-  public void setStatut(String statut) {
+  public void setStatut(StatutEntretien statut) {
     this.statut = statut;
   }
 
@@ -114,7 +118,7 @@ public class EntretienVehicule {
           "La date de planification ne peut pas être dans le passé");
     }
     this.datePlanification = date;
-    this.statut = "PLANIFIE";
+    this.statut = StatutEntretien.PLANIFIE;
   }
 
   /**
@@ -122,13 +126,13 @@ public class EntretienVehicule {
    */
   public void marquerRealise() {
     this.dateRealisation = LocalDate.now();
-    this.statut = "REALISE";
+    this.statut = StatutEntretien.REALISE;
   }
 
   /**
    * Annule l'entretien planifié.
    */
   public void annuler() {
-    this.statut = "ANNULE";
+    this.statut = StatutEntretien.ANNULE;
   }
 }

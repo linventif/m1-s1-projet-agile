@@ -4,6 +4,7 @@ import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.Entretien;
 import fr.univ.m1.projetagile.core.entity.EntretienVehicule;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
+import fr.univ.m1.projetagile.enums.StatutEntretien;
 import jakarta.persistence.EntityManager;
 import java.util.Collections;
 import java.util.List;
@@ -166,8 +167,8 @@ public class EntretienVehiculeRepository {
    * @param statut the status to filter by (EN_ATTENTE, PLANIFIE, REALISE, ANNULE)
    * @return list of maintenance records with the given status
    */
-  public List<EntretienVehicule> findByStatut(String statut) {
-    if (statut == null || statut.trim().isEmpty()) {
+  public List<EntretienVehicule> findByStatut(StatutEntretien statut) {
+    if (statut == null) {
       return Collections.emptyList();
     }
 
