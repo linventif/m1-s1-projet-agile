@@ -36,14 +36,10 @@ public class NoteLoueurRepository {
         criteresManagedList.add(managed);
       }
 
-      // 1) Persister la note sans critères pour générer l'ID
-      NoteLoueur noteToSave = new NoteLoueur(note.getAgent(), note.getLoueur(), new ArrayList<>());
+      // Persister la note avec les critères gérés pour éviter une liste vide
+      NoteLoueur noteToSave =
+          new NoteLoueur(note.getAgent(), note.getLoueur(), new ArrayList<>(criteresManagedList));
       em.persist(noteToSave);
-      em.flush();
-
-      // 2) Attacher les critères gérés et merger
-      noteToSave.getCriteres().addAll(criteresManagedList);
-      noteToSave = em.merge(noteToSave);
       em.flush();
 
       transaction.commit();

@@ -36,15 +36,10 @@ public class NoteVehiculeRepository {
         criteresManagedList.add(managed);
       }
 
-      // 1) Persister la note sans critères pour générer l'ID
-      NoteVehicule noteToSave =
-          new NoteVehicule(note.getVehicule(), note.getLoueur(), new ArrayList<>());
+      // Persister la note avec les critères gérés pour éviter une liste vide
+      NoteVehicule noteToSave = new NoteVehicule(note.getVehicule(), note.getLoueur(),
+          new ArrayList<>(criteresManagedList));
       em.persist(noteToSave);
-      em.flush();
-
-      // 2) Attacher les critères gérés et merger
-      noteToSave.getCriteres().addAll(criteresManagedList);
-      noteToSave = em.merge(noteToSave);
       em.flush();
 
       transaction.commit();

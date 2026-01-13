@@ -36,15 +36,11 @@ public class NoteAgentRepository {
         criteresManagedList.add(managed);
       }
 
-      // 1) Persister la note sans critères pour générer l'ID
-      NoteAgent noteToSave = new NoteAgent(note.getAgent(), note.getLoueur(), new ArrayList<>());
+      // Persister la note avec les critères gérés pour éviter une liste vide
+      NoteAgent noteToSave =
+          new NoteAgent(note.getAgent(), note.getLoueur(), new ArrayList<>(criteresManagedList));
       em.persist(noteToSave);
-      em.flush(); // garantit note_id avant les insertions de jointure
-
-      // 2) Attacher les critères gérés et merger
-      noteToSave.getCriteres().addAll(criteresManagedList);
-      noteToSave = em.merge(noteToSave);
-      em.flush();
+      em.flush(); // génère l'ID et insère la jointure
 
       transaction.commit();
       return noteToSave;
