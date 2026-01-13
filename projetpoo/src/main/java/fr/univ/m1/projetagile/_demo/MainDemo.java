@@ -32,6 +32,7 @@ import fr.univ.m1.projetagile.notes.service.NoteService;
 
 public class MainDemo {
   public static void main(String[] args) {
+
     try {
       // -- // -- // -- // -- // -- // -- // -- //
       // Database Connection

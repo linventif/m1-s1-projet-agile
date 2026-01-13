@@ -4,8 +4,8 @@ import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import fr.univ.m1.projetagile.core.persistence.UtilisateurRepository;
 
 /**
- * Service de base pour gérer les opérations métier communes aux utilisateurs
- * Cette classe fournit des méthodes réutilisables pour Agent et Loueur
+ * Service de base pour gérer les opérations métier communes aux utilisateurs Cette classe fournit
+ * des méthodes réutilisables pour Agent et Loueur
  *
  * @param <T> le type d'utilisateur (Agent ou Loueur)
  * @param <R> le type de repository correspondant
@@ -56,6 +56,8 @@ public abstract class UtilisateurService<T extends Utilisateur, R extends Utilis
     repository.delete(id);
   }
 
+
+
   /**
    * Valide le format d'un email
    *
@@ -66,11 +68,12 @@ public abstract class UtilisateurService<T extends Utilisateur, R extends Utilis
     if (email == null || email.trim().isEmpty()) {
       throw new IllegalArgumentException("L'email ne peut pas être vide.");
     }
-    
+
     // Regex pour valider le format email
     // Format accepté: utilisateur@domaine.extension
-    String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
-    
+    String emailRegex =
+        "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+
     if (!email.matches(emailRegex)) {
       throw new IllegalArgumentException(
           "Le format de l'email est invalide. Format attendu: utilisateur@domaine.extension");
@@ -85,7 +88,7 @@ public abstract class UtilisateurService<T extends Utilisateur, R extends Utilis
    */
   protected void validateCommonFields(String email, String motDePasse) {
     validateEmail(email);
-    
+
     if (motDePasse == null || motDePasse.trim().isEmpty()) {
       throw new IllegalArgumentException("Le mot de passe ne peut pas être vide.");
     }
@@ -155,7 +158,7 @@ public abstract class UtilisateurService<T extends Utilisateur, R extends Utilis
     if (utilisateur == null) {
       throw new IllegalArgumentException("L'utilisateur ne peut pas être nul.");
     }
-    
+
     validateEmail(nouvelEmail);
 
     // Vérifier que le nouvel email n'est pas déjà utilisé par un autre utilisateur

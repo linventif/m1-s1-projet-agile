@@ -1,6 +1,7 @@
 package fr.univ.m1.projetagile.core.entity;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -51,6 +52,9 @@ public class Vehicule {
   private Double prixJ; // prix journalier
 
   @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ControleTechnique> controlesTechniques = new ArrayList<>();
+
+  @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Disponibilite> datesDispo = new ArrayList<>();
 
   @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL)
@@ -82,6 +86,10 @@ public class Vehicule {
   // Getters et Setters
   public Long getId() {
     return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
   }
 
   public TypeV getType() {
@@ -131,6 +139,8 @@ public class Vehicule {
   public void setPrixJ(Double prixJ) {
     this.prixJ = prixJ;
   }
+
+
 
   public boolean isDisponible() {
     return disponible;
@@ -238,7 +248,6 @@ public class Vehicule {
         + ", couleur=" + couleur + ", ville=" + ville + ", prix=" + prixJ + "€/j"
         + ", proprietaire=" + (proprietaire != null ? proprietaire.getIdU() : "null") + "]";
   }
-
-  // Méthode filter serait typiquement dans un service/repository, pas dans l'entité
-  // public static List<Vehicule> filter(...) { ... }
 }
+// Méthode filter serait typiquement dans un service/repository, pas dans l'entité
+// public static List<Vehicule> filter(...) { ... }
