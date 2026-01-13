@@ -147,45 +147,4 @@ public class Entretien extends Utilisateur {
     entretienVehicules.add(ev);
     return ev;
   }
-
-  // Implémentation des méthodes abstraites de Utilisateur
-  @Override
-  public String getNom() {
-    return nomEntreprise;
-  }
-
-  @Override
-  public String getPrenom() {
-    return null; // Les entreprises d'entretien n'ont pas de prénom
-  }
-
-  @Override
-  public String getTelephone() {
-    return null; // Peut être ajouté plus tard si nécessaire
-  }
-
-  @Override
-  public String getAdresse() {
-    return null; // Peut être ajouté plus tard si nécessaire
-  }
-
-  @Override
-  public void setNom(String nom) {
-    this.nomEntreprise = nom;
-  }
-
-  @Override
-  public void setPrenom(String prenom) {
-    // Les entreprises d'entretien n'ont pas de prénom
-  }
-
-  @Override
-  public void setTelephone(String telephone) {
-    // Peut être ajouté plus tard si nécessaire
-  }
-
-  @Override
-  public void setAdresse(String adresse) {
-    // Peut être ajouté plus tard si nécessaire
-  }
 }
