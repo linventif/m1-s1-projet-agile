@@ -492,6 +492,8 @@ public class _MainDemo {
       // -- // -- // -- // -- // -- // -- // -- //
       System.out.println("\n=== Affichage des profils complets ===");
 
+      commentaireService = new CommentaireService(DatabaseConnection.getEntityManager());
+
       // Profil de Bob avec commentaires et véhicules
       ProfilInfo profilBob = APar_bob.getProfil(DatabaseConnection.getEntityManager());
       System.out.println("\n" + profilBob);
