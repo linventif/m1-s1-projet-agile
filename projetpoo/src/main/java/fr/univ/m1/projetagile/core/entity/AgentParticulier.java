@@ -4,12 +4,10 @@ import fr.univ.m1.projetagile.enums.TypeAgent;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "agents_particuliers")
-@PrimaryKeyJoinColumn(name = "idU")
 @DiscriminatorValue("PARTICULIER")
 public class AgentParticulier extends Agent {
 

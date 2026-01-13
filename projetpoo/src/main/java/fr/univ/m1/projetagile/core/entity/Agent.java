@@ -20,7 +20,6 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "agents")
-@PrimaryKeyJoinColumn(name = "idU")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "type_agent", discriminatorType = DiscriminatorType.STRING)
 public abstract class Agent extends Utilisateur {

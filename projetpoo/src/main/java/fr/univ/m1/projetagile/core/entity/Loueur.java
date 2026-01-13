@@ -7,12 +7,10 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "loueurs")
-@PrimaryKeyJoinColumn(name = "idU")
 public class Loueur extends Utilisateur {
 
   @Column(nullable = false)

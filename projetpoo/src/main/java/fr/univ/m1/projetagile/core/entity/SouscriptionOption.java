@@ -27,10 +27,9 @@ public class SouscriptionOption {
   @Column(nullable = false)
   private int periodicite; // en mois
 
-  // 🔗 Lien avec l'utilisateur
-  @ManyToOne
-  @JoinColumn(name = "utilisateur_id", nullable = false)
-  private Utilisateur utilisateur;
+  // 🔗 Lien avec l'utilisateur (stocke l'ID au lieu de la référence directe)
+  @Column(name = "utilisateur_id", nullable = false)
+  private Long utilisateurId;
 
   // 🔗 Lien avec l'option
   @ManyToOne
@@ -42,7 +41,7 @@ public class SouscriptionOption {
 
   public SouscriptionOption(Utilisateur utilisateur, Options option, int periodicite,
       boolean renouvellement) {
-    this.utilisateur = utilisateur;
+    this.utilisateurId = utilisateur.getIdU();
     this.option = option;
     this.periodicite = periodicite;
     this.renouvellement = renouvellement;
@@ -77,8 +76,8 @@ public class SouscriptionOption {
     return periodicite;
   }
 
-  public Utilisateur getUtilisateur() {
-    return utilisateur;
+  public Long getUtilisateurId() {
+    return utilisateurId;
   }
 
   public Options getOption() {
