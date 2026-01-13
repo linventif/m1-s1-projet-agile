@@ -11,6 +11,7 @@ import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.core.entity.Options;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
@@ -102,6 +103,22 @@ public class LocationService {
     }
 
     Location location = new Location(dateDebut, dateFin, lieuDepot, vehicule, loueur);
+    
+    // Vérifier si le propriétaire a l'option "Accepter les contrats manuellement" (ID 5)
+    Agent proprietaire = vehicule.getProprietaire();
+    if (proprietaire == null) {
+      throw new IllegalStateException("Le véhicule n'a pas de propriétaire associé.");
+    }
+    
+    boolean acceptationManuelle = proprietaire.getOptionsActives().stream()
+        .anyMatch(so -> so.getOption() != null && so.getOption().getId() != null
+            && so.getOption().getId().equals(Options.ACCEPTATION_MANUELLE_OPTION_ID));
+    
+    // Si le propriétaire a l'option, le statut reste EN_ATTENTE, sinon on l'accepte automatiquement
+    if (!acceptationManuelle) {
+      location.setStatut(StatutLocation.ACCEPTE);
+    }
+    
     Location locationSauvegardee = locationRepository.save(location);
 
     // Vérifier et gérer le parrainage du loueur
