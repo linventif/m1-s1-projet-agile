@@ -16,6 +16,7 @@ import fr.univ.m1.projetagile.core.entity.Disponibilite;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
+import fr.univ.m1.projetagile.core.entity.Ville;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.core.persistence.LoueurRepository;
@@ -25,6 +26,7 @@ import fr.univ.m1.projetagile.core.service.DisponibiliteService;
 import fr.univ.m1.projetagile.core.service.LocationService;
 import fr.univ.m1.projetagile.core.service.LoueurService;
 import fr.univ.m1.projetagile.core.service.VehiculeService;
+import fr.univ.m1.projetagile.core.service.VilleService;
 import fr.univ.m1.projetagile.enums.TypeV;
 import fr.univ.m1.projetagile.messagerie.entity.Message;
 import fr.univ.m1.projetagile.messagerie.persistence.MessageRepository;
@@ -545,5 +547,21 @@ public class MainDemo {
     } finally {
       DatabaseConnection.close();
     }
+
+    // 假设已经创建城市列表
+    List<Ville> villes =
+        List.of(new Ville("Paris", 48.8566, 2.3522), new Ville("Versailles", 48.8049, 2.1204),
+            new Ville("Lyon", 45.7640, 4.8357), new Ville("Marseille", 43.2965, 5.3698));
+
+    VilleService villeService = new VilleService(villes);
+
+    // 查询 Paris 50 km 范围内的城市
+    List<Ville> autourDeParis = villeService.getVillesAutour("Paris", 50);
+
+    System.out.println("Villes à moins de 50 km de Paris:");
+    for (Ville v : autourDeParis) {
+      System.out.println("- " + v.getNom());
+    }
+
   }
 }
