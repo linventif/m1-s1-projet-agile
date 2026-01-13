@@ -5,7 +5,8 @@ import fr.univ.m1.projetagile.core.persistence.EntretienRepository;
 
 /**
  * Service layer for managing Entretien (maintenance company) operations. Extends
- * UtilisateurService to inherit authentication and user management functionality.
+ * UtilisateurService to inherit common user operations such as authentication, email lookup,
+ * and password management for maintenance company accounts.
  */
 public class EntretienService extends UtilisateurService<Entretien, EntretienRepository> {
 
