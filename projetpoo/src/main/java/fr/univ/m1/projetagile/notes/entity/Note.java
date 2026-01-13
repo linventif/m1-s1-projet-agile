@@ -2,14 +2,18 @@ package fr.univ.m1.projetagile.notes.entity;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Table;
 
 /**
  * Classe abstraite représentant une note générique.
@@ -23,13 +27,19 @@ import jakarta.persistence.MappedSuperclass;
  * @version 2.0
  * @since 1.0
  */
-@MappedSuperclass
+@Entity
+@Table(name = "notes")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Note {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   /**
    * Liste des critères d'évaluation avec leurs notes.
    */
-  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @ManyToMany
   @JoinTable(name = "note_criteres", joinColumns = @JoinColumn(name = "note_id"),
       inverseJoinColumns = @JoinColumn(name = "critere_id"))
   protected List<Critere> criteres = new ArrayList<>();
@@ -49,24 +59,24 @@ public abstract class Note {
    * Crée une nouvelle note avec une liste de critères. La date est automatiquement définie à
    * aujourd'hui.
    *
-   * @param criteres la liste des critères d'évaluation
-   * @throws IllegalArgumentException si la liste de critères est null ou vide
+   * @param criteres la liste des critères d'évaluation (peut être vide mais pas null)
+   * @throws IllegalArgumentException si la liste de critères est null
    */
   protected Note(List<Critere> criteres) {
-    if (criteres == null || criteres.isEmpty()) {
-      throw new IllegalArgumentException("La liste de critères ne peut pas être vide");
+    if (criteres == null) {
+      throw new IllegalArgumentException("La liste de critères ne peut pas être null");
     }
     this.criteres = new ArrayList<>(criteres);
     this.date = LocalDate.now();
   }
 
   /**
-   * Retourne la liste des critères d'évaluation (non modifiable).
+   * Retourne une copie de la liste des critères d'évaluation.
    *
    * @return la liste des critères
    */
   public List<Critere> getCriteres() {
-    return Collections.unmodifiableList(criteres);
+    return new ArrayList<>(criteres);
   }
 
   /**
@@ -111,6 +121,24 @@ public abstract class Note {
    */
   public void setDate(LocalDate date) {
     this.date = date;
+  }
+
+  /**
+   * Retourne l'identifiant unique de la note.
+   *
+   * @return l'identifiant
+   */
+  public Long getId() {
+    return id;
+  }
+
+  /**
+   * Définit l'identifiant de la note.
+   *
+   * @param id l'identifiant
+   */
+  public void setId(Long id) {
+    this.id = id;
   }
 
   /**

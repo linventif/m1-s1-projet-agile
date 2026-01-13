@@ -71,8 +71,10 @@ public class Verification {
   }
 
   public void setKilometrageFin(Integer kilometrageFin) {
-    if (kilometrageFin != null && this.kilometrageDebut != null && kilometrageFin < this.kilometrageDebut) {
-      throw new IllegalArgumentException("kilometrageFin must be greater than or equal to kilometrageDebut");
+    if (kilometrageFin != null && this.kilometrageDebut != null
+        && kilometrageFin < this.kilometrageDebut) {
+      throw new IllegalArgumentException(
+          "kilometrageFin must be greater than or equal to kilometrageDebut");
     }
     this.kilometrageFin = kilometrageFin;
   }
@@ -83,5 +85,12 @@ public class Verification {
 
   public void setPhoto(String photo) {
     this.photo = photo;
+  }
+
+  @Override
+  public String toString() {
+    return "Verification{" + "id=" + id + ", location="
+        + (location != null ? location.getId() : "null") + ", kilometrageDebut=" + kilometrageDebut
+        + ", kilometrageFin=" + kilometrageFin + ", photo='" + photo + '\'' + '}';
   }
 }

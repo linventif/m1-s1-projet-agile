@@ -20,7 +20,6 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "agents")
-@PrimaryKeyJoinColumn(name = "idU")
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "type_agent", discriminatorType = DiscriminatorType.STRING)
 public abstract class Agent extends Utilisateur {
@@ -28,6 +27,9 @@ public abstract class Agent extends Utilisateur {
   @Enumerated(EnumType.STRING)
   @Column(name = "type_agent", insertable = false, updatable = false)
   private TypeAgent typeAgent;
+
+  @Column(name = "nom_commercial", length = 100)
+  private String nomCommercial;
 
   @OneToMany(mappedBy = "proprietaire", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Vehicule> vehicules = new ArrayList<>();
@@ -56,10 +58,12 @@ public abstract class Agent extends Utilisateur {
     return Collections.unmodifiableList(vehicules);
   }
 
-  public String getProfil() {
-    // À implémenter selon les besoins
-    // Retourne les informations du profil de l'agent
-    return "Profil de l'agent";
+  public String getNomCommercial() {
+    return nomCommercial;
+  }
+
+  public void setNomCommercial(String nomCommercial) {
+    this.nomCommercial = nomCommercial;
   }
 
   public void addVehicule(Vehicule v) {
@@ -165,8 +169,24 @@ public abstract class Agent extends Utilisateur {
 
   public Double calculerNote() {
     // Calcule la note moyenne de l'agent
-    // TODO: Récupérer toutes les NoteA pour cet agent et calculer la moyenne
-    return 0.0; // Placeholder
+    try {
+      fr.univ.m1.projetagile.notes.persistence.NoteAgentRepository repo =
+          new fr.univ.m1.projetagile.notes.persistence.NoteAgentRepository();
+      List<fr.univ.m1.projetagile.notes.entity.NoteAgent> notes = repo.findByAgentId(this.idU);
+
+      if (notes == null || notes.isEmpty()) {
+        return 0.0;
+      }
+
+      double somme = 0.0;
+      for (fr.univ.m1.projetagile.notes.entity.NoteAgent note : notes) {
+        somme += note.getNoteMoyenne();
+      }
+
+      return somme / notes.size();
+    } catch (Exception e) {
+      return 0.0;
+    }
   }
 
   // Méthode abstraite que les sous-classes doivent implémenter

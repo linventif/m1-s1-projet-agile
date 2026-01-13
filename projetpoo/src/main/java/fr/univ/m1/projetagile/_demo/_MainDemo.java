@@ -6,7 +6,10 @@ import java.util.List;
 import fr.univ.m1.projetagile.VerificationLocation.entity.Verification;
 import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepository;
 import fr.univ.m1.projetagile.VerificationLocation.service.VerificationService;
+import fr.univ.m1.projetagile.commentaire.entity.Commentaire;
+import fr.univ.m1.projetagile.commentaire.service.CommentaireService;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
+import fr.univ.m1.projetagile.core.dto.ProfilInfo;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
 import fr.univ.m1.projetagile.core.entity.Disponibilite;
@@ -33,7 +36,7 @@ import fr.univ.m1.projetagile.notes.entity.NoteVehicule;
 import fr.univ.m1.projetagile.notes.service.CritereService;
 import fr.univ.m1.projetagile.notes.service.NoteService;
 
-public class MainDemo {
+public class _MainDemo {
   public static void main(String[] args) {
 
     try {
@@ -68,7 +71,7 @@ public class MainDemo {
           (AgentParticulier) agentService.findByEmail("bob.maurise@gmail.com");
       if (APar_bob == null) {
         APar_bob = agentService.createAgentParticulier("maurise", "bob", "bob.maurise@gmail.com",
-            "p@ssw0rd", "33601020304");
+            "p@ssw0rd");
         System.out.println("✓ Agent créé: " + APar_bob);
       } else {
         System.out.println("✓ Agent existant récupéré: " + APar_bob);
@@ -78,7 +81,7 @@ public class MainDemo {
           (AgentParticulier) agentService.findByEmail("alice.dupont@gmail.com");
       if (APar_alice == null) {
         APar_alice = agentService.createAgentParticulier("dupont", "alice",
-            "alice.dupont@gmail.com", "p@ssw0rd", "33605060708");
+            "alice.dupont@gmail.com", "p@ssw0rd");
         System.out.println("✓ Agent créé: " + APar_alice);
       } else {
         System.out.println("✓ Agent existant récupéré: " + APar_alice);
@@ -121,6 +124,7 @@ public class MainDemo {
       } else {
         System.out.println("✓ Loueur existant récupéré: " + L_jane);
       }
+      final Loueur loueur_jane = L_jane;
 
       // -- // -- // -- // -- // -- // -- // -- //
       // Vehicules
@@ -239,7 +243,7 @@ public class MainDemo {
       // -- // -- // -- // -- // -- // -- // -- //
       // TEST LLD (#99 + #100)
       // -- // -- // -- // -- // -- // -- // -- //
-      System.out.println("\n=== TEST LLD (#99 + #100) : Location courte vs longue ===");
+      System.out.println("\n=== Tests de Location Longue Durée (LLD) ===");
 
       // Location courte (3 jours)
       LocalDateTime debutCourte = LocalDateTime.now();
@@ -247,14 +251,7 @@ public class MainDemo {
 
       Location locCourte = new Location(debutCourte, finCourte, V1, L_john);
       locCourte = locationRepository.save(locCourte);
-
-      System.out.println("\n--- Location COURTE (3 jours) ---");
-      System.out.println("ID   : " + locCourte.getId());
-      System.out.println("Début: " + locCourte.getDateDebut());
-      System.out.println("Fin  : " + locCourte.getDateFin());
-      System.out.println("Jours: " + locCourte.getNombreJours());
-      System.out.println("LLD ? " + locCourte.estLongueDuree());
-      System.out.println("Prix courte: " + locationService.getPrixLocation(locCourte));
+      System.out.println("✓ Location courte créée: " + locCourte);
 
       // Location longue (7 jours)
       LocalDateTime debutLongue = LocalDateTime.now();
@@ -262,14 +259,7 @@ public class MainDemo {
 
       Location locLongue = new Location(debutLongue, finLongue, V1, L_john);
       locLongue = locationRepository.save(locLongue);
-
-      System.out.println("\n--- Location LONGUE (7 jours) ---");
-      System.out.println("ID   : " + locLongue.getId());
-      System.out.println("Début: " + locLongue.getDateDebut());
-      System.out.println("Fin  : " + locLongue.getDateFin());
-      System.out.println("Jours: " + locLongue.getNombreJours());
-      System.out.println("LLD ? " + locLongue.estLongueDuree());
-      System.out.println("Prix longue: " + locationService.getPrixLocation(locLongue));
+      System.out.println("✓ Location longue créée: " + locLongue);
 
       // -- // -- // -- // -- // -- // -- // -- //
       // Messaging
@@ -393,6 +383,162 @@ public class MainDemo {
           .println("Moyenne Véhicule Peugeot 308: " + noteService.getMoyenneVehicule(V1) + "/10");
       System.out.println(
           "Moyenne Véhicule Renault Master: " + noteService.getMoyenneVehicule(V3) + "/10");
+
+      // -- // -- // -- // -- // -- // -- // -- //
+      // Commentaires de profil
+      // -- // -- // -- // -- // -- // -- // -- //
+      System.out.println("\n=== Tests de commentaires de profil ===");
+
+      CommentaireService commentaireService =
+          new CommentaireService(DatabaseConnection.getEntityManager());
+
+      // Loueur John commente le profil de l'agent Bob
+      try {
+        Commentaire comment1 = commentaireService.posterCommentaire(L_john, APar_bob,
+            "Excellent agent ! Très professionnel et réactif. Je recommande vivement.", 5);
+        System.out.println("✓ Commentaire posté: " + comment1);
+      } catch (Exception e) {
+        System.out.println("✗ Erreur lors de la création du commentaire: " + e.getMessage());
+      }
+
+      // Loueur Jane commente le profil de l'agent Bob
+      try {
+        Commentaire comment2 = commentaireService.posterCommentaire(L_jane, APar_bob,
+            "Bon service, quelques petits retards mais dans l'ensemble satisfaisant.", 4);
+        System.out.println("✓ Commentaire posté: " + comment2);
+      } catch (Exception e) {
+        System.out.println("✗ Erreur lors de la création du commentaire: " + e.getMessage());
+      }
+
+      // Bob répond au commentaire de Jane
+      try {
+        List<Commentaire> commentairesBob =
+            commentaireService.getCommentairesProfil(APar_bob.getIdU());
+        if (!commentairesBob.isEmpty()) {
+          Commentaire commentJane = commentairesBob.stream()
+              .filter(c -> c.getAuteurId().equals(loueur_jane.getIdU())).findFirst().orElse(null);
+          if (commentJane != null) {
+            Commentaire reponse = commentaireService.repondreACommentaire(APar_bob,
+                commentJane.getId(),
+                "Merci pour votre retour ! Je m'excuse pour les retards et je m'engage à améliorer ce point.");
+            System.out.println("✓ Réponse postée: " + reponse);
+          }
+        }
+      } catch (Exception e) {
+        System.out.println("✗ Erreur lors de la réponse: " + e.getMessage());
+      }
+
+      // Loueur John commente le profil de l'agent Alice
+      try {
+        Commentaire comment3 = commentaireService.posterCommentaire(L_john, APar_alice,
+            "Service impeccable ! Voiture en parfait état et accueil chaleureux.", 5);
+        System.out.println("✓ Commentaire posté: " + comment3);
+      } catch (Exception e) {
+        System.out.println("✗ Erreur lors de la création du commentaire: " + e.getMessage());
+      }
+
+      // Agent Alice commente le profil du loueur John
+      try {
+        Commentaire comment4 = commentaireService.posterCommentaire(APar_alice, L_john,
+            "Locataire exemplaire ! Respectueux du véhicule et ponctuel.", 5);
+        System.out.println("✓ Commentaire posté: " + comment4);
+      } catch (Exception e) {
+        System.out.println("✗ Erreur lors de la création du commentaire: " + e.getMessage());
+      }
+
+      // Test : Impossible de commenter son propre profil
+      try {
+        commentaireService.posterCommentaire(APar_bob, APar_bob, "Je suis génial !", 5);
+        System.out.println("✗ ERREUR: Commentaire sur soi-même autorisé (ne devrait pas)");
+      } catch (IllegalArgumentException e) {
+        System.out.println("✓ Validation OK: " + e.getMessage());
+      }
+
+      // Test : Impossible de commenter deux fois le même profil
+      try {
+        commentaireService.posterCommentaire(L_john, APar_bob, "Un deuxième commentaire", 4);
+        System.out.println("✗ ERREUR: Double commentaire autorisé (ne devrait pas)");
+      } catch (IllegalArgumentException e) {
+        System.out.println("✓ Validation OK: " + e.getMessage());
+      }
+
+      // -- // -- // -- // -- // -- // -- // -- //
+      // Modification des informations de profil
+      // -- // -- // -- // -- // -- // -- // -- //
+      System.out.println("\n=== Mise à jour des profils ===");
+
+      // Bob met à jour son profil
+      APar_bob.modifierProfil("Maurise", "Bob", "12 rue de la Location, Paris",
+          "Agent de location particulier passionné par l'automobile depuis 10 ans.");
+      APar_bob.setNomCommercial("Bob's Cars");
+      agentService.save(APar_bob);
+      System.out.println("✓ Profil de Bob mis à jour");
+
+      // Alice met à jour son profil
+      APar_alice.modifierProfil("Dupont", "Alice", "45 avenue des Véhicules, Lyon",
+          "Spécialisée dans la location de véhicules premium.");
+      APar_alice.setNomCommercial("Alice Premium Cars");
+      agentService.save(APar_alice);
+      System.out.println("✓ Profil d'Alice mis à jour");
+
+      // John met à jour son profil
+      L_john.modifierProfil("Doe", "John", "10 rue du Locataire, Marseille",
+          "Loueur régulier, je prends soin des véhicules.");
+      loueurService.save(L_john);
+      System.out.println("✓ Profil de John mis à jour");
+
+      // -- // -- // -- // -- // -- // -- // -- //
+      // Affichage des profils complets
+      // -- // -- // -- // -- // -- // -- // -- //
+      System.out.println("\n=== Affichage des profils complets ===");
+
+      commentaireService = new CommentaireService(DatabaseConnection.getEntityManager());
+
+      // Profil de Bob avec commentaires et véhicules
+      ProfilInfo profilBob = APar_bob.getProfil(DatabaseConnection.getEntityManager());
+      System.out.println("\n" + profilBob);
+      if (!profilBob.getCommentaires().isEmpty()) {
+        System.out.println("Commentaires détaillés:");
+        for (Commentaire c : profilBob.getCommentaires()) {
+          System.out.println("  - " + c);
+          List<Commentaire> reponses = commentaireService.getReponses(c.getId());
+          for (Commentaire r : reponses) {
+            System.out.println("    ↳ " + r);
+          }
+        }
+      }
+
+      // Profil d'Alice
+      ProfilInfo profilAlice = APar_alice.getProfil(DatabaseConnection.getEntityManager());
+      System.out.println("\n" + profilAlice);
+      if (!profilAlice.getCommentaires().isEmpty()) {
+        System.out.println("Commentaires détaillés:");
+        for (Commentaire c : profilAlice.getCommentaires()) {
+          System.out.println("  - " + c);
+        }
+      }
+
+      // Profil de John (loueur)
+      ProfilInfo profilJohn = L_john.getProfil(DatabaseConnection.getEntityManager());
+      System.out.println("\n" + profilJohn);
+      if (!profilJohn.getCommentaires().isEmpty()) {
+        System.out.println("Commentaires détaillés:");
+        for (Commentaire c : profilJohn.getCommentaires()) {
+          System.out.println("  - " + c);
+        }
+      }
+
+      // Statistiques des commentaires
+      System.out.println("\n=== Statistiques des commentaires ===");
+      System.out.println("Bob - Note moyenne: "
+          + String.format("%.1f", commentaireService.getMoyenneNotes(APar_bob.getIdU())) + "/5 ("
+          + commentaireService.countCommentaires(APar_bob.getIdU()) + " avis)");
+      System.out.println("Alice - Note moyenne: "
+          + String.format("%.1f", commentaireService.getMoyenneNotes(APar_alice.getIdU())) + "/5 ("
+          + commentaireService.countCommentaires(APar_alice.getIdU()) + " avis)");
+      System.out.println("John - Note moyenne: "
+          + String.format("%.1f", commentaireService.getMoyenneNotes(L_john.getIdU())) + "/5 ("
+          + commentaireService.countCommentaires(L_john.getIdU()) + " avis)");
 
       System.out.println("\n✓ Démonstration complète terminée avec succès!");
     } catch (Exception e) {

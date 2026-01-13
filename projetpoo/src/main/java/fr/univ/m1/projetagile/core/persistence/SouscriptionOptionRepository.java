@@ -3,7 +3,6 @@ package fr.univ.m1.projetagile.core.persistence;
 import java.util.List;
 import fr.univ.m1.projetagile.core.entity.Options;
 import fr.univ.m1.projetagile.core.entity.SouscriptionOption;
-import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 
@@ -16,7 +15,7 @@ public class SouscriptionOptionRepository {
   }
 
   /**
-   * Sauvegarde une souscription d’option (création ou mise à jour).
+   * Sauvegarde une souscription d'option (création ou mise à jour).
    */
   public SouscriptionOption save(SouscriptionOption souscription) {
     if (souscription.getId() == null) {
@@ -43,23 +42,54 @@ public class SouscriptionOptionRepository {
 
   /**
    * Recherche un utilisateur par son identifiant.
+   * Cherche parmi tous les types concrets d'utilisateurs (Agent, Loueur, Entretien).
+   * 
+   * @param utilisateurId l'ID de l'utilisateur
+   * @return l'utilisateur trouvé, ou null si non trouvé
    */
-  public Utilisateur findUtilisateurById(Long utilisateurId) {
-    return em.find(Utilisateur.class, utilisateurId);
+  public fr.univ.m1.projetagile.core.entity.Utilisateur findUtilisateurById(Long utilisateurId) {
+    // Essayer de trouver parmi les Agents (inclut AgentParticulier et AgentProfessionnel)
+    try {
+      fr.univ.m1.projetagile.core.entity.Utilisateur user = em.createQuery(
+          "SELECT a FROM Agent a WHERE a.idU = :id", 
+          fr.univ.m1.projetagile.core.entity.Agent.class)
+          .setParameter("id", utilisateurId)
+          .getResultList()
+          .stream()
+          .findFirst()
+          .orElse(null);
+      if (user != null) return user;
+    } catch (Exception ignored) {}
+    
+    // Essayer de trouver parmi les Loueurs
+    try {
+      fr.univ.m1.projetagile.core.entity.Utilisateur user = 
+          em.find(fr.univ.m1.projetagile.core.entity.Loueur.class, utilisateurId);
+      if (user != null) return user;
+    } catch (Exception ignored) {}
+    
+    // Essayer de trouver parmi les Entretiens
+    try {
+      fr.univ.m1.projetagile.core.entity.Utilisateur user = 
+          em.find(fr.univ.m1.projetagile.core.entity.Entretien.class, utilisateurId);
+      if (user != null) return user;
+    } catch (Exception ignored) {}
+    
+    return null;
   }
 
   /**
-   * Liste toutes les souscriptions ACTIVES d’un utilisateur.
+   * Liste toutes les souscriptions d'un utilisateur.
    */
   public List<SouscriptionOption> findByUtilisateur(Long utilisateurId) {
     return em
         .createQuery("SELECT s FROM SouscriptionOption s "
-            + "WHERE s.utilisateur.idU = :id AND s.annulee = false", SouscriptionOption.class)
+            + "WHERE s.utilisateurId = :id", SouscriptionOption.class)
         .setParameter("id", utilisateurId).getResultList();
   }
 
   /**
-   * Supprime physiquement une souscription d’option.
+   * Supprime physiquement une souscription d'option.
    */
   public void delete(SouscriptionOption souscription) {
     SouscriptionOption managed = souscription;
@@ -88,7 +118,7 @@ public class SouscriptionOptionRepository {
   }
 
   /**
-   * Exécute une action en la entourant d’une transaction.
+   * Exécute une action en la entourant d'une transaction.
    */
   public void runInTransaction(Runnable action) {
     EntityTransaction tx = em.getTransaction();

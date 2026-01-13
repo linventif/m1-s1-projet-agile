@@ -1,7 +1,9 @@
 package fr.univ.m1.projetagile.notes.persistence;
 
+import java.util.ArrayList;
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
+import fr.univ.m1.projetagile.notes.entity.Critere;
 import fr.univ.m1.projetagile.notes.entity.NoteAgent;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
@@ -19,14 +21,42 @@ public class NoteAgentRepository {
       transaction = em.getTransaction();
       transaction.begin();
 
-      if (note.getId() == null) {
-        em.persist(note);
-      } else {
-        note = em.merge(note);
+      // Recharger l'agent et le loueur pour avoir des instances gérées
+      var agentManaged =
+          em.find(fr.univ.m1.projetagile.core.entity.Agent.class, note.getAgent().getIdU());
+      var loueurManaged =
+          em.find(fr.univ.m1.projetagile.core.entity.Loueur.class, note.getLoueur().getIdU());
+
+      // Sauvegarder les critères originaux
+      List<Critere> criteresOriginaux = new ArrayList<>(note.getCriteres());
+
+      // Créer une nouvelle note SANS critères d'abord
+      NoteAgent noteToSave = new NoteAgent(agentManaged, loueurManaged, new ArrayList<>());
+      em.persist(noteToSave);
+      em.flush(); // Force l'insertion de la note pour obtenir son ID
+
+      // Maintenant ajouter les critères un par un
+      for (Critere critere : criteresOriginaux) {
+        Critere critereManaged;
+        if (critere.getId() == null) {
+          // Persister le nouveau critère
+          em.persist(critere);
+          em.flush();
+          critereManaged = critere;
+        } else {
+          // Récupérer le critère existant
+          critereManaged = em.find(Critere.class, critere.getId());
+          if (critereManaged == null) {
+            throw new IllegalStateException(
+                "Le critère avec l'ID " + critere.getId() + " n'existe pas en base");
+          }
+        }
+        noteToSave.ajouterCritere(critereManaged);
       }
 
+      em.flush();
       transaction.commit();
-      return note;
+      return noteToSave;
 
     } catch (Exception e) {
       if (transaction != null && transaction.isActive()) {
@@ -60,13 +90,13 @@ public class NoteAgentRepository {
   }
 
   public Double getMoyenneByAgentId(Long agentId) {
-    EntityManager em = DatabaseConnection.getEntityManager();
-    TypedQuery<Double> query = em.createQuery(
-        "SELECT AVG((n.note1 + n.note2 + n.note3) / 3.0) FROM NoteAgent n WHERE n.agent.idU = :agentId",
-        Double.class);
-    query.setParameter("agentId", agentId);
-    Double result = query.getSingleResult();
-    return result != null ? Math.round(result * 100.0) / 100.0 : 0.0;
+    List<NoteAgent> notes = findByAgentId(agentId);
+    if (notes.isEmpty()) {
+      return 0.0;
+    }
+    double somme = notes.stream().mapToDouble(NoteAgent::getNoteMoyenne).sum();
+    double moyenne = somme / notes.size();
+    return Math.round(moyenne * 100.0) / 100.0;
   }
 
   public void delete(Long id) {

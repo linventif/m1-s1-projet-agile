@@ -16,6 +16,9 @@ import jakarta.persistence.Table;
 @Table(name = "options")
 public class Options {
 
+  // ID de l'option "Accepter les contrats manuellement" en base de données
+  public static final Long ACCEPTATION_MANUELLE_OPTION_ID = 5L;
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;

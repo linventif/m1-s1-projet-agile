@@ -7,12 +7,10 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "loueurs")
-@PrimaryKeyJoinColumn(name = "idU")
 public class Loueur extends Utilisateur {
 
   @Column(nullable = false)
@@ -20,6 +18,9 @@ public class Loueur extends Utilisateur {
 
   @Column(nullable = false)
   private String prenom;
+
+  @Column(name = "adresse", length = 200)
+  private String adresse;
 
   @OneToMany(mappedBy = "loueur", cascade = CascadeType.ALL)
   private List<Location> locations = new ArrayList<>();
@@ -35,25 +36,35 @@ public class Loueur extends Utilisateur {
     this.prenom = prenom;
   }
 
-  // Getters et Setters
+  // Implémentation des méthodes abstraites
+  @Override
   public String getNom() {
     return nom;
   }
 
+  @Override
   public void setNom(String nom) {
     this.nom = nom;
   }
 
+  @Override
   public String getPrenom() {
     return prenom;
   }
 
+  @Override
   public void setPrenom(String prenom) {
     this.prenom = prenom;
   }
 
-  public String getNomComplet() {
-    return prenom + " " + nom;
+  @Override
+  public String getAdresse() {
+    return adresse;
+  }
+
+  @Override
+  public void setAdresse(String adresse) {
+    this.adresse = adresse;
   }
 
   // Méthodes selon UML
@@ -99,22 +110,26 @@ public class Loueur extends Utilisateur {
     return getLocations();
   }
 
-  public void noterVehicule(Vehicule vehicule, Double note1, Double note2, Double note3) {
-    // Permet au loueur de noter un véhicule
-    // TODO: Créer une NoteV et la persister
-    // NoteV note = new NoteV(note1, note2, note3, vehicule, this);
-  }
-
-  public void noterAgent(Agent agent, Double note1, Double note2, Double note3) {
-    // Permet au loueur de noter un agent
-    // TODO: Créer une NoteA et la persister
-    // NoteA note = new NoteA(note1, note2, note3, agent, this);
-  }
-
   public Double calculerNote() {
     // Calcule la note moyenne du loueur
-    // TODO: Récupérer toutes les NoteL pour ce loueur et calculer la moyenne
-    return 0.0; // Placeholder
+    try {
+      fr.univ.m1.projetagile.notes.persistence.NoteLoueurRepository repo =
+          new fr.univ.m1.projetagile.notes.persistence.NoteLoueurRepository();
+      List<fr.univ.m1.projetagile.notes.entity.NoteLoueur> notes = repo.findByLoueurId(this.idU);
+
+      if (notes == null || notes.isEmpty()) {
+        return 0.0;
+      }
+
+      double somme = 0.0;
+      for (fr.univ.m1.projetagile.notes.entity.NoteLoueur note : notes) {
+        somme += note.getNoteMoyenne();
+      }
+
+      return somme / notes.size();
+    } catch (Exception e) {
+      return 0.0;
+    }
   }
 
   @Override

@@ -6,10 +6,8 @@ import java.util.List;
 import fr.univ.m1.projetagile.enums.TypeV;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 
 /**
@@ -18,8 +16,6 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "entretiens")
-@PrimaryKeyJoinColumn(name = "idU")
-@DiscriminatorValue("ENTRETIEN")
 public class Entretien extends Utilisateur {
 
   @Column(nullable = false)
@@ -48,6 +44,37 @@ public class Entretien extends Utilisateur {
 
   public void setNomEntreprise(String nomEntreprise) {
     this.nomEntreprise = nomEntreprise;
+  }
+
+  // Implémentation des méthodes abstraites de Utilisateur
+  @Override
+  public String getNom() {
+    return nomEntreprise;
+  }
+
+  @Override
+  public void setNom(String nom) {
+    this.nomEntreprise = nom;
+  }
+
+  @Override
+  public String getPrenom() {
+    return null; // Les entreprises d'entretien n'ont pas de prénom
+  }
+
+  @Override
+  public void setPrenom(String prenom) {
+    // Les entreprises d'entretien n'ont pas de prénom
+  }
+
+  @Override
+  public String getAdresse() {
+    return null; // Adresse à ajouter si nécessaire
+  }
+
+  @Override
+  public void setAdresse(String adresse) {
+    // Adresse à ajouter si nécessaire
   }
 
   public List<PrixEntretien> getPrixEntretiens() {

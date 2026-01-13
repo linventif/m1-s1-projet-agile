@@ -1,22 +1,18 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import fr.univ.m1.projetagile.commentaire.service.CommentaireService;
+import fr.univ.m1.projetagile.core.dto.ProfilInfo;
 import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
-import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.Table;
+import jakarta.persistence.MappedSuperclass;
 
-@Entity
-@Table(name = "utilisateurs")
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "type_utilisateur", discriminatorType = DiscriminatorType.STRING)
+@MappedSuperclass
 public abstract class Utilisateur {
 
   @Id
@@ -29,6 +25,9 @@ public abstract class Utilisateur {
 
   @Column(nullable = false, name = "motdePasse")
   protected String motDePasse;
+
+  @Column(name = "bio", length = 500)
+  protected String bio;
 
   // Constructeur sans argument pour JPA
   protected Utilisateur() {}
@@ -72,6 +71,38 @@ public abstract class Utilisateur {
 
   public boolean verifierMotDePasse(String mdp) {
     return Objects.equals(this.motDePasse, mdp);
+  }
+
+  // Méthodes abstraites à implémenter dans les sous-classes
+  public abstract String getNom();
+
+  public abstract String getPrenom();
+
+  public abstract String getAdresse();
+
+  public abstract void setNom(String nom);
+
+  public abstract void setPrenom(String prenom);
+
+  public abstract void setAdresse(String adresse);
+
+  /**
+   * Retourne le nom complet de l'utilisateur
+   */
+  public String getNomComplet() {
+    String nom = getNom();
+    String prenom = getPrenom();
+
+    if (nom == null && prenom == null) {
+      return "Utilisateur #" + idU;
+    }
+    if (nom == null) {
+      return prenom;
+    }
+    if (prenom == null) {
+      return nom;
+    }
+    return prenom + " " + nom;
   }
 
   // Méthodes selon UML
@@ -164,6 +195,74 @@ public abstract class Utilisateur {
     if (nouveauEmail != null && !nouveauEmail.trim().isEmpty()) {
       this.email = nouveauEmail;
     }
+  }
+
+  /**
+   * Récupérer les informations du profil
+   */
+  public ProfilInfo getProfil(EntityManager em) {
+    ProfilInfo profil = new ProfilInfo();
+    profil.setIdUtilisateur(this.idU);
+    profil.setNom(getNom());
+    profil.setPrenom(getPrenom());
+    profil.setEmail(this.email);
+    profil.setAdresse(getAdresse());
+    profil.setBio(this.bio);
+
+    // Récupérer le nom commercial si c'est un Agent
+    if (this instanceof Agent) {
+      Agent agent = (Agent) this;
+      profil.setNomCommercial(agent.getNomCommercial());
+
+      // Récupérer les véhicules disponibles via une requête JPQL pour éviter
+      // LazyInitializationException
+      if (em != null) {
+        try {
+          List<Vehicule> vehiculesDisponibles = em.createQuery(
+              "SELECT v FROM Vehicule v WHERE v.proprietaire.idU = :agentId AND v.disponible = true",
+              Vehicule.class).setParameter("agentId", agent.getIdU()).getResultList();
+          profil.setVehiculesDisponibles(vehiculesDisponibles);
+        } catch (Exception e) {
+          profil.setVehiculesDisponibles(new ArrayList<>());
+        }
+      }
+    }
+
+    // Récupérer les commentaires
+    if (em != null) {
+      CommentaireService commentaireService = new CommentaireService(em);
+      profil.setCommentaires(commentaireService.getCommentairesProfil(this.idU));
+      profil.setMoyenneNotes(commentaireService.getMoyenneNotes(this.idU));
+      profil.setNombreCommentaires(commentaireService.countCommentaires(this.idU));
+    }
+
+    return profil;
+  }
+
+  /**
+   * Modifier les informations du profil
+   */
+  public void modifierProfil(String nom, String prenom, String adresse, String bio) {
+    if (nom != null && !nom.trim().isEmpty()) {
+      setNom(nom);
+    }
+    if (prenom != null && !prenom.trim().isEmpty()) {
+      setPrenom(prenom);
+    }
+    if (adresse != null) {
+      setAdresse(adresse);
+    }
+    if (bio != null) {
+      this.bio = bio;
+    }
+  }
+
+  public String getBio() {
+    return bio;
+  }
+
+  public void setBio(String bio) {
+    this.bio = bio;
   }
 
   @Override
