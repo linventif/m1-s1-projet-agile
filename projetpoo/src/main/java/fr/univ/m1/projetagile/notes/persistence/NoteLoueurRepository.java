@@ -20,28 +20,40 @@ public class NoteLoueurRepository {
       transaction = em.getTransaction();
       transaction.begin();
 
-      // Recharger tous les critères depuis la base pour avoir des instances gérées
-      List<fr.univ.m1.projetagile.notes.entity.Critere> criteresManagedList = new ArrayList<>();
-      for (fr.univ.m1.projetagile.notes.entity.Critere critere : note.getCriteres()) {
+      // Recharger l'agent et le loueur pour avoir des instances gérées
+      var agentManaged =
+          em.find(fr.univ.m1.projetagile.core.entity.Agent.class, note.getAgent().getIdU());
+      var loueurManaged =
+          em.find(fr.univ.m1.projetagile.core.entity.Loueur.class, note.getLoueur().getIdU());
+
+      // Sauvegarder les critères originaux
+      List<fr.univ.m1.projetagile.notes.entity.Critere> criteresOriginaux =
+          new ArrayList<>(note.getCriteres());
+
+      // Créer une nouvelle note SANS critères d'abord
+      NoteLoueur noteToSave = new NoteLoueur(agentManaged, loueurManaged, new ArrayList<>());
+      em.persist(noteToSave);
+      em.flush(); // Force l'insertion de la note pour obtenir son ID
+
+      // Maintenant ajouter les critères un par un
+      for (fr.univ.m1.projetagile.notes.entity.Critere critere : criteresOriginaux) {
+        fr.univ.m1.projetagile.notes.entity.Critere critereManaged;
         if (critere.getId() == null) {
-          throw new IllegalStateException(
-              "Tous les critères doivent être persistés avant de créer une note");
+          em.persist(critere);
+          em.flush();
+          critereManaged = critere;
+        } else {
+          critereManaged =
+              em.find(fr.univ.m1.projetagile.notes.entity.Critere.class, critere.getId());
+          if (critereManaged == null) {
+            throw new IllegalStateException(
+                "Le critère avec l'ID " + critere.getId() + " n'existe pas en base");
+          }
         }
-        fr.univ.m1.projetagile.notes.entity.Critere managed =
-            em.find(fr.univ.m1.projetagile.notes.entity.Critere.class, critere.getId());
-        if (managed == null) {
-          throw new IllegalStateException(
-              "Le critère avec l'ID " + critere.getId() + " n'existe pas en base");
-        }
-        criteresManagedList.add(managed);
+        noteToSave.ajouterCritere(critereManaged);
       }
 
-      // Persister la note avec les critères gérés pour éviter une liste vide
-      NoteLoueur noteToSave =
-          new NoteLoueur(note.getAgent(), note.getLoueur(), new ArrayList<>(criteresManagedList));
-      em.persist(noteToSave);
       em.flush();
-
       transaction.commit();
       return noteToSave;
 

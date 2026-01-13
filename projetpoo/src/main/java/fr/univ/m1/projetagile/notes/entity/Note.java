@@ -47,12 +47,12 @@ public abstract class Note {
    * Crée une nouvelle note avec une liste de critères. La date est automatiquement définie à
    * aujourd'hui.
    *
-   * @param criteres la liste des critères d'évaluation
-   * @throws IllegalArgumentException si la liste de critères est null ou vide
+   * @param criteres la liste des critères d'évaluation (peut être vide mais pas null)
+   * @throws IllegalArgumentException si la liste de critères est null
    */
   protected Note(List<Critere> criteres) {
-    if (criteres == null || criteres.isEmpty()) {
-      throw new IllegalArgumentException("La liste de critères ne peut pas être vide");
+    if (criteres == null) {
+      throw new IllegalArgumentException("La liste de critères ne peut pas être null");
     }
     this.criteres = new ArrayList<>(criteres);
     this.date = LocalDate.now();
