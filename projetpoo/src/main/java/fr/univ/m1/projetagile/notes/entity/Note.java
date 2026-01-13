@@ -4,10 +4,16 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Table;
 
 /**
  * Classe abstraite représentant une note générique.
@@ -21,8 +27,14 @@ import jakarta.persistence.MappedSuperclass;
  * @version 2.0
  * @since 1.0
  */
-@MappedSuperclass
+@Entity
+@Table(name = "notes")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Note {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
   /**
    * Liste des critères d'évaluation avec leurs notes.
@@ -109,6 +121,24 @@ public abstract class Note {
    */
   public void setDate(LocalDate date) {
     this.date = date;
+  }
+
+  /**
+   * Retourne l'identifiant unique de la note.
+   *
+   * @return l'identifiant
+   */
+  public Long getId() {
+    return id;
+  }
+
+  /**
+   * Définit l'identifiant de la note.
+   *
+   * @param id l'identifiant
+   */
+  public void setId(Long id) {
+    this.id = id;
   }
 
   /**
