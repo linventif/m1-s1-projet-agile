@@ -116,7 +116,6 @@ public class MainDemo {
       } else {
         System.out.println("✓ Loueur existant récupéré: " + L_john);
       }
-      final Loueur loueur_john = L_john;
 
       Loueur L_jane = loueurService.findByEmail("jane.smith@gmail.com");
       if (L_jane == null) {
