@@ -282,6 +282,88 @@ public class LocationService {
   }
 
   /**
+   * Permet à un agent d'accepter manuellement une location en attente.
+   *
+   * @param locationId l'identifiant de la location à accepter
+   * @param agent l'agent qui accepte la location
+   * @throws IllegalArgumentException si l'identifiant de la location ou l'agent est null
+   * @throws IllegalStateException si la location n'existe pas, si l'agent n'est pas le propriétaire
+   *         du véhicule, ou si la location n'est pas en attente d'acceptation
+   */
+  public void accepterLocationManuellement(Long locationId, Agent agent) {
+    if (locationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la location ne peut pas être nul.");
+    }
+    if (agent == null || agent.getIdU() == null) {
+      throw new IllegalArgumentException("L'agent doit être spécifié et avoir un identifiant.");
+    }
+
+    Location location = locationRepository.findById(locationId);
+    if (location == null) {
+      throw new IllegalStateException("Aucune location trouvée avec l'identifiant " + locationId);
+    }
+
+    // Vérifier que l'agent est bien le propriétaire du véhicule
+    Agent proprietaire = location.getVehicule().getProprietaire();
+    if (proprietaire == null || !proprietaire.getIdU().equals(agent.getIdU())) {
+      throw new IllegalStateException(
+          "Seul le propriétaire du véhicule peut accepter cette location.");
+    }
+
+    // Vérifier que la location est en attente d'acceptation
+    if (location.getStatut() != StatutLocation.EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT) {
+      throw new IllegalStateException(
+          "La location ne peut être acceptée que si son statut est EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT. "
+              + "Statut actuel : " + location.getStatut());
+    }
+
+    // Accepter la location
+    location.setStatut(StatutLocation.ACCEPTE);
+    locationRepository.save(location);
+  }
+
+  /**
+   * Permet à un agent de refuser manuellement une location en attente.
+   *
+   * @param locationId l'identifiant de la location à refuser
+   * @param agent l'agent qui refuse la location
+   * @throws IllegalArgumentException si l'identifiant de la location ou l'agent est null
+   * @throws IllegalStateException si la location n'existe pas, si l'agent n'est pas le propriétaire
+   *         du véhicule, ou si la location n'est pas en attente d'acceptation
+   */
+  public void refuserLocationManuellement(Long locationId, Agent agent) {
+    if (locationId == null) {
+      throw new IllegalArgumentException("L'identifiant de la location ne peut pas être nul.");
+    }
+    if (agent == null || agent.getIdU() == null) {
+      throw new IllegalArgumentException("L'agent doit être spécifié et avoir un identifiant.");
+    }
+
+    Location location = locationRepository.findById(locationId);
+    if (location == null) {
+      throw new IllegalStateException("Aucune location trouvée avec l'identifiant " + locationId);
+    }
+
+    // Vérifier que l'agent est bien le propriétaire du véhicule
+    Agent proprietaire = location.getVehicule().getProprietaire();
+    if (proprietaire == null || !proprietaire.getIdU().equals(agent.getIdU())) {
+      throw new IllegalStateException(
+          "Seul le propriétaire du véhicule peut refuser cette location.");
+    }
+
+    // Vérifier que la location est en attente d'acceptation
+    if (location.getStatut() != StatutLocation.EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT) {
+      throw new IllegalStateException(
+          "La location ne peut être refusée que si son statut est EN_ATTENTE_D_ACCEPTATION_PAR_L_AGENT. "
+              + "Statut actuel : " + location.getStatut());
+    }
+
+    // Refuser la location (annuler)
+    location.setStatut(StatutLocation.ANNULE);
+    locationRepository.save(location);
+  }
+
+  /**
    * Termine une location en cours. Met à jour la vérification existante avec le kilométrage de fin
    * et la photo, vérifie que tout est correct, puis change le statut de la location à TERMINE et la
    * sauvegarde en base de données.
@@ -465,5 +547,32 @@ public class LocationService {
     }
 
     return previousLocations;
+  }
+
+  /**
+   * Récupère toutes les locations en attente d'acceptation pour un agent donné. Ces locations
+   * concernent les véhicules dont l'agent est propriétaire.
+   *
+   * @param agentId l'identifiant de l'agent
+   * @return la liste des LocationDTO en attente d'acceptation pour cet agent
+   * @throws IllegalArgumentException si l'identifiant de l'agent est null
+   */
+  public List<LocationDTO> getLocationsPendingAcceptanceForAgent(Long agentId) {
+    if (agentId == null) {
+      throw new IllegalArgumentException("L'identifiant de l'agent ne peut pas être nul.");
+    }
+
+    // Récupérer les locations en attente depuis le repository
+    List<Location> locations =
+        locationRepository.findPendingLocationsByAgentId(agentId);
+
+    List<LocationDTO> pendingLocations = new ArrayList<>();
+
+    for (Location location : locations) {
+      LocationDTO locationDTO = convertLocationToDTO(location);
+      pendingLocations.add(locationDTO);
+    }
+
+    return pendingLocations;
   }
 }
