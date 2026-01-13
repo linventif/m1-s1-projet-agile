@@ -885,4 +885,17 @@ public class VehiculeService {
     return vehiculeRepository.findById(id);
   }
 
+  // =======================
+  // obtenir les véhicules par ville
+  // =======================
+  public List<Vehicule> getVehiculesParVille(String ville) {
+    return vehiculeRepository.findByVille(ville);
+  }
+
+  // =======================
+  // filterer les véhicules par ville dans une liste donnée
+  // =======================
+  public List<Vehicule> getVehiculesParVilleDansListe(List<Vehicule> liste, String ville) {
+    return liste.stream().filter(v -> ville.equals(v.getVille())).toList();
+  }
 }
