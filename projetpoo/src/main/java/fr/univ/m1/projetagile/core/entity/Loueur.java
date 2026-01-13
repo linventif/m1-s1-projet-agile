@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrimaryKeyJoinColumn;
@@ -13,6 +14,18 @@ import jakarta.persistence.Table;
 @Table(name = "loueurs")
 @PrimaryKeyJoinColumn(name = "idU")
 public class Loueur extends Utilisateur {
+
+  @Column(nullable = false)
+  private String nom;
+
+  @Column(nullable = false)
+  private String prenom;
+
+  @Column(name = "telephone", length = 20)
+  private String telephone;
+
+  @Column(name = "adresse", length = 200)
+  private String adresse;
 
   @OneToMany(mappedBy = "loueur", cascade = CascadeType.ALL)
   private List<Location> locations = new ArrayList<>();
@@ -28,14 +41,45 @@ public class Loueur extends Utilisateur {
     this.prenom = prenom;
   }
 
-  // Getters et Setters hérités de Utilisateur pour nom et prenom
+  // Implémentation des méthodes abstraites
+  @Override
+  public String getNom() {
+    return nom;
+  }
 
+  @Override
+  public void setNom(String nom) {
+    this.nom = nom;
+  }
+
+  @Override
+  public String getPrenom() {
+    return prenom;
+  }
+
+  @Override
   public void setPrenom(String prenom) {
     this.prenom = prenom;
   }
 
-  public String getNomComplet() {
-    return prenom + " " + nom;
+  @Override
+  public String getTelephone() {
+    return telephone;
+  }
+
+  @Override
+  public void setTelephone(String telephone) {
+    this.telephone = telephone;
+  }
+
+  @Override
+  public String getAdresse() {
+    return adresse;
+  }
+
+  @Override
+  public void setAdresse(String adresse) {
+    this.adresse = adresse;
   }
 
   // Méthodes selon UML

@@ -34,20 +34,8 @@ public abstract class Utilisateur {
   @Column(nullable = false, name = "motdePasse")
   protected String motDePasse;
 
-  @Column(name = "nom", length = 100)
-  protected String nom;
-
-  @Column(name = "prenom", length = 100)
-  protected String prenom;
-
   @Column(name = "bio", length = 500)
   protected String bio;
-
-  @Column(name = "telephone", length = 20)
-  protected String telephone;
-
-  @Column(name = "adresse", length = 200)
-  protected String adresse;
 
   // Constructeur sans argument pour JPA
   protected Utilisateur() {}
@@ -91,6 +79,42 @@ public abstract class Utilisateur {
 
   public boolean verifierMotDePasse(String mdp) {
     return Objects.equals(this.motDePasse, mdp);
+  }
+
+  // Méthodes abstraites à implémenter dans les sous-classes
+  public abstract String getNom();
+
+  public abstract String getPrenom();
+
+  public abstract String getTelephone();
+
+  public abstract String getAdresse();
+
+  public abstract void setNom(String nom);
+
+  public abstract void setPrenom(String prenom);
+
+  public abstract void setTelephone(String telephone);
+
+  public abstract void setAdresse(String adresse);
+
+  /**
+   * Retourne le nom complet de l'utilisateur
+   */
+  public String getNomComplet() {
+    String nom = getNom();
+    String prenom = getPrenom();
+
+    if (nom == null && prenom == null) {
+      return "Utilisateur #" + idU;
+    }
+    if (nom == null) {
+      return prenom;
+    }
+    if (prenom == null) {
+      return nom;
+    }
+    return prenom + " " + nom;
   }
 
   // Méthodes selon UML
@@ -191,11 +215,11 @@ public abstract class Utilisateur {
   public ProfilInfo getProfil(EntityManager em) {
     ProfilInfo profil = new ProfilInfo();
     profil.setIdUtilisateur(this.idU);
-    profil.setNom(this.nom);
-    profil.setPrenom(this.prenom);
+    profil.setNom(getNom());
+    profil.setPrenom(getPrenom());
     profil.setEmail(this.email);
-    profil.setTelephone(this.telephone);
-    profil.setAdresse(this.adresse);
+    profil.setTelephone(getTelephone());
+    profil.setAdresse(getAdresse());
     profil.setBio(this.bio);
 
     // Récupérer le nom commercial si c'est un Agent
@@ -226,37 +250,20 @@ public abstract class Utilisateur {
   public void modifierProfil(String nom, String prenom, String telephone, String adresse,
       String bio) {
     if (nom != null && !nom.trim().isEmpty()) {
-      this.nom = nom;
+      setNom(nom);
     }
     if (prenom != null && !prenom.trim().isEmpty()) {
-      this.prenom = prenom;
+      setPrenom(prenom);
     }
     if (telephone != null) {
-      this.telephone = telephone;
+      setTelephone(telephone);
     }
     if (adresse != null) {
-      this.adresse = adresse;
+      setAdresse(adresse);
     }
     if (bio != null) {
       this.bio = bio;
     }
-  }
-
-  // Getters et setters pour les nouveaux champs
-  public String getNom() {
-    return nom;
-  }
-
-  public void setNom(String nom) {
-    this.nom = nom;
-  }
-
-  public String getPrenom() {
-    return prenom;
-  }
-
-  public void setPrenom(String prenom) {
-    this.prenom = prenom;
   }
 
   public String getBio() {
@@ -265,22 +272,6 @@ public abstract class Utilisateur {
 
   public void setBio(String bio) {
     this.bio = bio;
-  }
-
-  public String getTelephone() {
-    return telephone;
-  }
-
-  public void setTelephone(String telephone) {
-    this.telephone = telephone;
-  }
-
-  public String getAdresse() {
-    return adresse;
-  }
-
-  public void setAdresse(String adresse) {
-    this.adresse = adresse;
   }
 
   @Override

@@ -16,18 +16,24 @@ public class AgentProfessionnel extends Agent {
   @Column(nullable = false)
   private String siret;
 
-  @Column(nullable = false)
-  private String nom;
+  @Column(nullable = false, name = "nom_entreprise")
+  private String nomEntreprise;
+
+  @Column(name = "telephone", length = 20)
+  private String telephone;
+
+  @Column(name = "adresse", length = 200)
+  private String adresse;
 
   // Constructeur sans argument pour JPA
   protected AgentProfessionnel() {
     super();
   }
 
-  public AgentProfessionnel(String email, String motDePasse, String siret, String nom) {
+  public AgentProfessionnel(String email, String motDePasse, String siret, String nomEntreprise) {
     super(email, motDePasse, TypeAgent.PROFESSIONNEL);
     this.siret = siret;
-    this.nom = nom;
+    this.nomEntreprise = nomEntreprise;
   }
 
   // Getters et Setters
@@ -39,12 +45,53 @@ public class AgentProfessionnel extends Agent {
     this.siret = siret;
   }
 
-  public String getNom() {
-    return nom;
+  public String getNomEntreprise() {
+    return nomEntreprise;
   }
 
+  public void setNomEntreprise(String nomEntreprise) {
+    this.nomEntreprise = nomEntreprise;
+  }
+
+  // Implémentation des méthodes abstraites
+  @Override
+  public String getNom() {
+    return nomEntreprise;
+  }
+
+  @Override
   public void setNom(String nom) {
-    this.nom = nom;
+    this.nomEntreprise = nom;
+  }
+
+  @Override
+  public String getPrenom() {
+    return null; // Les professionnels n'ont pas de prénom
+  }
+
+  @Override
+  public void setPrenom(String prenom) {
+    // Les professionnels n'ont pas de prénom
+  }
+
+  @Override
+  public String getTelephone() {
+    return telephone;
+  }
+
+  @Override
+  public void setTelephone(String telephone) {
+    this.telephone = telephone;
+  }
+
+  @Override
+  public String getAdresse() {
+    return adresse;
+  }
+
+  @Override
+  public void setAdresse(String adresse) {
+    this.adresse = adresse;
   }
 
   @Override
@@ -54,7 +101,7 @@ public class AgentProfessionnel extends Agent {
 
   @Override
   public String toString() {
-    return "AgentProfessionnel [id=" + getIdU() + ", entreprise=" + nom + ", email=" + getEmail()
-        + ", siret=" + siret + "]";
+    return "AgentProfessionnel [id=" + getIdU() + ", entreprise=" + nomEntreprise + ", email="
+        + getEmail() + ", siret=" + siret + "]";
   }
 }
