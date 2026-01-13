@@ -25,17 +25,17 @@ public class DisponibiliteDemoSimple {
 
       AgentParticulier agent = agentService.createAgentParticulier("Dispo", "Owner",
           "dispo" + suffix + "@demo", "pass", "339" + String.format("%08d", suffix));
-      Vehicule vehicule = vehiculeService.createVehicule(TypeV.voiture, "Citroen", "C3",
-          "Rouge", "Lille", 28.0, agent);
+      Vehicule vehicule = vehiculeService.createVehicule(TypeV.voiture, "Citroen", "C3", "Rouge",
+          "Lille", 28.0, agent);
 
       LocalDate base = LocalDate.now();
       Disponibilite d1 = dispoService.creerDisponibilite(vehicule, base, base.plusDays(10));
-      Disponibilite d2 = dispoService.creerDisponibilite(vehicule, base.plusDays(12),
-          base.plusDays(20));
-      Disponibilite d3 = dispoService.creerDisponibilite(vehicule, base.plusDays(25),
-          base.plusDays(35));
-      Disponibilite d4 = dispoService.creerDisponibilite(vehicule, base.plusDays(40),
-          base.plusDays(50));
+      Disponibilite d2 =
+          dispoService.creerDisponibilite(vehicule, base.plusDays(12), base.plusDays(20));
+      Disponibilite d3 =
+          dispoService.creerDisponibilite(vehicule, base.plusDays(25), base.plusDays(35));
+      Disponibilite d4 =
+          dispoService.creerDisponibilite(vehicule, base.plusDays(40), base.plusDays(50));
 
       System.out.println("Disponibilités créées :");
       System.out.println(d1);
