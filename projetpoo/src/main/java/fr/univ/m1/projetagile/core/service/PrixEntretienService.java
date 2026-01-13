@@ -109,6 +109,14 @@ public class PrixEntretienService {
       throw new IllegalArgumentException("Aucun prix trouvé avec l'id: " + prixEntretienId);
     }
 
+    // Check if the new combination already exists (excluding the current entry)
+    PrixEntretien existing = repository.findByEntretienAndVehiculeTypeAndModel(
+        prixEntretien.getEntretien(), nouveauType, prixEntretien.getModeleVehi());
+    if (existing != null && !existing.getId().equals(prixEntretienId)) {
+      throw new IllegalArgumentException(
+          "Un prix existe déjà pour ce type de véhicule et ce modèle");
+    }
+
     prixEntretien.setTypeVehi(nouveauType);
     return repository.save(prixEntretien);
   }
@@ -133,6 +141,14 @@ public class PrixEntretienService {
     PrixEntretien prixEntretien = repository.findById(prixEntretienId);
     if (prixEntretien == null) {
       throw new IllegalArgumentException("Aucun prix trouvé avec l'id: " + prixEntretienId);
+    }
+
+    // Check if the new combination already exists (excluding the current entry)
+    PrixEntretien existing = repository.findByEntretienAndVehiculeTypeAndModel(
+        prixEntretien.getEntretien(), prixEntretien.getTypeVehi(), nouveauModele);
+    if (existing != null && !existing.getId().equals(prixEntretienId)) {
+      throw new IllegalArgumentException(
+          "Un prix existe déjà pour ce type de véhicule et ce modèle");
     }
 
     prixEntretien.setModeleVehi(nouveauModele);
