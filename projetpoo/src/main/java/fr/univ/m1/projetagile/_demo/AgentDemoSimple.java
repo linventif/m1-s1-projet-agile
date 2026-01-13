@@ -21,12 +21,10 @@ public class AgentDemoSimple {
       AgentParticulier a2 = agentService.createAgentParticulier("Durand", "Paul",
           "paul" + suffix + "@agent.demo", "pass", "337" + String.format("%08d", suffix));
 
-      AgentProfessionnel p1 = agentService.createAgentProfessionnel(
-          "pro1" + suffix + "@agent.demo", "pass", "" + (11_000_000_000_000L + suffix),
-          "AgencePro" + suffix);
-      AgentProfessionnel p2 = agentService.createAgentProfessionnel(
-          "pro2" + suffix + "@agent.demo", "pass", "" + (12_000_000_000_000L + suffix),
-          "Mobilia" + suffix);
+      AgentProfessionnel p1 = agentService.createAgentProfessionnel("pro1" + suffix + "@agent.demo",
+          "pass", "" + (11_000_000_000_000L + suffix), "AgencePro" + suffix);
+      AgentProfessionnel p2 = agentService.createAgentProfessionnel("pro2" + suffix + "@agent.demo",
+          "pass", "" + (12_000_000_000_000L + suffix), "Mobilia" + suffix);
 
       System.out.println("Agents créés :");
       System.out.println(a1);
