@@ -6,7 +6,9 @@ import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import fr.univ.m1.projetagile.core.entity.ControleTechnique;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
+import fr.univ.m1.projetagile.core.persistence.ControleTechniqueRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 
 /**
@@ -18,12 +20,93 @@ import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 public class ControlTechniqueService {
 
   private final VehiculeRepository vehiculeRepository;
+  private final ControleTechniqueRepository controleTechniqueRepository;
 
   public ControlTechniqueService(VehiculeRepository vehiculeRepository) {
     this.vehiculeRepository = vehiculeRepository;
+    this.controleTechniqueRepository = new ControleTechniqueRepository();
+  }
+
+  public ControlTechniqueService(VehiculeRepository vehiculeRepository,
+      ControleTechniqueRepository controleTechniqueRepository) {
+    this.vehiculeRepository = vehiculeRepository;
+    this.controleTechniqueRepository = controleTechniqueRepository;
   }
 
   // ==================== MÉTHODES PRINCIPALES ====================
+
+  /**
+   * Obtient le contrôle technique d'un véhicule (ou null si inexistant)
+   *
+   * @param vehiculeId l'identifiant du véhicule
+   * @return le contrôle technique du véhicule ou null
+   */
+  public ControleTechnique getControleTechniqueByVehiculeId(Long vehiculeId) {
+    return controleTechniqueRepository.findByVehiculeId(vehiculeId);
+  }
+
+  /**
+   * Obtient ou crée un contrôle technique pour un véhicule
+   *
+   * @param vehiculeId l'identifiant du véhicule
+   * @return le contrôle technique du véhicule
+   */
+  public ControleTechnique getOrCreateControleTechnique(Long vehiculeId) {
+    ControleTechnique ct = controleTechniqueRepository.findByVehiculeId(vehiculeId);
+    if (ct == null) {
+      Vehicule vehicule = vehiculeRepository.findById(vehiculeId);
+      if (vehicule == null) {
+        throw new IllegalArgumentException("Véhicule non trouvé avec l'ID: " + vehiculeId);
+      }
+      ct = new ControleTechnique(vehicule);
+      ct = controleTechniqueRepository.save(ct);
+    }
+    return ct;
+  }
+
+  /**
+   * Met à jour les informations du contrôle technique d'un véhicule
+   */
+  public ControleTechnique updateControleTechnique(Long vehiculeId, LocalDate dateMiseEnCirculation,
+      LocalDate dateDernierControle, Integer kilometrageActuel, Integer kilometrageDernierControle,
+      LocalDate dateProchainControle, LocalDate dateDernierEntretien, String resultat) {
+    ControleTechnique ct = getOrCreateControleTechnique(vehiculeId);
+    
+    if (dateMiseEnCirculation != null) {
+      ct.setDateMiseEnCirculation(dateMiseEnCirculation);
+    }
+    if (dateDernierControle != null) {
+      ct.setDate(dateDernierControle);
+    }
+    if (kilometrageActuel != null) {
+      ct.setKilometrageActuel(kilometrageActuel);
+    }
+    if (kilometrageDernierControle != null) {
+      ct.setKilometrageDernierControle(kilometrageDernierControle);
+    }
+    if (dateProchainControle != null) {
+      ct.setDateLimite(dateProchainControle);
+    }
+    if (dateDernierEntretien != null) {
+      ct.setDateDernierEntretien(dateDernierEntretien);
+    }
+    if (resultat != null) {
+      ct.setResultat(resultat);
+    }
+    
+    return controleTechniqueRepository.save(ct);
+  }
+
+  /**
+   * Calcule l'âge d'un véhicule en années
+   */
+  public int getAgeVehicule(Long vehiculeId) {
+    ControleTechnique ct = getControleTechniqueByVehiculeId(vehiculeId);
+    if (ct == null || ct.getDateMiseEnCirculation() == null) {
+      return 0;
+    }
+    return Period.between(ct.getDateMiseEnCirculation(), LocalDate.now()).getYears();
+  }
 
   /**
    * 
@@ -57,8 +140,13 @@ public class ControlTechniqueService {
       return null;
     }
 
-    LocalDate dateDernierControle = vehicule.getDateDernierControle();
-    LocalDate dateMiseEnCirculation = vehicule.getDateMiseEnCirculation();
+    ControleTechnique ct = getControleTechniqueByVehiculeId(vehicule.getId());
+    if (ct == null) {
+      return null;
+    }
+
+    LocalDate dateDernierControle = ct.getDate();
+    LocalDate dateMiseEnCirculation = ct.getDateMiseEnCirculation();
 
     if (dateMiseEnCirculation == null) {
       // si la date de mise en circulation est inconnue, on ne peut pas calculer
@@ -89,8 +177,9 @@ public class ControlTechniqueService {
     LocalDate dateProchainControle = calculerDateProchainControle(vehicule);
 
     if (dateProchainControle != null) {
-      vehicule.setDateProchainControle(dateProchainControle);
-      vehiculeRepository.save(vehicule);
+      ControleTechnique ct = getOrCreateControleTechnique(vehicule.getId());
+      ct.setDateLimite(dateProchainControle);
+      controleTechniqueRepository.save(ct);
     }
 
     return dateProchainControle;
@@ -129,7 +218,8 @@ public class ControlTechniqueService {
       return "Véhicule non spécifié";
     }
 
-    LocalDate dateProchainControle = vehicule.getDateProchainControle();
+    ControleTechnique ct = getControleTechniqueByVehiculeId(vehicule.getId());
+    LocalDate dateProchainControle = ct != null ? ct.getDateLimite() : null;
     if (dateProchainControle == null) {
       dateProchainControle = calculerDateProchainControle(vehicule);
     }
@@ -193,16 +283,18 @@ public class ControlTechniqueService {
         .append(vehicule.getModele()).append("\n");
     rapport.append("Immatriculation: ").append(vehicule.getId()).append("\n\n");
 
+    ControleTechnique ct = getControleTechniqueByVehiculeId(vehicule.getId());
+
     // donnees de base
     rapport.append("📊 INFORMATIONS DE BASE\n");
     rapport.append("─".repeat(30)).append("\n");
-    if (vehicule.getDateMiseEnCirculation() != null) {
-      rapport.append("Date mise en circulation: ").append(vehicule.getDateMiseEnCirculation())
+    if (ct != null && ct.getDateMiseEnCirculation() != null) {
+      rapport.append("Date mise en circulation: ").append(ct.getDateMiseEnCirculation())
           .append("\n");
-      rapport.append("Âge du véhicule: ").append(vehicule.getAgeVehicule()).append(" ans\n");
+      rapport.append("Âge du véhicule: ").append(getAgeVehicule(vehicule.getId())).append(" ans\n");
     }
-    if (vehicule.getKilometrageActuel() != null) {
-      rapport.append("Kilométrage actuel: ").append(vehicule.getKilometrageActuel())
+    if (ct != null && ct.getKilometrageActuel() != null) {
+      rapport.append("Kilométrage actuel: ").append(ct.getKilometrageActuel())
           .append(" km\n");
     }
     rapport.append("\n");
@@ -210,15 +302,15 @@ public class ControlTechniqueService {
     // historique des contrôles
     rapport.append("📅 HISTORIQUE DES CONTRÔLES\n");
     rapport.append("─".repeat(30)).append("\n");
-    if (vehicule.getDateDernierControle() != null) {
-      rapport.append("Dernier contrôle: ").append(vehicule.getDateDernierControle()).append("\n");
+    if (ct != null && ct.getDate() != null) {
+      rapport.append("Dernier contrôle: ").append(ct.getDate()).append("\n");
     }
-    if (vehicule.getKilometrageDernierControle() != null) {
+    if (ct != null && ct.getKilometrageDernierControle() != null) {
       rapport.append("Kilométrage dernier contrôle: ")
-          .append(vehicule.getKilometrageDernierControle()).append(" km\n");
+          .append(ct.getKilometrageDernierControle()).append(" km\n");
     }
-    if (vehicule.getDateProchainControle() != null) {
-      rapport.append("Prochain contrôle calculé: ").append(vehicule.getDateProchainControle())
+    if (ct != null && ct.getDateLimite() != null) {
+      rapport.append("Prochain contrôle calculé: ").append(ct.getDateLimite())
           .append("\n");
     }
     rapport.append("\n");
@@ -295,13 +387,18 @@ public class ControlTechniqueService {
   public List<String> getRecommandationsEntretienParKilometrage(Vehicule vehicule) {
     List<String> recommandations = new ArrayList<>();
 
-    if (vehicule == null || vehicule.getKilometrageActuel() == null
-        || vehicule.getKilometrageDernierControle() == null) {
+    if (vehicule == null) {
       return recommandations;
     }
 
-    int kilometrageActuel = vehicule.getKilometrageActuel();
-    int kilometrageDernierControle = vehicule.getKilometrageDernierControle();
+    ControleTechnique ct = getControleTechniqueByVehiculeId(vehicule.getId());
+    if (ct == null || ct.getKilometrageActuel() == null
+        || ct.getKilometrageDernierControle() == null) {
+      return recommandations;
+    }
+
+    int kilometrageActuel = ct.getKilometrageActuel();
+    int kilometrageDernierControle = ct.getKilometrageDernierControle();
     int kilometresParcourus = kilometrageActuel - kilometrageDernierControle;
 
     if (kilometresParcourus <= 0) {
@@ -350,17 +447,19 @@ public class ControlTechniqueService {
       throw new RuntimeException("Véhicule non trouvé");
     }
 
+    ControleTechnique ct = getOrCreateControleTechnique(vehiculeId);
 
     // mise à jour des informations du contrôle
-    vehicule.setDateDernierControle(dateControle);
-    vehicule.setKilometrageDernierControle(kilometrage);
+    ct.setDate(dateControle);
+    ct.setKilometrageDernierControle(kilometrage);
+    ct.setResultat(resultat);
 
     // recalculer la date du prochain contrôle
     LocalDate nouveauProchainControle = calculerDateProchainControle(vehicule);
-    vehicule.setDateProchainControle(nouveauProchainControle);
+    ct.setDateLimite(nouveauProchainControle);
 
     // enregistrer les modifications
-    vehiculeRepository.save(vehicule);
+    controleTechniqueRepository.save(ct);
   }
 
   // ==================== MÉTHODES UTILITAIRES ====================
@@ -369,7 +468,8 @@ public class ControlTechniqueService {
    * calculer les jours restants avant le prochain contrôle technique
    */
   public long calculerJoursRestants(Vehicule vehicule) {
-    LocalDate dateProchainControle = vehicule.getDateProchainControle();
+    ControleTechnique ct = getControleTechniqueByVehiculeId(vehicule.getId());
+    LocalDate dateProchainControle = ct != null ? ct.getDateLimite() : null;
     if (dateProchainControle == null) {
       dateProchainControle = calculerDateProchainControle(vehicule);
     }
@@ -386,7 +486,8 @@ public class ControlTechniqueService {
    * verifier si le contrôle technique est dépassé
    */
   public boolean estControleDepasse(Vehicule vehicule) {
-    LocalDate dateProchainControle = vehicule.getDateProchainControle();
+    ControleTechnique ct = getControleTechniqueByVehiculeId(vehicule.getId());
+    LocalDate dateProchainControle = ct != null ? ct.getDateLimite() : null;
     if (dateProchainControle == null) {
       return false;
     }

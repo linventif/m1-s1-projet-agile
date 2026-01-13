@@ -9,6 +9,7 @@ import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
+import fr.univ.m1.projetagile.core.entity.ControleTechnique;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
@@ -34,87 +35,8 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     this.controlTechniqueService = new ControlTechniqueService(vehiculeRepository);
   }
 
-
   public AgentService(AgentRepository agentRepository) {
-    super(agentRepository);
-
-    // 创建临时的内存VehiculeRepository
-    VehiculeRepository tempRepository = createTemporaryVehiculeRepository();
-    this.vehiculeService = new VehiculeService(tempRepository);
-    this.controlTechniqueService = new ControlTechniqueService(tempRepository);
-  }
-
-  private VehiculeRepository createTemporaryVehiculeRepository() {
-    return new VehiculeRepository() {
-      private java.util.Map<Long, Vehicule> storage = new java.util.HashMap<>();
-      private long nextId = 1;
-
-      @Override
-      public Vehicule findById(Long id) {
-        return storage.get(id);
-      }
-
-      @Override
-      public Vehicule save(Vehicule vehicule) {
-        if (vehicule.getId() == null) {
-          Vehicule vehiculeWithId = createVehiculeWithId(vehicule, nextId++);
-          storage.put(vehiculeWithId.getId(), vehiculeWithId);
-          return vehiculeWithId;
-        }
-        storage.put(vehicule.getId(), vehicule);
-        return vehicule;
-      }
-
-      private Vehicule createVehiculeWithId(Vehicule original, Long id) {
-        Vehicule newVehicule = new Vehicule(original.getType(), original.getMarque(),
-            original.getModele(), original.getCouleur(), original.getVille(), original.getPrixJ(),
-            original.getProprietaire());
-
-
-        try {
-          java.lang.reflect.Field idField = Vehicule.class.getDeclaredField("id");
-          idField.setAccessible(true);
-          idField.set(newVehicule, id);
-          idField.setAccessible(false);
-        } catch (Exception e) {
-          System.err.println("无法设置ID: " + e.getMessage());
-          return original;
-        }
-
-
-        newVehicule.setDateMiseEnCirculation(original.getDateMiseEnCirculation());
-        newVehicule.setDateDernierControle(original.getDateDernierControle());
-        newVehicule.setKilometrageActuel(original.getKilometrageActuel());
-        newVehicule.setKilometrageDernierControle(original.getKilometrageDernierControle());
-        newVehicule.setDateProchainControle(original.getDateProchainControle());
-        newVehicule.setDateDernierEntretien(original.getDateDernierEntretien());
-        newVehicule.setDisponible(original.isDisponible());
-
-        return newVehicule;
-      }
-
-
-      @Override
-      public List<Vehicule> findAll() {
-        return new ArrayList<>(storage.values());
-      }
-
-      @Override
-      public void delete(Long id) {
-        storage.remove(id);
-      }
-
-      @Override
-      public List<Vehicule> findByAgentId(Long agentId) {
-        List<Vehicule> result = new ArrayList<>();
-        for (Vehicule v : storage.values()) {
-          if (v.getProprietaire() != null && v.getProprietaire().getIdU().equals(agentId)) {
-            result.add(v);
-          }
-        }
-        return result;
-      }
-    };
+    this(agentRepository, new VehiculeRepository());
   }
 
   /**
@@ -489,10 +411,12 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
         return "❌ Véhicule non trouvé après l'enregistrement";
       }
 
+      ControleTechnique ct = controlTechniqueService.getControleTechniqueByVehiculeId(vehiculeId);
+      LocalDate dateProchainControle = ct != null ? ct.getDateLimite() : null;
+
       return String.format(
           "✅ Contrôle technique enregistré pour %s %s\n" + "Date: %s\n" + "Prochain contrôle: %s",
-          vehicule.getMarque(), vehicule.getModele(), dateControle,
-          vehicule.getDateProchainControle());
+          vehicule.getMarque(), vehicule.getModele(), dateControle, dateProchainControle);
     } catch (Exception e) {
       return "❌ Erreur lors de l'enregistrement: " + e.getMessage();
     }
@@ -595,7 +519,6 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
     VehiculeDTO dto = new VehiculeDTO();
 
-
     dto.setId(vehicule.getId());
 
     dto.setType(vehicule.getType());
@@ -605,13 +528,16 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     dto.setVille(vehicule.getVille());
     dto.setPrixJ(vehicule.getPrixJ());
 
-
-    dto.setDateMiseEnCirculation(vehicule.getDateMiseEnCirculation());
-    dto.setDateDernierControle(vehicule.getDateDernierControle());
-    dto.setKilometrageActuel(vehicule.getKilometrageActuel());
-    dto.setKilometrageDernierControle(vehicule.getKilometrageDernierControle());
-    dto.setDateProchainControle(vehicule.getDateProchainControle());
-    dto.setDateDernierEntretien(vehicule.getDateDernierEntretien());
+    // Get technical control data via service
+    ControleTechnique ct = controlTechniqueService.getControleTechniqueByVehiculeId(vehicule.getId());
+    if (ct != null) {
+      dto.setDateMiseEnCirculation(ct.getDateMiseEnCirculation());
+      dto.setDateDernierControle(ct.getDate());
+      dto.setKilometrageActuel(ct.getKilometrageActuel());
+      dto.setKilometrageDernierControle(ct.getKilometrageDernierControle());
+      dto.setDateProchainControle(ct.getDateLimite());
+      dto.setDateDernierEntretien(ct.getDateDernierEntretien());
+    }
     dto.setDisponible(vehicule.isDisponible());
 
     return dto;
@@ -625,8 +551,7 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     Vehicule vehicule = new Vehicule(dto.getType(), dto.getMarque(), dto.getModele(),
         dto.getCouleur(), dto.getVille(), dto.getPrixJ(), null);
 
-
-    vehicule.setIdV(dto.getId());
+    vehicule.setId(dto.getId());
     vehicule.setType(dto.getType());
     vehicule.setMarque(dto.getMarque());
     vehicule.setModele(dto.getModele());
@@ -635,7 +560,13 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     vehicule.setPrixJ(dto.getPrixJ());
     vehicule.setDisponible(dto.isDisponible());
 
-
+    // Set control technique fields via service if vehicule has an ID
+    if (dto.getId() != null) {
+      controlTechniqueService.updateControleTechnique(dto.getId(),
+          dto.getDateMiseEnCirculation(), dto.getDateDernierControle(), dto.getKilometrageActuel(),
+          dto.getKilometrageDernierControle(), dto.getDateProchainControle(),
+          dto.getDateDernierEntretien(), null);
+    }
 
     return vehicule;
   }

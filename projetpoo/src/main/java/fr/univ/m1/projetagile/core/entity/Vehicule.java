@@ -51,23 +51,8 @@ public class Vehicule {
   @Column(nullable = false, name = "prixJ")
   private Double prixJ; // prix journalier
 
-  @Column(name = "date_mise_en_circulation")
-  private LocalDate dateMiseEnCirculation; // première mise en circulation
-
-  @Column(name = "date_dernier_controle")
-  private LocalDate dateDernierControle; // dernier contrôle technique
-
-  @Column(name = "kilometrage_actuel")
-  private Integer kilometrageActuel; // mileage actuel
-
-  @Column(name = "kilometrage_dernier_controle")
-  private Integer kilometrageDernierControle; // mileage au dernier contrôle
-
-  @Column(name = "date_prochain_controle")
-  private LocalDate dateProchainControle; // prochain contrôle technique(calculer automatiquement)
-
-  @Column(name = "date_dernier_entretien")
-  private LocalDate dateDernierEntretien; // dernier entretien
+  @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ControleTechnique> controlesTechniques = new ArrayList<>();
 
   @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Disponibilite> datesDispo = new ArrayList<>();
@@ -155,53 +140,7 @@ public class Vehicule {
     this.prixJ = prixJ;
   }
 
-  public LocalDate getDateMiseEnCirculation() {
-    return dateMiseEnCirculation;
-  }
 
-  public void setDateMiseEnCirculation(LocalDate dateMiseEnCirculation) {
-    this.dateMiseEnCirculation = dateMiseEnCirculation;
-  }
-
-  public LocalDate getDateDernierControle() {
-    return dateDernierControle;
-  }
-
-  public void setDateDernierControle(LocalDate dateDernierControle) {
-    this.dateDernierControle = dateDernierControle;
-  }
-
-  public Integer getKilometrageActuel() {
-    return kilometrageActuel;
-  }
-
-  public void setKilometrageActuel(Integer kilometrageActuel) {
-    this.kilometrageActuel = kilometrageActuel;
-  }
-
-  public Integer getKilometrageDernierControle() {
-    return kilometrageDernierControle;
-  }
-
-  public void setKilometrageDernierControle(Integer kilometrageDernierControle) {
-    this.kilometrageDernierControle = kilometrageDernierControle;
-  }
-
-  public LocalDate getDateProchainControle() {
-    return dateProchainControle;
-  }
-
-  public void setDateProchainControle(LocalDate dateProchainControle) {
-    this.dateProchainControle = dateProchainControle;
-  }
-
-  public LocalDate getDateDernierEntretien() {
-    return dateDernierEntretien;
-  }
-
-  public void setDateDernierEntretien(LocalDate dateDernierEntretien) {
-    this.dateDernierEntretien = dateDernierEntretien;
-  }
 
   public boolean isDisponible() {
     return disponible;
@@ -301,14 +240,6 @@ public class Vehicule {
   public List<Location> getHistoriqueLocations() {
     // Retourne l'historique des locations du véhicule
     return Collections.unmodifiableList(locations);
-  }
-
-  // calcul de l'age du vehicule
-  public int getAgeVehicule() {
-    if (dateMiseEnCirculation == null) {
-      return 0;
-    }
-    return Period.between(dateMiseEnCirculation, LocalDate.now()).getYears();
   }
 
   @Override
