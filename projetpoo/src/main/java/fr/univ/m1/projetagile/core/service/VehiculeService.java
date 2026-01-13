@@ -160,10 +160,23 @@ public class VehiculeService {
   }
 
   /**
-   * Supprime un véhicule par son identifiant
+   * Vérifie si un véhicule peut être supprimé (aucune location active ou future)
+   */
+  private void verifierVehiculeNonLoue(Long vehiculeId) {
+    List<Object[]> locationsActives = vehiculeRepository.getDatesLocationsActives(vehiculeId);
+
+    if (locationsActives != null && !locationsActives.isEmpty()) {
+      throw new IllegalArgumentException(
+          "Impossible de supprimer ce véhicule : il est actuellement loué ou réservé.");
+    }
+  }
+
+  /**
+   * Supprime un véhicule par son identifiant, uniquement s'il n'est pas loué (aucune location en
+   * cours ou planifiée).
    *
    * @param vehiculeId l'identifiant du véhicule à supprimer
-   * @throws IllegalArgumentException si le véhicule n'existe pas
+   * @throws IllegalArgumentException si le véhicule n'existe pas ou s'il est encore loué
    */
   public void deleteVehicule(Long vehiculeId) {
     if (vehiculeId == null) {
@@ -174,6 +187,9 @@ public class VehiculeService {
     if (vehicule == null) {
       throw new IllegalArgumentException("Aucun véhicule trouvé avec l'identifiant " + vehiculeId);
     }
+
+    // Vérifier qu'aucune location active (non annulée/terminée) n'existe pour ce véhicule
+    verifierVehiculeNonLoue(vehiculeId);
 
     // Supprimer le véhicule
     vehiculeRepository.delete(vehiculeId);

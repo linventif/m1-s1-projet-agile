@@ -281,5 +281,6 @@ public class VehiculeRepository {
       throw new RuntimeException(
           "Erreur lors de la récupération des véhicules de l'agent " + agentId, e);
     }
+
   }
 }
