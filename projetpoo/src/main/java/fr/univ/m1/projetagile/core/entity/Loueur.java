@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrimaryKeyJoinColumn;
@@ -14,12 +13,6 @@ import jakarta.persistence.Table;
 @Table(name = "loueurs")
 @PrimaryKeyJoinColumn(name = "idU")
 public class Loueur extends Utilisateur {
-
-  @Column(nullable = false)
-  private String nom;
-
-  @Column(nullable = false)
-  private String prenom;
 
   @OneToMany(mappedBy = "loueur", cascade = CascadeType.ALL)
   private List<Location> locations = new ArrayList<>();
@@ -35,18 +28,7 @@ public class Loueur extends Utilisateur {
     this.prenom = prenom;
   }
 
-  // Getters et Setters
-  public String getNom() {
-    return nom;
-  }
-
-  public void setNom(String nom) {
-    this.nom = nom;
-  }
-
-  public String getPrenom() {
-    return prenom;
-  }
+  // Getters et Setters hérités de Utilisateur pour nom et prenom
 
   public void setPrenom(String prenom) {
     this.prenom = prenom;
@@ -97,24 +79,6 @@ public class Loueur extends Utilisateur {
   public List<Location> consulterLocations() {
     // Consulte toutes les locations du loueur
     return getLocations();
-  }
-
-  public void noterVehicule(Vehicule vehicule, Double note1, Double note2, Double note3) {
-    // Permet au loueur de noter un véhicule
-    // TODO: Créer une NoteV et la persister
-    // NoteV note = new NoteV(note1, note2, note3, vehicule, this);
-  }
-
-  public void noterAgent(Agent agent, Double note1, Double note2, Double note3) {
-    // Permet au loueur de noter un agent
-    // TODO: Créer une NoteA et la persister
-    // NoteA note = new NoteA(note1, note2, note3, agent, this);
-  }
-
-  public Double calculerNote() {
-    // Calcule la note moyenne du loueur
-    // TODO: Récupérer toutes les NoteL pour ce loueur et calculer la moyenne
-    return 0.0; // Placeholder
   }
 
   @Override

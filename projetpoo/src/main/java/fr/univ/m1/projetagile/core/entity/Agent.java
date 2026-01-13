@@ -29,6 +29,9 @@ public abstract class Agent extends Utilisateur {
   @Column(name = "type_agent", insertable = false, updatable = false)
   private TypeAgent typeAgent;
 
+  @Column(name = "nom_commercial", length = 100)
+  private String nomCommercial;
+
   @OneToMany(mappedBy = "proprietaire", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Vehicule> vehicules = new ArrayList<>();
 
@@ -56,10 +59,12 @@ public abstract class Agent extends Utilisateur {
     return Collections.unmodifiableList(vehicules);
   }
 
-  public String getProfil() {
-    // À implémenter selon les besoins
-    // Retourne les informations du profil de l'agent
-    return "Profil de l'agent";
+  public String getNomCommercial() {
+    return nomCommercial;
+  }
+
+  public void setNomCommercial(String nomCommercial) {
+    this.nomCommercial = nomCommercial;
   }
 
   public void addVehicule(Vehicule v) {
