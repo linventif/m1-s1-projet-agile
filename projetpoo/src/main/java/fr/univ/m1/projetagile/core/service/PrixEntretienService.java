@@ -22,7 +22,7 @@ public class PrixEntretienService {
   /**
    * Creates a new maintenance price entry.
    *
-   * @param entretien the maintenance company
+   * @param entretien the Entretien entity representing the maintenance company
    * @param typeVehi the vehicle type
    * @param modeleVehi the vehicle model
    * @param prix the price
