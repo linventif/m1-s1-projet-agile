@@ -1,8 +1,8 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import fr.univ.m1.projetagile.commentaire.service.CommentaireService;
 import fr.univ.m1.projetagile.core.dto.ProfilInfo;
 import jakarta.persistence.Column;
@@ -214,10 +214,18 @@ public abstract class Utilisateur {
       Agent agent = (Agent) this;
       profil.setNomCommercial(agent.getNomCommercial());
 
-      // Récupérer les véhicules disponibles
-      List<Vehicule> vehiculesDisponibles =
-          agent.getVehicules().stream().filter(Vehicule::isDisponible).collect(Collectors.toList());
-      profil.setVehiculesDisponibles(vehiculesDisponibles);
+      // Récupérer les véhicules disponibles via une requête JPQL pour éviter
+      // LazyInitializationException
+      if (em != null) {
+        try {
+          List<Vehicule> vehiculesDisponibles = em.createQuery(
+              "SELECT v FROM Vehicule v WHERE v.proprietaire.idU = :agentId AND v.disponible = true",
+              Vehicule.class).setParameter("agentId", agent.getIdU()).getResultList();
+          profil.setVehiculesDisponibles(vehiculesDisponibles);
+        } catch (Exception e) {
+          profil.setVehiculesDisponibles(new ArrayList<>());
+        }
+      }
     }
 
     // Récupérer les commentaires
