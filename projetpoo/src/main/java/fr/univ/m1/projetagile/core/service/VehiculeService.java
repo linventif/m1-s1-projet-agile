@@ -896,6 +896,12 @@ public class VehiculeService {
   // filterer les véhicules par ville dans une liste donnée
   // =======================
   public List<Vehicule> getVehiculesParVilleDansListe(List<Vehicule> liste, String ville) {
+    if (liste == null) {
+      throw new IllegalArgumentException("La liste de véhicules ne peut pas être null.");
+    }
+    if (ville == null) {
+      throw new IllegalArgumentException("La ville ne peut pas être null.");
+    }
     return liste.stream().filter(v -> ville.equals(v.getVille())).toList();
   }
 }
