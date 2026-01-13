@@ -2,10 +2,14 @@ package fr.univ.m1.projetagile.core.entity;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import fr.univ.m1.projetagile.commentaire.service.CommentaireService;
+import fr.univ.m1.projetagile.core.dto.ProfilInfo;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,6 +33,21 @@ public abstract class Utilisateur {
 
   @Column(nullable = false, name = "motdePasse")
   protected String motDePasse;
+
+  @Column(name = "nom", length = 100)
+  protected String nom;
+
+  @Column(name = "prenom", length = 100)
+  protected String prenom;
+
+  @Column(name = "bio", length = 500)
+  protected String bio;
+
+  @Column(name = "telephone", length = 20)
+  protected String telephone;
+
+  @Column(name = "adresse", length = 200)
+  protected String adresse;
 
   // Constructeur sans argument pour JPA
   protected Utilisateur() {}
@@ -164,6 +183,104 @@ public abstract class Utilisateur {
     if (nouveauEmail != null && !nouveauEmail.trim().isEmpty()) {
       this.email = nouveauEmail;
     }
+  }
+
+  /**
+   * Récupérer les informations du profil
+   */
+  public ProfilInfo getProfil(EntityManager em) {
+    ProfilInfo profil = new ProfilInfo();
+    profil.setIdUtilisateur(this.idU);
+    profil.setNom(this.nom);
+    profil.setPrenom(this.prenom);
+    profil.setEmail(this.email);
+    profil.setTelephone(this.telephone);
+    profil.setAdresse(this.adresse);
+    profil.setBio(this.bio);
+
+    // Récupérer le nom commercial si c'est un Agent
+    if (this instanceof Agent) {
+      Agent agent = (Agent) this;
+      profil.setNomCommercial(agent.getNomCommercial());
+
+      // Récupérer les véhicules disponibles
+      List<Vehicule> vehiculesDisponibles =
+          agent.getVehicules().stream().filter(Vehicule::isDisponible).collect(Collectors.toList());
+      profil.setVehiculesDisponibles(vehiculesDisponibles);
+    }
+
+    // Récupérer les commentaires
+    if (em != null) {
+      CommentaireService commentaireService = new CommentaireService(em);
+      profil.setCommentaires(commentaireService.getCommentairesProfil(this.idU));
+      profil.setMoyenneNotes(commentaireService.getMoyenneNotes(this.idU));
+      profil.setNombreCommentaires(commentaireService.countCommentaires(this.idU));
+    }
+
+    return profil;
+  }
+
+  /**
+   * Modifier les informations du profil
+   */
+  public void modifierProfil(String nom, String prenom, String telephone, String adresse,
+      String bio) {
+    if (nom != null && !nom.trim().isEmpty()) {
+      this.nom = nom;
+    }
+    if (prenom != null && !prenom.trim().isEmpty()) {
+      this.prenom = prenom;
+    }
+    if (telephone != null) {
+      this.telephone = telephone;
+    }
+    if (adresse != null) {
+      this.adresse = adresse;
+    }
+    if (bio != null) {
+      this.bio = bio;
+    }
+  }
+
+  // Getters et setters pour les nouveaux champs
+  public String getNom() {
+    return nom;
+  }
+
+  public void setNom(String nom) {
+    this.nom = nom;
+  }
+
+  public String getPrenom() {
+    return prenom;
+  }
+
+  public void setPrenom(String prenom) {
+    this.prenom = prenom;
+  }
+
+  public String getBio() {
+    return bio;
+  }
+
+  public void setBio(String bio) {
+    this.bio = bio;
+  }
+
+  public String getTelephone() {
+    return telephone;
+  }
+
+  public void setTelephone(String telephone) {
+    this.telephone = telephone;
+  }
+
+  public String getAdresse() {
+    return adresse;
+  }
+
+  public void setAdresse(String adresse) {
+    this.adresse = adresse;
   }
 
   @Override
