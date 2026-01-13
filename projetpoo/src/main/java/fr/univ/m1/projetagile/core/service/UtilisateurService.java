@@ -56,6 +56,19 @@ public abstract class UtilisateurService<T extends Utilisateur, R extends Utilis
     repository.delete(id);
   }
 
+  /**
+   * Sauvegarde ou met à jour un utilisateur
+   *
+   * @param utilisateur l'utilisateur à sauvegarder
+   * @return l'utilisateur sauvegardé
+   */
+  public T save(T utilisateur) {
+    if (utilisateur == null) {
+      throw new IllegalArgumentException("L'utilisateur ne peut pas être nul.");
+    }
+    return repository.save(utilisateur);
+  }
+
 
 
   /**

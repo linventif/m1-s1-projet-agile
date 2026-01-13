@@ -1,7 +1,9 @@
 package fr.univ.m1.projetagile.notes.persistence;
 
+import java.util.ArrayList;
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
+import fr.univ.m1.projetagile.notes.entity.Critere;
 import fr.univ.m1.projetagile.notes.entity.NoteAgent;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
@@ -19,14 +21,29 @@ public class NoteAgentRepository {
       transaction = em.getTransaction();
       transaction.begin();
 
-      if (note.getId() == null) {
-        em.persist(note);
-      } else {
-        note = em.merge(note);
+      // Recharger tous les critères depuis la base pour avoir des instances gérées
+      List<Critere> criteresManagedList = new ArrayList<>();
+      for (Critere critere : note.getCriteres()) {
+        if (critere.getId() == null) {
+          throw new IllegalStateException(
+              "Tous les critères doivent être persistés avant de créer une note");
+        }
+        Critere managed = em.find(Critere.class, critere.getId());
+        if (managed == null) {
+          throw new IllegalStateException(
+              "Le critère avec l'ID " + critere.getId() + " n'existe pas en base");
+        }
+        criteresManagedList.add(managed);
       }
 
+      // Persister la note avec les critères gérés pour éviter une liste vide
+      NoteAgent noteToSave =
+          new NoteAgent(note.getAgent(), note.getLoueur(), new ArrayList<>(criteresManagedList));
+      em.persist(noteToSave);
+      em.flush(); // génère l'ID et insère la jointure
+
       transaction.commit();
-      return note;
+      return noteToSave;
 
     } catch (Exception e) {
       if (transaction != null && transaction.isActive()) {

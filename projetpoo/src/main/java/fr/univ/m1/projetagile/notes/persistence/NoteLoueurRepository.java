@@ -1,5 +1,6 @@
 package fr.univ.m1.projetagile.notes.persistence;
 
+import java.util.ArrayList;
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.notes.entity.NoteLoueur;
@@ -19,14 +20,30 @@ public class NoteLoueurRepository {
       transaction = em.getTransaction();
       transaction.begin();
 
-      if (note.getId() == null) {
-        em.persist(note);
-      } else {
-        note = em.merge(note);
+      // Recharger tous les critères depuis la base pour avoir des instances gérées
+      List<fr.univ.m1.projetagile.notes.entity.Critere> criteresManagedList = new ArrayList<>();
+      for (fr.univ.m1.projetagile.notes.entity.Critere critere : note.getCriteres()) {
+        if (critere.getId() == null) {
+          throw new IllegalStateException(
+              "Tous les critères doivent être persistés avant de créer une note");
+        }
+        fr.univ.m1.projetagile.notes.entity.Critere managed =
+            em.find(fr.univ.m1.projetagile.notes.entity.Critere.class, critere.getId());
+        if (managed == null) {
+          throw new IllegalStateException(
+              "Le critère avec l'ID " + critere.getId() + " n'existe pas en base");
+        }
+        criteresManagedList.add(managed);
       }
 
+      // Persister la note avec les critères gérés pour éviter une liste vide
+      NoteLoueur noteToSave =
+          new NoteLoueur(note.getAgent(), note.getLoueur(), new ArrayList<>(criteresManagedList));
+      em.persist(noteToSave);
+      em.flush();
+
       transaction.commit();
-      return note;
+      return noteToSave;
 
     } catch (Exception e) {
       if (transaction != null && transaction.isActive()) {

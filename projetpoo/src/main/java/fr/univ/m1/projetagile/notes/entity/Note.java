@@ -2,9 +2,7 @@ package fr.univ.m1.projetagile.notes.entity;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -29,7 +27,7 @@ public abstract class Note {
   /**
    * Liste des critères d'évaluation avec leurs notes.
    */
-  @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+  @ManyToMany
   @JoinTable(name = "note_criteres", joinColumns = @JoinColumn(name = "note_id"),
       inverseJoinColumns = @JoinColumn(name = "critere_id"))
   protected List<Critere> criteres = new ArrayList<>();
@@ -61,12 +59,12 @@ public abstract class Note {
   }
 
   /**
-   * Retourne la liste des critères d'évaluation (non modifiable).
+   * Retourne une copie de la liste des critères d'évaluation.
    *
    * @return la liste des critères
    */
   public List<Critere> getCriteres() {
-    return Collections.unmodifiableList(criteres);
+    return new ArrayList<>(criteres);
   }
 
   /**

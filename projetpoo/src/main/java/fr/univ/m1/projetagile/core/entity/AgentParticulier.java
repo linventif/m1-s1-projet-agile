@@ -17,7 +17,11 @@ public class AgentParticulier extends Agent {
   @Column(nullable = false)
   private String prenom;
 
+  @Column(name = "telephone", length = 20)
   private String telephone;
+
+  @Column(name = "adresse", length = 200)
+  private String adresse;
 
   // Constructeur sans argument pour JPA
   protected AgentParticulier() {
@@ -32,29 +36,45 @@ public class AgentParticulier extends Agent {
     this.telephone = telephone;
   }
 
-  // Getters et Setters
+  // Getters et Setters - implémentation des méthodes abstraites
+  @Override
   public String getNom() {
     return nom;
   }
 
+  @Override
   public void setNom(String nom) {
     this.nom = nom;
   }
 
+  @Override
   public String getPrenom() {
     return prenom;
   }
 
+  @Override
   public void setPrenom(String prenom) {
     this.prenom = prenom;
   }
 
+  @Override
   public String getTelephone() {
     return telephone;
   }
 
+  @Override
   public void setTelephone(String telephone) {
     this.telephone = telephone;
+  }
+
+  @Override
+  public String getAdresse() {
+    return adresse;
+  }
+
+  @Override
+  public void setAdresse(String adresse) {
+    this.adresse = adresse;
   }
 
   @Override
