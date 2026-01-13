@@ -7,8 +7,10 @@ import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
+import fr.univ.m1.projetagile.core.entity.RappelControleTechnique;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
+
 
 /**
  * Service métier pour la gestion des agents (particuliers et professionnels) Fournit des méthodes
@@ -251,5 +253,44 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
     agent.setSiret(nouveauSiret);
     return (AgentProfessionnel) repository.save(agent);
+  }
+
+  @Autowired
+  private RappelControleTechniqueService rappelControleTechniqueService;
+
+  /**
+   * Générer des rappels de contrôle technique pour l'agent
+   */
+  public List<RappelControleTechnique> genererRappelsControleTechnique(Long agentId,
+      int joursAlerte) {
+    return rappelControleTechniqueService.genererRappelsPourAgent(agentId, joursAlerte);
+  }
+
+  /**
+   * Obtenir le résumé des rappels pour l'agent
+   */
+  public String getResumeRappelsControleTechnique(Long agentId) {
+    return rappelControleTechniqueService.getResumeRappelsPourAgent(agentId);
+  }
+
+  /**
+   * Obtenir un rapport détaillé pour l'agent
+   */
+  public String getRapportDetailleControleTechnique(Long agentId) {
+    return rappelControleTechniqueService.genererRapportDetaillePourAgent(agentId);
+  }
+
+  /**
+   * Envoyer les rappels par message à l'agent
+   */
+  public int envoyerRappelsControleTechnique(Long agentId) {
+    return rappelControleTechniqueService.envoyerRappelsParMessage(agentId);
+  }
+
+  /**
+   * Obtenir les rappels urgents
+   */
+  public List<RappelControleTechnique> getRappelsUrgentsControleTechnique(Long agentId) {
+    return rappelControleTechniqueService.getRappelsUrgentsPourAgent(agentId);
   }
 }

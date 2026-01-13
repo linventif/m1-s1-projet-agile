@@ -250,4 +250,7 @@ public class MessagerieService {
   public boolean ontEchangeMessages(Utilisateur utilisateur1, Utilisateur utilisateur2) {
     return !getConversation(utilisateur1, utilisateur2).isEmpty();
   }
+
+
+
 }
