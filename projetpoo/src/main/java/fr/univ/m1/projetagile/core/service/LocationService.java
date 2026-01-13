@@ -333,14 +333,14 @@ public class LocationService {
   }
 
   /**
-   * Permet à un agent de refuser manuellement une location en attente.
+   * Permet à un agent de refuser manuellement une location en attente. Si le délai d'acceptation a
+   * expiré, la location est automatiquement annulée.
    *
    * @param locationId l'identifiant de la location à refuser
    * @param agent l'agent qui refuse la location
    * @throws IllegalArgumentException si l'identifiant de la location ou l'agent est null
    * @throws IllegalStateException si la location n'existe pas, si l'agent n'est pas le propriétaire
-   *         du véhicule, si la location n'est pas en attente d'acceptation, ou si le délai
-   *         d'acceptation a expiré
+   *         du véhicule, ou si la location n'est pas en attente d'acceptation
    */
   public void refuserLocationManuellement(Long locationId, Agent agent) {
     if (locationId == null) {
@@ -369,11 +369,12 @@ public class LocationService {
               + "Statut actuel : " + location.getStatut());
     }
 
-    // Vérifier que le délai d'acceptation n'a pas expiré (bien que refuser une location expirée
-    // soit moins critique)
+    // Si le délai a expiré, annuler automatiquement (même comportement que accepterLocationManuellement)
     if (location.delaiAcceptationExpire()) {
+      location.setStatut(StatutLocation.ANNULE);
+      locationRepository.save(location);
       throw new IllegalStateException(
-          "Le délai d'acceptation de 6 heures a expiré. La location est déjà considérée comme annulée.");
+          "Le délai d'acceptation de 6 heures a expiré. La location a été automatiquement annulée.");
     }
 
     // Refuser la location (annuler)
