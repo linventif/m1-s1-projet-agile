@@ -1,5 +1,7 @@
 package fr.univ.m1.projetagile.core.entity;
 
+import java.time.LocalDateTime;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,61 +18,70 @@ public class SouscriptionOption {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(nullable = false)
+  private LocalDateTime dateDebut;
+
+  @Column(nullable = false)
+  private boolean renouvellement;
+
+  @Column(nullable = false)
+  private int periodicite; // en mois
+
+  // 🔗 Lien avec l'utilisateur
+  @ManyToOne
+  @JoinColumn(name = "utilisateur_id", nullable = false)
+  private Utilisateur utilisateur;
+
+  // 🔗 Lien avec l'option
   @ManyToOne
   @JoinColumn(name = "option_id", nullable = false)
   private Options option;
 
-  @ManyToOne
-  @JoinColumn(name = "vehicule_id", nullable = false)
-  private Vehicule vehicule;
-
-  @ManyToOne
-  @JoinColumn(name = "agent_id", nullable = false)
-  private Agent agent;
-
-  // Constructeur sans argument pour JPA
+  // Constructeur JPA
   protected SouscriptionOption() {}
 
-  public SouscriptionOption(Options option, Vehicule vehicule, Agent agent) {
+  public SouscriptionOption(Utilisateur utilisateur, Options option, int periodicite,
+      boolean renouvellement) {
+    this.utilisateur = utilisateur;
     this.option = option;
-    this.vehicule = vehicule;
-    this.agent = agent;
+    this.periodicite = periodicite;
+    this.renouvellement = renouvellement;
+    this.dateDebut = LocalDateTime.now();
   }
 
-  // Getters et Setters
+  // =======================
+  // Méthodes métier (UML)
+  // =======================
+
+  public void annulerOption() {
+    this.renouvellement = false;
+  }
+
+  // =======================
+  // Getters
+  // =======================
+
   public Long getId() {
     return id;
   }
 
+  public LocalDateTime getDateDebut() {
+    return dateDebut;
+  }
+
+  public boolean isRenouvellement() {
+    return renouvellement;
+  }
+
+  public int getPeriodicite() {
+    return periodicite;
+  }
+
+  public Utilisateur getUtilisateur() {
+    return utilisateur;
+  }
+
   public Options getOption() {
     return option;
-  }
-
-  public void setOption(Options option) {
-    this.option = option;
-  }
-
-  public Vehicule getVehicule() {
-    return vehicule;
-  }
-
-  public void setVehicule(Vehicule vehicule) {
-    this.vehicule = vehicule;
-  }
-
-  public Agent getAgent() {
-    return agent;
-  }
-
-  public void setAgent(Agent agent) {
-    this.agent = agent;
-  }
-
-  // Méthode selon UML
-  public void annulerOption() {
-    // Annule la souscription d'option
-    // La suppression sera gérée par le service/repository qui appellera cette méthode
-    // Cette méthode marque simplement l'intention d'annulation
-    // TODO: Implémenter la logique de suppression si nécessaire
   }
 }
