@@ -243,7 +243,7 @@ public class MainDemo {
       // -- // -- // -- // -- // -- // -- // -- //
       // TEST LLD (#99 + #100)
       // -- // -- // -- // -- // -- // -- // -- //
-      System.out.println("\n=== TEST LLD (#99 + #100) : Location courte vs longue ===");
+      System.out.println("\n=== Tests de Location Longue Durée (LLD) ===");
 
       // Location courte (3 jours)
       LocalDateTime debutCourte = LocalDateTime.now();
@@ -251,14 +251,7 @@ public class MainDemo {
 
       Location locCourte = new Location(debutCourte, finCourte, V1, L_john);
       locCourte = locationRepository.save(locCourte);
-
-      System.out.println("\n--- Location COURTE (3 jours) ---");
-      System.out.println("ID   : " + locCourte.getId());
-      System.out.println("Début: " + locCourte.getDateDebut());
-      System.out.println("Fin  : " + locCourte.getDateFin());
-      System.out.println("Jours: " + locCourte.getNombreJours());
-      System.out.println("LLD ? " + locCourte.estLongueDuree());
-      System.out.println("Prix courte: " + locationService.getPrixLocation(locCourte));
+      System.out.println("✓ Location courte créée: " + locCourte);
 
       // Location longue (7 jours)
       LocalDateTime debutLongue = LocalDateTime.now();
@@ -266,14 +259,7 @@ public class MainDemo {
 
       Location locLongue = new Location(debutLongue, finLongue, V1, L_john);
       locLongue = locationRepository.save(locLongue);
-
-      System.out.println("\n--- Location LONGUE (7 jours) ---");
-      System.out.println("ID   : " + locLongue.getId());
-      System.out.println("Début: " + locLongue.getDateDebut());
-      System.out.println("Fin  : " + locLongue.getDateFin());
-      System.out.println("Jours: " + locLongue.getNombreJours());
-      System.out.println("LLD ? " + locLongue.estLongueDuree());
-      System.out.println("Prix longue: " + locationService.getPrixLocation(locLongue));
+      System.out.println("✓ Location longue créée: " + locLongue);
 
       // -- // -- // -- // -- // -- // -- // -- //
       // Messaging

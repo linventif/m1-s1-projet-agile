@@ -37,18 +37,17 @@ public class NoteAgentRepository {
         }
       }
 
-      // Remplacer les critères par les instances gérées
-      note.setCriteres(criteresManagedList);
+      // Créer une NOUVELLE instance de NoteAgent avec les critères gérés
+      NoteAgent noteToSave = new NoteAgent(note.getAgent(), note.getLoueur(), criteresManagedList);
 
-      // Persister ou fusionner la note
-      if (note.getId() == null) {
-        em.persist(note);
-      } else {
-        note = em.merge(note);
-      }
+      // Persister la note
+      em.persist(noteToSave);
+
+      // Forcer le flush pour générer l'ID avant la table de jointure
+      em.flush();
 
       transaction.commit();
-      return note;
+      return noteToSave;
 
     } catch (Exception e) {
       if (transaction != null && transaction.isActive()) {

@@ -19,12 +19,12 @@ public class NoteVehiculeRepository {
       transaction = em.getTransaction();
       transaction.begin();
 
-      // Recharger les critères existants pour obtenir des instances gérées
+      // Recharger tous les critères depuis la base pour avoir des instances gérées
       List<fr.univ.m1.projetagile.notes.entity.Critere> criteresManagedList =
           new java.util.ArrayList<>();
       for (fr.univ.m1.projetagile.notes.entity.Critere critere : note.getCriteres()) {
         if (critere.getId() != null) {
-          // Recharger depuis la base pour avoir une instance gérée
+          // Les critères doivent déjà exister en base
           fr.univ.m1.projetagile.notes.entity.Critere managed =
               em.find(fr.univ.m1.projetagile.notes.entity.Critere.class, critere.getId());
           if (managed == null) {
@@ -38,18 +38,18 @@ public class NoteVehiculeRepository {
         }
       }
 
-      // Remplacer les critères par les instances gérées
-      note.setCriteres(criteresManagedList);
+      // Créer une NOUVELLE instance de NoteVehicule avec les critères gérés
+      NoteVehicule noteToSave =
+          new NoteVehicule(note.getVehicule(), note.getLoueur(), criteresManagedList);
 
-      // Persister ou fusionner la note
-      if (note.getId() == null) {
-        em.persist(note);
-      } else {
-        note = em.merge(note);
-      }
+      // Persister la note
+      em.persist(noteToSave);
+
+      // Forcer le flush pour générer l'ID avant la table de jointure
+      em.flush();
 
       transaction.commit();
-      return note;
+      return noteToSave;
 
     } catch (Exception e) {
       if (transaction != null && transaction.isActive()) {
