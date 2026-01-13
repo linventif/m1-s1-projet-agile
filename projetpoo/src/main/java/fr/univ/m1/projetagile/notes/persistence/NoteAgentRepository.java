@@ -1,5 +1,6 @@
 package fr.univ.m1.projetagile.notes.persistence;
 
+import java.util.ArrayList;
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.notes.entity.Critere;
@@ -21,29 +22,28 @@ public class NoteAgentRepository {
       transaction.begin();
 
       // Recharger tous les critères depuis la base pour avoir des instances gérées
-      List<Critere> criteresManagedList = new java.util.ArrayList<>();
+      List<Critere> criteresManagedList = new ArrayList<>();
       for (Critere critere : note.getCriteres()) {
-        if (critere.getId() != null) {
-          // Les critères doivent déjà exister en base
-          Critere managed = em.find(Critere.class, critere.getId());
-          if (managed == null) {
-            throw new IllegalStateException(
-                "Le critère avec l'ID " + critere.getId() + " n'existe pas en base");
-          }
-          criteresManagedList.add(managed);
-        } else {
+        if (critere.getId() == null) {
           throw new IllegalStateException(
               "Tous les critères doivent être persistés avant de créer une note");
         }
+        Critere managed = em.find(Critere.class, critere.getId());
+        if (managed == null) {
+          throw new IllegalStateException(
+              "Le critère avec l'ID " + critere.getId() + " n'existe pas en base");
+        }
+        criteresManagedList.add(managed);
       }
 
-      // Créer une NOUVELLE instance de NoteAgent avec les critères gérés
-      NoteAgent noteToSave = new NoteAgent(note.getAgent(), note.getLoueur(), criteresManagedList);
-
-      // Persister la note
+      // 1) Persister la note sans critères pour générer l'ID
+      NoteAgent noteToSave = new NoteAgent(note.getAgent(), note.getLoueur(), new ArrayList<>());
       em.persist(noteToSave);
+      em.flush(); // garantit note_id avant les insertions de jointure
 
-      // Forcer le flush pour générer l'ID avant la table de jointure
+      // 2) Attacher les critères gérés et merger
+      noteToSave.getCriteres().addAll(criteresManagedList);
+      noteToSave = em.merge(noteToSave);
       em.flush();
 
       transaction.commit();

@@ -1,5 +1,6 @@
 package fr.univ.m1.projetagile.notes.persistence;
 
+import java.util.ArrayList;
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.notes.entity.NoteLoueur;
@@ -20,32 +21,29 @@ public class NoteLoueurRepository {
       transaction.begin();
 
       // Recharger tous les critères depuis la base pour avoir des instances gérées
-      List<fr.univ.m1.projetagile.notes.entity.Critere> criteresManagedList =
-          new java.util.ArrayList<>();
+      List<fr.univ.m1.projetagile.notes.entity.Critere> criteresManagedList = new ArrayList<>();
       for (fr.univ.m1.projetagile.notes.entity.Critere critere : note.getCriteres()) {
-        if (critere.getId() != null) {
-          // Les critères doivent déjà exister en base
-          fr.univ.m1.projetagile.notes.entity.Critere managed =
-              em.find(fr.univ.m1.projetagile.notes.entity.Critere.class, critere.getId());
-          if (managed == null) {
-            throw new IllegalStateException(
-                "Le critère avec l'ID " + critere.getId() + " n'existe pas en base");
-          }
-          criteresManagedList.add(managed);
-        } else {
+        if (critere.getId() == null) {
           throw new IllegalStateException(
               "Tous les critères doivent être persistés avant de créer une note");
         }
+        fr.univ.m1.projetagile.notes.entity.Critere managed =
+            em.find(fr.univ.m1.projetagile.notes.entity.Critere.class, critere.getId());
+        if (managed == null) {
+          throw new IllegalStateException(
+              "Le critère avec l'ID " + critere.getId() + " n'existe pas en base");
+        }
+        criteresManagedList.add(managed);
       }
 
-      // Créer une NOUVELLE instance de NoteLoueur avec les critères gérés
-      NoteLoueur noteToSave =
-          new NoteLoueur(note.getAgent(), note.getLoueur(), criteresManagedList);
-
-      // Persister la note
+      // 1) Persister la note sans critères pour générer l'ID
+      NoteLoueur noteToSave = new NoteLoueur(note.getAgent(), note.getLoueur(), new ArrayList<>());
       em.persist(noteToSave);
+      em.flush();
 
-      // Forcer le flush pour générer l'ID avant la table de jointure
+      // 2) Attacher les critères gérés et merger
+      noteToSave.getCriteres().addAll(criteresManagedList);
+      noteToSave = em.merge(noteToSave);
       em.flush();
 
       transaction.commit();
