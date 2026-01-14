@@ -214,6 +214,28 @@ public class AssuranceService {
   }
 
   /**
+   * Récupère la souscription d'assurance pour une location donnée.
+   *
+   * @param locationId l'identifiant de la location
+   * @return la souscription d'assurance ou null si aucune souscription n'existe pour cette location
+   */
+  public SouscriptionAssurance getSouscriptionParLocation(Long locationId) {
+    if (locationId == null) {
+      throw new IllegalArgumentException("locationId null");
+    }
+
+    List<SouscriptionAssurance> souscriptions =
+        souscriptionAssuranceRepository.findByLocationId(locationId);
+
+    if (souscriptions.isEmpty()) {
+      return null;
+    }
+
+    // Normalement, il ne devrait y avoir qu'une seule souscription par location
+    return souscriptions.get(0);
+  }
+
+  /**
    * Calcul du nb de jours à partir des LocalDateTime. - si la différence est 0 (même jour), on
    * considère 1 jour (pour éviter prix=0)
    */

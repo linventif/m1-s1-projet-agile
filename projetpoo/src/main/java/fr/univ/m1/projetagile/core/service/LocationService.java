@@ -7,6 +7,8 @@ import java.util.List;
 import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepository;
 import fr.univ.m1.projetagile.VerificationLocation.service.VerificationService;
 import fr.univ.m1.projetagile.assurance.entity.Assurance;
+import fr.univ.m1.projetagile.assurance.entity.SouscriptionAssurance;
+import fr.univ.m1.projetagile.assurance.persistence.SouscriptionAssuranceRepository;
 import fr.univ.m1.projetagile.assurance.service.AssuranceService;
 import fr.univ.m1.projetagile.core.dto.LocationDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
@@ -288,7 +290,8 @@ public class LocationService {
    * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
    * - Le prix de base (prix par jour x nombre de jours) - Une commission proportionnelle de 10% sur
    * le prix de base (ou 5% si location de longue durée) - Des frais fixes de 2 EUR par jour - Une
-   * promotion de 10% si le lieu de dépôt est un parking
+   * promotion de 10% si le lieu de dépôt est un parking - Le prix de l'assurance si une assurance
+   * est souscrite
    *
    * le prix de base - Des frais fixes de 2 EUR par jour
    *
@@ -319,6 +322,19 @@ public class LocationService {
     // Promotion de 10% si le lieu de dépôt est un parking
     if (location.getLieuDepot() != null && location.getLieuDepot() instanceof Parking) {
       prixTotal = prixTotal * Parking.DISCOUNT_RATE;
+    }
+
+    // Ajouter le prix de l'assurance si elle existe
+    if (location.getId() != null) {
+      SouscriptionAssuranceRepository souscriptionRepo = new SouscriptionAssuranceRepository();
+      List<SouscriptionAssurance> souscriptions =
+          souscriptionRepo.findByLocationId(location.getId());
+      if (!souscriptions.isEmpty()) {
+        // Normalement, il ne devrait y avoir qu'une seule souscription par location
+        SouscriptionAssurance souscription = souscriptions.get(0);
+        double prixAssurance = souscription.calculerPrix();
+        prixTotal += prixAssurance;
+      }
     }
 
     return prixTotal;
