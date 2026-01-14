@@ -17,16 +17,6 @@ import jakarta.persistence.TypedQuery;
  * Repository pour gérer la persistance des véhicules
  */
 public class VehiculeRepository {
-<<<<<<< HEAD
-
-  private final EntityManager em;
-
-  public VehiculeRepository(EntityManager em) {
-    this.em = em;
-  }
-
-=======
->>>>>>> 9caf91c0e27c2be0e595669bf178dbcead29e98b
   /**
    * Enregistre un véhicule dans la base de données (création ou mise à jour)
    *
@@ -298,16 +288,6 @@ public class VehiculeRepository {
 
   }
 
-<<<<<<< HEAD
-  // consulter les véhicules d'une ville donnée
-  public List<Vehicule> findByVille(String ville) {
-    return em.createQuery("SELECT v FROM Vehicule v WHERE v.ville = :ville", Vehicule.class)
-        .setParameter("ville", ville).getResultList();
-  }
-
-
-
-=======
   // =======================
   // consulter les véhicules par ville
   // =======================
@@ -320,5 +300,4 @@ public class VehiculeRepository {
       throw new RuntimeException("Erreur lors de la récupération des véhicules par ville", e);
     }
   }
->>>>>>> 9caf91c0e27c2be0e595669bf178dbcead29e98b
 }
