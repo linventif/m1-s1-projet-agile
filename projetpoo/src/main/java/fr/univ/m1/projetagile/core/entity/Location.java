@@ -44,6 +44,7 @@ public class Location {
   @AnyDiscriminator(DiscriminatorType.STRING)
   @AnyKeyJavaClass(Long.class)
   @AnyDiscriminatorValue(discriminator = "ADRESSE", entity = Adresse.class)
+  @AnyDiscriminatorValue(discriminator = "PARKING", entity = fr.univ.m1.projetagile.parking.entity.Parking.class)
   @Column(name = "lieu_depot_type", nullable = true)
   @JoinColumn(name = "lieu_depot_id", nullable = true)
   private LieuRestitution lieuDepot;

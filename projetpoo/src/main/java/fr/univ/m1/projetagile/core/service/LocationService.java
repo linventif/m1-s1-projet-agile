@@ -117,8 +117,8 @@ public class LocationService {
 
       // Vérifier si l'agent a une souscription à l'option Parking
       boolean aOptionParking = souscriptionOptionService.getOptionsActives(agent).stream()
-          .anyMatch(so -> so.getOption() != null && so.getOption().getId() != null
-              && so.getOption().getId().equals(Parking.PARKING_OPTION_ID));
+          .anyMatch(so -> so.getOption() != null && so.getOption().getNomOption() != null
+              && so.getOption().getNomOption().equals("Option Parking"));
 
       if (!aOptionParking) {
         throw new IllegalStateException(

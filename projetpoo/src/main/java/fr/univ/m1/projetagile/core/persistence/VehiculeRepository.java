@@ -8,7 +8,6 @@ import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import fr.univ.m1.projetagile.enums.TypeV;
-import fr.univ.m1.projetagile.parking.entity.Parking;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.TypedQuery;
@@ -130,7 +129,7 @@ public class VehiculeRepository {
       // Filtre par option Parking (si demandé)
       if (hasParkingOption != null && hasParkingOption) {
         conditions.add(
-            "EXISTS (SELECT so FROM SouscriptionOption so WHERE so.agent = v.proprietaire AND so.option.id = :parkingOptionId)");
+            "EXISTS (SELECT so FROM SouscriptionOption so WHERE so.utilisateurId = v.proprietaire.idU AND so.option.nomOption = :parkingOptionName)");
       }
 
       // Ajouter les conditions WHERE si elles existent
@@ -186,7 +185,7 @@ public class VehiculeRepository {
         query.setParameter("dateFin", dateFin.atStartOfDay());
       }
       if (hasParkingOption != null && hasParkingOption) {
-        query.setParameter("parkingOptionId", Parking.PARKING_OPTION_ID);
+        query.setParameter("parkingOptionName", "Option Parking");
       }
 
       return query.getResultList();

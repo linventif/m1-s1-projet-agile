@@ -7,9 +7,7 @@ import fr.univ.m1.projetagile.core.dto.AgentDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
-import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.core.service.AgentService;
-import fr.univ.m1.projetagile.core.service.VehiculeService;
 
 /**
  * US.V.3 Je veux pouvoir consulter le profil des agents de la plateforme, et les véhicules qu'ils
@@ -21,7 +19,6 @@ public class TestUSV3 {
       DatabaseConnection.init();
       System.out.println("✓ DB connectée");
 
-      VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
       AgentService agentService = new AgentService(new AgentRepository());
 
       // Ensure we have test data
