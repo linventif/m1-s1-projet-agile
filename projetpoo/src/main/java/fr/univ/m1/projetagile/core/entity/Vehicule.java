@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import fr.univ.m1.projetagile.controleTechnique.entity.ControleTechnique;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import fr.univ.m1.projetagile.enums.TypeV;
 import jakarta.persistence.CascadeType;
@@ -50,9 +49,6 @@ public class Vehicule {
 
   @Column(nullable = false, name = "prixJ")
   private Double prixJ; // prix journalier
-
-  @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<ControleTechnique> controlesTechniques = new ArrayList<>();
 
   @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Disponibilite> datesDispo = new ArrayList<>();

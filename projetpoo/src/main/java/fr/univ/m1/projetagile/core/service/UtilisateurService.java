@@ -1,7 +1,14 @@
 package fr.univ.m1.projetagile.core.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import fr.univ.m1.projetagile.commentaire.service.CommentaireService;
+import fr.univ.m1.projetagile.core.dto.ProfilInfo;
+import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
+import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.UtilisateurRepository;
+import jakarta.persistence.EntityManager;
 
 /**
  * Service de base pour gérer les opérations métier communes aux utilisateurs Cette classe fournit
@@ -182,6 +189,90 @@ public abstract class UtilisateurService<T extends Utilisateur, R extends Utilis
 
     // Utilise la méthode changerEmail de la classe Utilisateur
     utilisateur.changerEmail(nouvelEmail);
+
+    // Sauvegarde les modifications en base de données
+    return repository.save(utilisateur);
+  }
+
+  /**
+   * Récupère les informations du profil d'un utilisateur
+   *
+   * @param utilisateur l'utilisateur dont on veut récupérer le profil
+   * @param em l'EntityManager pour les requêtes
+   * @return les informations du profil
+   * @throws IllegalArgumentException si l'utilisateur est null
+   */
+  public ProfilInfo getProfil(T utilisateur, EntityManager em) {
+    if (utilisateur == null) {
+      throw new IllegalArgumentException("L'utilisateur ne peut pas être nul.");
+    }
+
+    ProfilInfo profil = new ProfilInfo();
+    profil.setIdUtilisateur(utilisateur.getIdU());
+    profil.setNom(utilisateur.getNom());
+    profil.setPrenom(utilisateur.getPrenom());
+    profil.setEmail(utilisateur.getEmail());
+    profil.setAdresse(utilisateur.getAdresse());
+    profil.setBio(utilisateur.getBio());
+
+    // Récupérer le nom commercial si c'est un Agent
+    if (utilisateur instanceof Agent) {
+      Agent agent = (Agent) utilisateur;
+      profil.setNomCommercial(agent.getNomCommercial());
+
+      // Récupérer les véhicules disponibles via une requête JPQL pour éviter
+      // LazyInitializationException
+      if (em != null) {
+        try {
+          List<Vehicule> vehiculesDisponibles = em.createQuery(
+              "SELECT v FROM Vehicule v WHERE v.proprietaire.idU = :agentId AND v.disponible = true",
+              Vehicule.class).setParameter("agentId", agent.getIdU()).getResultList();
+          profil.setVehiculesDisponibles(vehiculesDisponibles);
+        } catch (Exception e) {
+          profil.setVehiculesDisponibles(new ArrayList<>());
+        }
+      }
+    }
+
+    // Récupérer les commentaires
+    if (em != null) {
+      CommentaireService commentaireService = new CommentaireService(em);
+      profil.setCommentaires(commentaireService.getCommentairesProfil(utilisateur.getIdU()));
+      profil.setMoyenneNotes(commentaireService.getMoyenneNotes(utilisateur.getIdU()));
+      profil.setNombreCommentaires(commentaireService.countCommentaires(utilisateur.getIdU()));
+    }
+
+    return profil;
+  }
+
+  /**
+   * Modifie les informations du profil d'un utilisateur
+   *
+   * @param utilisateur l'utilisateur dont on veut modifier le profil
+   * @param nom le nouveau nom (optionnel)
+   * @param prenom le nouveau prénom (optionnel)
+   * @param adresse la nouvelle adresse (optionnel)
+   * @param bio la nouvelle bio (optionnel)
+   * @return l'utilisateur modifié et sauvegardé
+   * @throws IllegalArgumentException si l'utilisateur est null
+   */
+  public T modifierProfil(T utilisateur, String nom, String prenom, String adresse, String bio) {
+    if (utilisateur == null) {
+      throw new IllegalArgumentException("L'utilisateur ne peut pas être nul.");
+    }
+
+    if (nom != null && !nom.trim().isEmpty()) {
+      utilisateur.setNom(nom);
+    }
+    if (prenom != null && !prenom.trim().isEmpty()) {
+      utilisateur.setPrenom(prenom);
+    }
+    if (adresse != null) {
+      utilisateur.setAdresse(adresse);
+    }
+    if (bio != null) {
+      utilisateur.setBio(bio);
+    }
 
     // Sauvegarde les modifications en base de données
     return repository.save(utilisateur);

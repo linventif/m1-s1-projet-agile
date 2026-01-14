@@ -1,12 +1,7 @@
 package fr.univ.m1.projetagile.core.entity;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import fr.univ.m1.projetagile.commentaire.service.CommentaireService;
-import fr.univ.m1.projetagile.core.dto.ProfilInfo;
 import jakarta.persistence.Column;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -106,75 +101,6 @@ public abstract class Utilisateur {
   }
 
   // Méthodes selon UML
-  public void contacterAgent(Agent agent) {
-    // À implémenter avec le système de messagerie
-    // TODO: implémenter la logique de contact avec un agent
-  }
-
-  public void contacterLoueur(Loueur loueur) {
-    // À implémenter avec le système de messagerie
-    // TODO: implémenter la logique de contact avec un loueur
-  }
-
-  /**
-   * Envoie un message à un autre utilisateur avec validation et sauvegarde automatiques.
-   *
-   * @param destinataire l'utilisateur destinataire
-   * @param contenu le contenu du message
-   * @return le message envoyé et sauvegardé
-   */
-  public fr.univ.m1.projetagile.messagerie.entity.Message envoyerMessage(Utilisateur destinataire,
-      String contenu) {
-    fr.univ.m1.projetagile.messagerie.service.MessagerieService service =
-        new fr.univ.m1.projetagile.messagerie.service.MessagerieService();
-    return service.envoyerMessage(this, destinataire, contenu);
-  }
-
-  /**
-   * Récupère la conversation avec un autre utilisateur.
-   *
-   * @param autreUtilisateur l'autre utilisateur
-   * @return la liste des messages échangés dans l'ordre chronologique
-   */
-  public List<fr.univ.m1.projetagile.messagerie.entity.Message> getConversationAvec(
-      Utilisateur autreUtilisateur) {
-    fr.univ.m1.projetagile.messagerie.service.MessagerieService service =
-        new fr.univ.m1.projetagile.messagerie.service.MessagerieService();
-    return service.getConversation(this, autreUtilisateur);
-  }
-
-  /**
-   * Récupère tous les messages de cet utilisateur (envoyés et reçus)
-   *
-   * @return la liste des messages
-   */
-  public List<fr.univ.m1.projetagile.messagerie.entity.Message> getMessages() {
-    fr.univ.m1.projetagile.messagerie.persistence.MessageRepository messageRepository =
-        new fr.univ.m1.projetagile.messagerie.persistence.MessageRepository();
-    return messageRepository.findAllMessagesByUser(this);
-  }
-
-  /**
-   * Récupère les messages envoyés par cet utilisateur
-   *
-   * @return la liste des messages envoyés
-   */
-  public List<fr.univ.m1.projetagile.messagerie.entity.Message> getMessagesSent() {
-    fr.univ.m1.projetagile.messagerie.persistence.MessageRepository messageRepository =
-        new fr.univ.m1.projetagile.messagerie.persistence.MessageRepository();
-    return messageRepository.findMessagesSentBy(this);
-  }
-
-  /**
-   * Récupère les messages reçus par cet utilisateur
-   *
-   * @return la liste des messages reçus
-   */
-  public List<fr.univ.m1.projetagile.messagerie.entity.Message> getMessagesReceived() {
-    fr.univ.m1.projetagile.messagerie.persistence.MessageRepository messageRepository =
-        new fr.univ.m1.projetagile.messagerie.persistence.MessageRepository();
-    return messageRepository.findMessagesReceivedBy(this);
-  }
 
   public boolean seConnecter(String email, String motDePasse) {
     // Vérifie les identifiants et connecte l'utilisateur
@@ -194,66 +120,6 @@ public abstract class Utilisateur {
     // Change l'email de l'utilisateur
     if (nouveauEmail != null && !nouveauEmail.trim().isEmpty()) {
       this.email = nouveauEmail;
-    }
-  }
-
-  /**
-   * Récupérer les informations du profil
-   */
-  public ProfilInfo getProfil(EntityManager em) {
-    ProfilInfo profil = new ProfilInfo();
-    profil.setIdUtilisateur(this.idU);
-    profil.setNom(getNom());
-    profil.setPrenom(getPrenom());
-    profil.setEmail(this.email);
-    profil.setAdresse(getAdresse());
-    profil.setBio(this.bio);
-
-    // Récupérer le nom commercial si c'est un Agent
-    if (this instanceof Agent) {
-      Agent agent = (Agent) this;
-      profil.setNomCommercial(agent.getNomCommercial());
-
-      // Récupérer les véhicules disponibles via une requête JPQL pour éviter
-      // LazyInitializationException
-      if (em != null) {
-        try {
-          List<Vehicule> vehiculesDisponibles = em.createQuery(
-              "SELECT v FROM Vehicule v WHERE v.proprietaire.idU = :agentId AND v.disponible = true",
-              Vehicule.class).setParameter("agentId", agent.getIdU()).getResultList();
-          profil.setVehiculesDisponibles(vehiculesDisponibles);
-        } catch (Exception e) {
-          profil.setVehiculesDisponibles(new ArrayList<>());
-        }
-      }
-    }
-
-    // Récupérer les commentaires
-    if (em != null) {
-      CommentaireService commentaireService = new CommentaireService(em);
-      profil.setCommentaires(commentaireService.getCommentairesProfil(this.idU));
-      profil.setMoyenneNotes(commentaireService.getMoyenneNotes(this.idU));
-      profil.setNombreCommentaires(commentaireService.countCommentaires(this.idU));
-    }
-
-    return profil;
-  }
-
-  /**
-   * Modifier les informations du profil
-   */
-  public void modifierProfil(String nom, String prenom, String adresse, String bio) {
-    if (nom != null && !nom.trim().isEmpty()) {
-      setNom(nom);
-    }
-    if (prenom != null && !prenom.trim().isEmpty()) {
-      setPrenom(prenom);
-    }
-    if (adresse != null) {
-      setAdresse(adresse);
-    }
-    if (bio != null) {
-      this.bio = bio;
     }
   }
 

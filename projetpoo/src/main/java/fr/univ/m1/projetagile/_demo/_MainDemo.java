@@ -468,21 +468,21 @@ public class _MainDemo {
       System.out.println("\n=== Mise à jour des profils ===");
 
       // Bob met à jour son profil
-      APar_bob.modifierProfil("Maurise", "Bob", "12 rue de la Location, Paris",
+      agentService.modifierProfil(APar_bob, "Maurise", "Bob", "12 rue de la Location, Paris",
           "Agent de location particulier passionné par l'automobile depuis 10 ans.");
       APar_bob.setNomCommercial("Bob's Cars");
       agentService.save(APar_bob);
       System.out.println("✓ Profil de Bob mis à jour");
 
       // Alice met à jour son profil
-      APar_alice.modifierProfil("Dupont", "Alice", "45 avenue des Véhicules, Lyon",
+      agentService.modifierProfil(APar_alice, "Dupont", "Alice", "45 avenue des Véhicules, Lyon",
           "Spécialisée dans la location de véhicules premium.");
       APar_alice.setNomCommercial("Alice Premium Cars");
       agentService.save(APar_alice);
       System.out.println("✓ Profil d'Alice mis à jour");
 
       // John met à jour son profil
-      L_john.modifierProfil("Doe", "John", "10 rue du Locataire, Marseille",
+      loueurService.modifierProfil(L_john, "Doe", "John", "10 rue du Locataire, Marseille",
           "Loueur régulier, je prends soin des véhicules.");
       loueurService.save(L_john);
       System.out.println("✓ Profil de John mis à jour");
@@ -495,7 +495,7 @@ public class _MainDemo {
       commentaireService = new CommentaireService(DatabaseConnection.getEntityManager());
 
       // Profil de Bob avec commentaires et véhicules
-      ProfilInfo profilBob = APar_bob.getProfil(DatabaseConnection.getEntityManager());
+      ProfilInfo profilBob = agentService.getProfil(APar_bob, DatabaseConnection.getEntityManager());
       System.out.println("\n" + profilBob);
       if (!profilBob.getCommentaires().isEmpty()) {
         System.out.println("Commentaires détaillés:");
@@ -509,7 +509,7 @@ public class _MainDemo {
       }
 
       // Profil d'Alice
-      ProfilInfo profilAlice = APar_alice.getProfil(DatabaseConnection.getEntityManager());
+      ProfilInfo profilAlice = agentService.getProfil(APar_alice, DatabaseConnection.getEntityManager());
       System.out.println("\n" + profilAlice);
       if (!profilAlice.getCommentaires().isEmpty()) {
         System.out.println("Commentaires détaillés:");
@@ -519,7 +519,7 @@ public class _MainDemo {
       }
 
       // Profil de John (loueur)
-      ProfilInfo profilJohn = L_john.getProfil(DatabaseConnection.getEntityManager());
+      ProfilInfo profilJohn = loueurService.getProfil(L_john, DatabaseConnection.getEntityManager());
       System.out.println("\n" + profilJohn);
       if (!profilJohn.getCommentaires().isEmpty()) {
         System.out.println("Commentaires détaillés:");

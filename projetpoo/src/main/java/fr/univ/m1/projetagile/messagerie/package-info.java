@@ -34,19 +34,13 @@
  * // Via le service (recommandé)
  * MessagerieService service = new MessagerieService();
  * Message msg = service.envoyerMessage(loueur, agent, "Bonjour!");
- *
- * // Via les méthodes de Utilisateur
- * Message msg2 = utilisateur.envoyerMessage(destinataire, "Bonjour!");
- * List<Message> messages = utilisateur.getMessages();
- * List<Message> conversation = utilisateur.getConversationAvec(autreUtilisateur);
+ * List<Message> messages = service.getMessagesUtilisateur(loueur);
+ * List<Message> conversation = service.getConversation(loueur, agent);
  * }</pre>
  *
  * @see fr.univ.m1.projetagile.messagerie.entity.Message
  * @see fr.univ.m1.projetagile.messagerie.persistence.MessageRepository
  * @see fr.univ.m1.projetagile.messagerie.service.MessagerieService
- * @see fr.univ.m1.projetagile.core.entity.Utilisateur#envoyerMessage(fr.univ.m1.projetagile.core.entity.Utilisateur,
- *      String)
- * @see fr.univ.m1.projetagile.core.entity.Utilisateur#getMessages()
  *
  * @since 1.0
  * @version 1.0
