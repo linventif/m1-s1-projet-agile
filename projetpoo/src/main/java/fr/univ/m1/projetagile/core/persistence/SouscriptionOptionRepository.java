@@ -80,6 +80,24 @@ public class SouscriptionOptionRepository {
   }
 
   /**
+   * Recherche une option par son nom.
+   */
+  public Options findOptionByNom(String nomOption) {
+    EntityManager em = acquireEntityManager();
+    boolean ownsEm = ownsEntityManager();
+    try {
+      List<Options> options = em
+          .createQuery("SELECT o FROM Options o WHERE o.nomOption = :nom", Options.class)
+          .setParameter("nom", nomOption).getResultList();
+      return options.isEmpty() ? null : options.get(0);
+    } finally {
+      if (ownsEm) {
+        em.close();
+      }
+    }
+  }
+
+  /**
    * Sauvegarde une option (création ou mise à jour).
    */
   public Options saveOption(Options option) {

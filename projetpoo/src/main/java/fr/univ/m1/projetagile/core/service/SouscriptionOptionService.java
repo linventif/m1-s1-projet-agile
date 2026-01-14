@@ -50,7 +50,7 @@ public class SouscriptionOptionService {
   }
 
   /**
-   * Annule une souscription d’option.
+   * Annule une souscription d'option.
    */
   public void annulerSouscription(Long souscriptionId) {
     if (souscriptionId == null) {
@@ -66,5 +66,31 @@ public class SouscriptionOptionService {
       souscription.annulerOption();
       repository.save(souscription);
     });
+  }
+
+  /**
+   * Recherche une option par son nom.
+   */
+  public Options findOptionByNom(String nomOption) {
+    if (nomOption == null || nomOption.trim().isEmpty()) {
+      throw new IllegalArgumentException("Le nom de l'option est obligatoire");
+    }
+    return repository.findOptionByNom(nomOption);
+  }
+
+  /**
+   * Crée ou met à jour une option.
+   */
+  public Options saveOption(Options option) {
+    if (option == null) {
+      throw new IllegalArgumentException("L'option est obligatoire");
+    }
+    if (option.getNomOption() == null || option.getNomOption().trim().isEmpty()) {
+      throw new IllegalArgumentException("Le nom de l'option est obligatoire");
+    }
+    if (option.getPrix() == null || option.getPrix() < 0) {
+      throw new IllegalArgumentException("Le prix de l'option doit être positif");
+    }
+    return repository.saveOption(option);
   }
 }
