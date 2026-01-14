@@ -27,7 +27,7 @@ public class EntretienTechnique {
   @JoinColumn(name = "type_technique_id", nullable = false)
   private TypeTechnique typeTechnique;
 
-  @Column(nullable = false)
+  @Column(name = "date_entretien", nullable = false)
   private LocalDate date;
 
   // Constructeur sans argument pour JPA
