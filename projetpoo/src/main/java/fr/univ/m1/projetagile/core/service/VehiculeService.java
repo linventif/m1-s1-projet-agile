@@ -9,6 +9,7 @@ import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Disponibilite;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
+import fr.univ.m1.projetagile.core.entity.Ville;
 import fr.univ.m1.projetagile.core.persistence.DisponibiliteRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.enums.TypeV;
@@ -885,13 +886,43 @@ public class VehiculeService {
     return vehiculeRepository.findById(id);
   }
 
+<<<<<<< HEAD
+
+=======
   // =======================
   // obtenir les véhicules par ville
   // =======================
+>>>>>>> 9caf91c0e27c2be0e595669bf178dbcead29e98b
   public List<Vehicule> getVehiculesParVille(String ville) {
     return vehiculeRepository.findByVille(ville);
   }
 
+<<<<<<< HEAD
+
+  public List<Vehicule> getVehiculesParVilleDansListe(List<Vehicule> liste, String ville) {
+    return liste.stream().filter(v -> ville.equals(v.getVille())).toList();
+  }
+
+  // ================================
+  // methode: getVehiculesAutour
+  // ================================
+  public List<Vehicule> getVehiculesAutour(String villeDepart, double xKm,
+      VilleService villeService) {
+    List<Vehicule> resultat = new ArrayList<>();
+
+    // liste des villes dans un rayon de xKm autour de la ville de départ
+    List<Ville> villesProches = villeService.getVillesAutour(villeDepart, xKm);
+
+    // y compris la ville de départ
+    villesProches.add(new Ville(villeDepart, 0, 0)); // 假设坐标无影响，主要为了包含本城市
+
+    // obtenir les véhicules dans chacune de ces villes
+    for (Ville v : villesProches) {
+      List<Vehicule> vehicules = getVehiculesParVille(v.getNom());
+      resultat.addAll(vehicules);
+    }
+    return resultat;
+=======
   /**
    * Filtre les véhicules par ville dans une liste donnée.
    *
@@ -907,5 +938,6 @@ public class VehiculeService {
       throw new IllegalArgumentException("La ville ne peut pas être null.");
     }
     return liste.stream().filter(v -> ville.equalsIgnoreCase(v.getVille())).toList();
+>>>>>>> 9caf91c0e27c2be0e595669bf178dbcead29e98b
   }
 }
