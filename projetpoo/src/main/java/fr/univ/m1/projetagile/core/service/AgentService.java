@@ -14,6 +14,7 @@ import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
+import fr.univ.m1.projetagile.notes.service.NoteService;
 
 /**
  * Service métier pour la gestion des agents (particuliers et professionnels) Fournit des méthodes
@@ -23,6 +24,7 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
   private final VehiculeService vehiculeService;
   private final ControlTechniqueService controlTechniqueService;
+  private final NoteService noteService;
 
 
   public AgentService(AgentRepository agentRepository, VehiculeRepository vehiculeRepository) {
@@ -34,6 +36,7 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
     this.vehiculeService = new VehiculeService(vehiculeRepository);
     this.controlTechniqueService = new ControlTechniqueService(vehiculeRepository);
+    this.noteService = new NoteService();
   }
 
   public AgentService(AgentRepository agentRepository) {
@@ -121,7 +124,7 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     dto.setIdU(agent.getIdU());
     dto.setEmail(agent.getEmail());
     dto.setTypeAgent(agent.getTypeAgent());
-    dto.setNoteMoyenne(agent.calculerNote());
+    dto.setNoteMoyenne(noteService.getMoyenneAgent(agent));
 
     // Informations spécifiques selon le type d'agent
     if (agent instanceof AgentParticulier) {
