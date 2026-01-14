@@ -116,15 +116,15 @@ public class LocationService {
 
     Location location = new Location(dateDebut, dateFin, lieuDepot, vehicule, loueur);
     
-    // Vérifier si le propriétaire a l'option "Accepter les contrats manuellement" (ID 5)
+    // Vérifier si le propriétaire a l'option "Accepter les contrats manuellement"
     Agent proprietaire = vehicule.getProprietaire();
     if (proprietaire == null) {
       throw new IllegalStateException("Le véhicule n'a pas de propriétaire associé.");
     }
     
     boolean acceptationManuelle = proprietaire.getOptionsActives().stream()
-        .anyMatch(so -> so.getOption() != null && so.getOption().getId() != null
-            && so.getOption().getId().equals(Options.ACCEPTATION_MANUELLE_OPTION_ID));
+        .anyMatch(so -> so.getOption() != null && so.getOption().getNomOption() != null
+            && so.getOption().getNomOption().equals("Accepter les contrats manuellement"));
     
     // Si le propriétaire a l'option, le statut reste EN_ATTENTE, sinon on l'accepte automatiquement
     if (!acceptationManuelle) {
