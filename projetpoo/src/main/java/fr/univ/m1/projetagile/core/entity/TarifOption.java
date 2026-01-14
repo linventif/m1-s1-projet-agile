@@ -9,6 +9,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/**
+ * Entity representing a tariff for an option with specific periodicity and price.
+ * Allows defining different pricing schemes for the same option.
+ */
 @Entity
 @Table(name = "tarif_options")
 public class TarifOption {
@@ -23,7 +27,9 @@ public class TarifOption {
   @Column(nullable = false)
   private double prix;
 
-  // 🔗 Plusieurs tarifs pour une même option
+  /**
+   * Multiple tariffs can exist for the same option
+   */
   @ManyToOne
   @JoinColumn(name = "option_id", nullable = false)
   private Options option;

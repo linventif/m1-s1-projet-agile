@@ -12,6 +12,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+/**
+ * Entity representing a tariff grid that groups vehicle tariffs, insurance option tariffs,
+ * and associated insurances.
+ */
 @Entity
 @Table(name = "grilles_tarifs")
 public class GrilleTarif {
@@ -29,7 +33,9 @@ public class GrilleTarif {
   @OneToMany(mappedBy = "grille", cascade = CascadeType.ALL, orphanRemoval = true)
   private final List<Assurance> assurances = new ArrayList<>();
 
-  // ✅ IMPORTANT : public pour pouvoir faire new GrilleTarif() depuis core.service
+  /**
+   * IMPORTANT: public constructor to allow instantiation from core.service
+   */
   public GrilleTarif() {}
 
   public Long getId() {

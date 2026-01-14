@@ -13,7 +13,7 @@ public class VilleService {
   }
 
   // =======================
-  // Haversine：calculer la distance entre deux villes en km
+  // Haversine: calculate distance between two cities in km
   // =======================
   private double distanceKm(Ville v1, Ville v2) {
     final int R = 6371;

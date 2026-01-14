@@ -187,7 +187,7 @@ public class MessageRepository {
    *
    * <p>
    * Cette méthode retourne tous les messages échangés entre deux utilisateurs, dans les deux sens
-   * (user1 → user2 ET user2 → user1). Les messages sont triés par date d'envoi croissante (ordre
+   * (user1 to user2 AND user2 to user1). Les messages sont triés par date d'envoi croissante (ordre
    * chronologique).
    * </p>
    *

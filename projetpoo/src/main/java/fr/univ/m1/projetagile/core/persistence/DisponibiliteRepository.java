@@ -228,9 +228,9 @@ public class DisponibiliteRepository {
       //   * Sa fin est >= dateDebut - 1 (peut se terminer la veille du début)
       //   * Son début est <= dateFin + 1 (peut commencer le lendemain de la fin)
       // Exemples:
-      //   - Existant: 10-20, Nouveau: 21-30 → 20 >= 20 ET 10 <= 31 → trouvé (adjacent)
-      //   - Existant: 21-30, Nouveau: 10-20 → 30 >= 9 ET 21 <= 21 → trouvé (adjacent)
-      //   - Existant: 15-25, Nouveau: 10-20 → 25 >= 9 ET 15 <= 21 → trouvé (chevauchant)
+      //   - Existant: 10-20, Nouveau: 21-30 => 20 >= 20 ET 10 <= 31 => trouvé (adjacent)
+      //   - Existant: 21-30, Nouveau: 10-20 => 30 >= 9 ET 21 <= 21 => trouvé (adjacent)
+      //   - Existant: 15-25, Nouveau: 10-20 => 25 >= 9 ET 15 <= 21 => trouvé (chevauchant)
       jpql.append("AND d.dateDebut <= :dateFinPlus1 ");
       jpql.append("AND d.dateFin >= :dateDebutMinus1");
 

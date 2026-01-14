@@ -222,19 +222,20 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     return (AgentProfessionnel) repository.save(agent);
   }
 
-  // ==================== 技术检查相关方法 ====================
+  // ==================== Technical Control Methods ====================
 
   /**
-   * Correspond au US.A.9：reminder le contrôle technique pour tous les véhicules d'un agent
+   * Verifies technical controls for all vehicles belonging to an agent.
+   * Corresponds to US.A.9: reminder for technical control for all agent's vehicles
    *
-   * @param agentId
-   * @return
+   * @param agentId the agent identifier
+   * @return a report string with technical control status for all vehicles
    */
   public String verifierControlesTechniquesAgent(int agentId) {
 
     Agent agent = findById(agentId);
     if (agent == null) {
-      return "❌ Agent non trouvé";
+      return "Agent not found";
     }
 
 
@@ -247,49 +248,49 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   }
 
   /**
+   * Retrieves detailed technical control information for a vehicle.
    *
-   *
-   * @param vehiculeId
-   * @return 车
+   * @param vehiculeId the vehicle identifier
+   * @return a report string with technical control information
    */
   public String getInfoControleVehicule(Long vehiculeId) {
     // Obtenir le véhicule
     Vehicule vehicule = findVehiculeById(vehiculeId);
 
     if (vehicule == null) {
-      return "❌ Véhicule non trouvé";
+      return "Vehicle not found";
     }
 
     return controlTechniqueService.genererRapportControle(vehicule);
   }
 
   /**
+   * Verifies if a vehicle needs a technical control soon.
    *
-   *
-   * @param vehiculeId
-   * @return
+   * @param vehiculeId the vehicle identifier
+   * @return a report string with verification results
    */
   public String verifierControleVehicule(Long vehiculeId) {
 
     Vehicule vehicule = findVehiculeById(vehiculeId);
 
     if (vehicule == null) {
-      return "❌ Véhicule non trouvé";
+      return "Vehicle not found";
     }
 
     boolean doitControle = controlTechniqueService.doitFaireControleProchainement(vehicule);
     String statut = controlTechniqueService.getStatutControleDetaille(vehicule);
 
     StringBuilder resultat = new StringBuilder();
-    resultat.append("🔍 Vérification du contrôle technique\n");
+    resultat.append("Technical Control Verification\n");
     resultat.append("Véhicule: ").append(vehicule.getMarque()).append(" ")
         .append(vehicule.getModele()).append("\n");
     resultat.append("Résultat: ");
 
     if (doitControle) {
-      resultat.append("⚠️ Il faut faire un contrôle technique\n");
+      resultat.append("A technical control is needed\n");
     } else {
-      resultat.append("✅ Pas besoin de contrôle technique pour le moment\n");
+      resultat.append("No technical control needed at the moment\n");
     }
 
     resultat.append("Détails: ").append(statut);
@@ -343,14 +344,15 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   }
 
   /**
-   * correspond au US.A.8
+   * Registers a technical control for a vehicle.
+   * Corresponds to US.A.8
    *
-   * @param vehiculeId
-   * @param dateControle
-   * @param kilometrage
-   * @param resultat
-   * @param commentaires
-   * @return
+   * @param vehiculeId the vehicle identifier
+   * @param dateControle the control date
+   * @param kilometrage the vehicle mileage
+   * @param resultat the control result
+   * @param commentaires additional comments
+   * @return a confirmation string with control details
    */
   public String enregistrerControleTechnique(Long vehiculeId, LocalDate dateControle,
       Integer kilometrage, String resultat, String commentaires) {
@@ -361,42 +363,42 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
 
       Vehicule vehicule = findVehiculeById(vehiculeId);
       if (vehicule == null) {
-        return "❌ Véhicule non trouvé après l'enregistrement";
+        return "Vehicle not found after registration";
       }
 
       ControleTechnique ct = controlTechniqueService.getControleTechniqueByVehiculeId(vehiculeId);
       LocalDate dateProchainControle = ct != null ? ct.getDateLimite() : null;
 
       return String.format(
-          "✅ Contrôle technique enregistré pour %s %s\n" + "Date: %s\n" + "Prochain contrôle: %s",
+          "Technical control registered for %s %s\n" + "Date: %s\n" + "Next control: %s",
           vehicule.getMarque(), vehicule.getModele(), dateControle, dateProchainControle);
     } catch (Exception e) {
-      return "❌ Erreur lors de l'enregistrement: " + e.getMessage();
+      return "Error during registration: " + e.getMessage();
     }
   }
 
   /**
-   * obtenir le statut détaillé du contrôle technique d'un véhicule
+   * Retrieves the detailed technical control status of a vehicle.
    *
-   * @param vehiculeId
-   * @return
+   * @param vehiculeId the vehicle identifier
+   * @return a status string with technical control details
    */
   public String getStatutControleVehicule(Long vehiculeId) {
     Vehicule vehicule = findVehiculeById(vehiculeId);
 
     if (vehicule == null) {
-      return "❌ Véhicule non trouvé";
+      return "Vehicle not found";
     }
 
     return controlTechniqueService.getStatutControleDetaille(vehicule);
   }
 
   /**
-   * calculer la date du prochain contrôle technique Correspond au US.A.10：calcular la fecha del
-   * próximo control técnico
+   * Calculates the date of the next technical control.
+   * Corresponds to US.A.10
    *
-   * @param vehiculeId
-   * @return
+   * @param vehiculeId the vehicle identifier
+   * @return the date of the next technical control, or null if cannot be calculated
    */
   public LocalDate calculerDateProchainControle(Long vehiculeId) {
     Vehicule vehicule = findVehiculeById(vehiculeId);
@@ -409,10 +411,10 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   }
 
   /**
-   * verifier si un véhicule doit faire un contrôle technique prochainement
+   * Verifies if a vehicle needs a technical control soon.
    *
-   * @param vehiculeId
-   * @return
+   * @param vehiculeId the vehicle identifier
+   * @return true if control is needed soon, false otherwise
    */
   public boolean doitFaireControleProchainement(Long vehiculeId) {
     Vehicule vehicule = findVehiculeById(vehiculeId);
@@ -425,10 +427,11 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   }
 
   /**
-   * correspond au US.A.11
+   * Retrieves maintenance recommendations for a vehicle based on mileage.
+   * Corresponds to US.A.11
    *
-   * @param vehiculeId
-   * @return
+   * @param vehiculeId the vehicle identifier
+   * @return a list of maintenance recommendations
    */
   public List<String> getRecommandationsEntretien(Long vehiculeId) {
     Vehicule vehicule = findVehiculeById(vehiculeId);
@@ -440,10 +443,13 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     return controlTechniqueService.getRecommandationsEntretienParKilometrage(vehicule);
   }
 
-  // ==================== methode ====================
+  // ==================== Utility Methods ====================
 
   /**
-   * obtenir la liste des véhicules d'un agent en tant qu'entités
+   * Retrieves the list of vehicles belonging to an agent as entities.
+   *
+   * @param agent the agent whose vehicles to retrieve
+   * @return a list of vehicle entities
    */
   private List<Vehicule> getVehiculesEntityByAgent(Agent agent) {
 
@@ -526,14 +532,20 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   }
 
   /**
-   * consulter un agent par son ID
+   * Finds an agent by their ID.
+   *
+   * @param agentId the agent identifier
+   * @return the agent, or null if not found
    */
   public Agent findById(int agentId) {
     return super.findById((long) agentId);
   }
 
   /**
-   * consulter un véhicule par son ID
+   * Finds a vehicle by its ID.
+   *
+   * @param vehiculeId the vehicle identifier
+   * @return the vehicle, or null if not found
    */
   public Vehicule findVehiculeById(Long vehiculeId) {
     if (vehiculeId == null) {
@@ -543,9 +555,10 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   }
 
   /**
-   * obtenir le rapport de contrôle technique pour tous les agents
+   * Generates a technical control report for all agents.
    *
-   * @return
+   * @param agentIds the list of agent identifiers
+   * @return a formatted report string
    */
   public String genererRapportTousAgents(List<Integer> agentIds) {
 
@@ -554,8 +567,8 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     }
 
     StringBuilder rapport = new StringBuilder();
-    rapport.append("📊 RAPPORT CONTRÔLE TECHNIQUE - TOUS LES AGENTS\n");
-    rapport.append("═".repeat(70)).append("\n");
+    rapport.append("TECHNICAL CONTROL REPORT - ALL AGENTS\n");
+    rapport.append("=".repeat(70)).append("\n");
     rapport.append("Nombre total d'agents: ").append(agentIds.size()).append("\n\n");
 
     int totalVehicules = 0;
@@ -564,14 +577,14 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
     for (Integer agentId : agentIds) {
       Agent agent = findById(agentId);
       if (agent == null) {
-        rapport.append("❌ Agent ID ").append(agentId).append(" non trouvé\n\n");
+        rapport.append("Agent ID ").append(agentId).append(" not found\n\n");
         continue;
       }
       List<Vehicule> vehicules = getVehiculesEntityByAgent(agent);
       int vehiculesCount = vehicules != null ? vehicules.size() : 0;
       totalVehicules += vehiculesCount;
 
-      rapport.append("👤 Agent: ");
+      rapport.append("Agent: ");
       if (agent instanceof AgentParticulier) {
         AgentParticulier particulier = (AgentParticulier) agent;
         rapport.append(particulier.getPrenom()).append(" ").append(particulier.getNom());
@@ -606,32 +619,36 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
       rapport.append("\n");
     }
 
-    // 总结
-    rapport.append("📈 RÉSUMÉ GÉNÉRAL\n");
-    rapport.append("═".repeat(30)).append("\n");
+    // Summary
+    rapport.append("GENERAL SUMMARY\n");
+    rapport.append("=".repeat(30)).append("\n");
     rapport.append("Agents totaux: ").append(agentIds.size()).append("\n");
     rapport.append("Véhicules totaux: ").append(totalVehicules).append("\n");
     rapport.append("Contrôles urgents: ").append(totalUrgents).append("\n");
 
     if (totalUrgents > 0) {
-      rapport.append("🔴 ATTENTION: ").append(totalUrgents)
+      rapport.append("ATTENTION: ").append(totalUrgents)
           .append(" véhicules nécessitent un contrôle urgent!\n");
     }
 
-    rapport.append("═".repeat(70));
+    rapport.append("=".repeat(70));
 
     return rapport.toString();
   }
 
   /**
+   * Returns the technical control service.
    *
+   * @return the ControlTechniqueService instance
    */
   public ControlTechniqueService getControlTechniqueService() {
     return controlTechniqueService;
   }
 
   /**
-   * obtenir le service de véhicule
+   * Returns the vehicle service.
+   *
+   * @return the VehiculeService instance
    */
   public VehiculeService getVehiculeService() {
     return vehiculeService;

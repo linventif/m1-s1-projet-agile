@@ -17,7 +17,7 @@ public class Main {
       DatabaseConnection.init();
       em = DatabaseConnection.getEntityManager();
 
-      System.out.println("✓ DB connectée\n");
+      System.out.println("DB connected\n");
 
       // =========================
       // 1) Liste des tables
@@ -67,11 +67,11 @@ public class Main {
 
       em.getTransaction().commit();
 
-      System.out.println("✓ Grille sauvegardée (id=" + grille.getId() + ")");
+      System.out.println("Grille saved (id=" + grille.getId() + ")");
       System.out.println(
-          "✓ Assurance sauvegardée (id=" + assurance.getId() + ", nom=" + assurance.getNom() + ")");
-      System.out.println("✓ Tarifs véhicules enregistrés: " + grille.getTarifVehi().size());
-      System.out.println("✓ Tarifs options enregistrés: " + grille.getTarifOptions().size());
+          "Assurance saved (id=" + assurance.getId() + ", nom=" + assurance.getNom() + ")");
+      System.out.println("Tarifs véhicules registered: " + grille.getTarifVehi().size());
+      System.out.println("Tarifs options registered: " + grille.getTarifOptions().size());
 
       // =========================
       // 3) Vérification lecture (JPQL simple)
@@ -87,17 +87,17 @@ public class Main {
       System.out.println("Grilles en DB: " + nbGrilles);
 
     } catch (Exception e) {
-      System.err.println("✗ Erreur: " + e.getMessage());
+      System.err.println("Error: " + e.getMessage());
       e.printStackTrace();
 
       // rollback si une transaction est ouverte
       try {
         if (em != null && em.getTransaction().isActive()) {
           em.getTransaction().rollback();
-          System.out.println("↩ Transaction rollback");
+          System.out.println("Transaction rollback");
         }
       } catch (Exception ex) {
-        System.err.println("✗ Erreur rollback: " + ex.getMessage());
+        System.err.println("Rollback error: " + ex.getMessage());
       }
 
     } finally {

@@ -10,6 +10,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+/**
+ * Entity representing a subscription to an option by a user.
+ * Links users to options with subscription details like periodicity and renewal.
+ */
 @Entity
 @Table(name = "souscription_options")
 public class SouscriptionOption {
@@ -27,11 +31,15 @@ public class SouscriptionOption {
   @Column(nullable = false)
   private int periodicite; // en mois
 
-  // 🔗 Lien avec l'utilisateur (stocke l'ID au lieu de la référence directe)
+  /**
+   * Reference to the user (stores the ID instead of the direct reference)
+   */
   @Column(name = "utilisateur_id", nullable = false)
   private Long utilisateurId;
 
-  // 🔗 Lien avec l'option
+  /**
+   * Reference to the option
+   */
   @ManyToOne
   @JoinColumn(name = "option_id", nullable = false)
   private Options option;

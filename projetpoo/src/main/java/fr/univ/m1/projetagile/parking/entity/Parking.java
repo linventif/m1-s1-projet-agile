@@ -113,6 +113,6 @@ public class Parking implements LieuRestitution {
   @Override
   public String toString() {
     return "Parking [id=" + id + ", nom=" + nom + ", rue=" + rue + ", ville=" + ville + ", cp=" + cp
-        + ", prix=" + prix + "€]";
+        + ", prix=" + prix + " EUR]";
   }
 }

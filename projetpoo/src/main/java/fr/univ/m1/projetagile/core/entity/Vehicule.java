@@ -237,7 +237,7 @@ public class Vehicule {
   @Override
   public String toString() {
     return "Vehicule [id=" + id + ", type=" + type + ", marque=" + marque + ", modele=" + modele
-        + ", couleur=" + couleur + ", ville=" + ville + ", prix=" + prixJ + "€/j"
+        + ", couleur=" + couleur + ", ville=" + ville + ", prix=" + prixJ + " EUR/j"
         + ", proprietaire=" + (proprietaire != null ? proprietaire.getIdU() : "null") + "]";
   }
 }

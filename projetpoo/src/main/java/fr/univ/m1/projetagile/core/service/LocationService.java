@@ -266,11 +266,11 @@ public class LocationService {
 
   /**
    * Calcule le prix total d'une location en fonction de la durée et du véhicule. Le prix comprend :
-   * - Le prix de base (prix par jour × nombre de jours) - Une commission proportionnelle de 10% sur
-   * le prix de base (ou 5% si location de longue durée) - Des frais fixes de 2€ par jour - Une
+   * - Le prix de base (prix par jour x nombre de jours) - Une commission proportionnelle de 10% sur
+   * le prix de base (ou 5% si location de longue durée) - Des frais fixes de 2 EUR par jour - Une
    * promotion de 10% si le lieu de dépôt est un parking
    *
-   * le prix de base - Des frais fixes de 2€ par jour
+   * le prix de base - Des frais fixes de 2 EUR par jour
    *
    * @param location la location pour laquelle calculer le prix
    * @return le prix total de la location
@@ -280,13 +280,13 @@ public class LocationService {
       throw new IllegalArgumentException("La location ne peut pas être nulle.");
     }
 
-    // ✅ #99 : on utilise la méthode centralisée dans Location
+    // Use the centralized method in Location
     int nombreJours = location.getNombreJours();
 
     // Prix de base
     double prixBase = location.getVehicule().getPrixJ() * nombreJours;
 
-    // ✅ #100 : commission réduite si LLD
+    // Reduced commission if long-term rental
     double tauxCommission = location.estLongueDuree() ? COMMISSION_LLD : COMMISSION_NORMALE;
     double commissionProportionnelle = prixBase * tauxCommission;
 

@@ -510,9 +510,9 @@ public class VehiculeService {
    * disponibilités existantes, elles seront automatiquement fusionnées en une seule période
    * continue
    *
-   * Exemples de fusion : - Existant: 10-20 oct, Nouveau: 20-30 oct → Résultat: 10-30 oct -
-   * Existant: 10-20 oct, Nouveau: 15-25 oct → Résultat: 10-25 oct - Existant: 10-15 oct + 20-25
-   * oct, Nouveau: 14-21 oct → Résultat: 10-25 oct
+   * Exemples de fusion : - Existant: 10-20 oct, Nouveau: 20-30 oct => Résultat: 10-30 oct -
+   * Existant: 10-20 oct, Nouveau: 15-25 oct => Résultat: 10-25 oct - Existant: 10-15 oct + 20-25
+   * oct, Nouveau: 14-21 oct => Résultat: 10-25 oct
    *
    * @param agent l'agent propriétaire du véhicule
    * @param vehiculeId l'identifiant du véhicule
@@ -694,10 +694,10 @@ public class VehiculeService {
    * Supprime une plage de dates des disponibilités d'un véhicule. Cette méthode "découpe" les
    * disponibilités existantes en supprimant la plage spécifiée.
    *
-   * Exemples: - Disponibilité: 10-20 oct, Supprimer: 13-18 oct → Résultat: 10-12 oct + 19-20 oct -
-   * Disponibilité: 10-20 oct, Supprimer: 10-15 oct → Résultat: 16-20 oct - Disponibilité: 10-20
-   * oct, Supprimer: 15-20 oct → Résultat: 10-14 oct - Disponibilité: 10-20 oct, Supprimer: 10-20
-   * oct → Résultat: (supprimée complètement) - Disponibilité: 10-20 oct, Supprimer: 5-25 oct →
+   * Exemples: - Disponibilité: 10-20 oct, Supprimer: 13-18 oct => Résultat: 10-12 oct + 19-20 oct -
+   * Disponibilité: 10-20 oct, Supprimer: 10-15 oct => Résultat: 16-20 oct - Disponibilité: 10-20
+   * oct, Supprimer: 15-20 oct => Résultat: 10-14 oct - Disponibilité: 10-20 oct, Supprimer: 10-20
+   * oct => Résultat: (supprimée complètement) - Disponibilité: 10-20 oct, Supprimer: 5-25 oct =>
    * Résultat: (supprimée complètement)
    *
    * @param agent l'agent propriétaire du véhicule
@@ -904,8 +904,8 @@ public class VehiculeService {
     // liste des villes dans un rayon de xKm autour de la ville de départ
     List<Ville> villesProches = villeService.getVillesAutour(villeDepart, xKm);
 
-    // y compris la ville de départ
-    villesProches.add(new Ville(villeDepart, 0, 0)); // 假设坐标无影响，主要为了包含本城市
+    // Include the starting city as well
+    villesProches.add(new Ville(villeDepart, 0, 0));
 
     // obtenir les véhicules dans chacune de ces villes
     for (Ville v : villesProches) {

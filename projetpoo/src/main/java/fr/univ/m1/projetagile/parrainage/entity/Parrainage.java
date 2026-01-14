@@ -26,7 +26,7 @@ import jakarta.persistence.Table;
 public class Parrainage {
 
   /**
-   * Montant du crédit accordé au parrain lorsque le parrainage est activé. Le montant est de 10€.
+   * Montant du crédit accordé au parrain lorsque le parrainage est activé. Le montant est de 10 EUR.
    */
   public static final Double MONTANT_CREDIT_PARRAIN = 10.0;
 

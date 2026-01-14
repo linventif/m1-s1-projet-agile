@@ -109,9 +109,10 @@ public class ControlTechniqueService {
   }
 
   /**
+   * Verifies if a vehicle needs a technical control soon.
    * 
-   * @param vehicule les véhicules à vérifier
-   * @return true: besoin, false: pas besoin
+   * @param vehicule the vehicle to check
+   * @return true if control is needed, false otherwise
    */
   public boolean doitFaireControleProchainement(Vehicule vehicule) {
     if (vehicule == null) {
@@ -131,9 +132,14 @@ public class ControlTechniqueService {
   }
 
   /**
-   * calcule et retourne la date du prochain contrôle technique (sans sauvegarder) selon les règles
-   * françaises : - Nouveau véhicule (0-4 ans) : premier contrôle au 4ème anniversaire - 4-10 ans :
-   * contrôle tous les 2 ans - Plus de 10 ans : contrôle annuel
+   * Calculates and returns the date of the next technical control (without saving).
+   * Follows French regulations:
+   * - New vehicle (0-4 years): first control at 4th anniversary
+   * - 4-10 years: control every 2 years
+   * - Over 10 years: annual control
+   *
+   * @param vehicule the vehicle to check
+   * @return the date of the next control, or null if cannot be calculated
    */
   public LocalDate calculerDateProchainControle(Vehicule vehicule) {
     if (vehicule == null) {
@@ -171,7 +177,10 @@ public class ControlTechniqueService {
   }
 
   /**
-   * calcule et enregistre la date du prochain contrôle technique
+   * Calculates and saves the date of the next technical control.
+   *
+   * @param vehicule the vehicle to check
+   * @return the calculated next control date
    */
   public LocalDate calculerEtEnregistrerProchainControle(Vehicule vehicule) {
     LocalDate dateProchainControle = calculerDateProchainControle(vehicule);
@@ -186,11 +195,11 @@ public class ControlTechniqueService {
   }
 
   /**
+   * Checks if the next technical control is approaching within a certain number of days.
    *
-   *
-   * @param dateProchainControle
-   * @param joursAlerte
-   * @return true: besoin de rappel, false: pas besoin
+   * @param dateProchainControle the date of the next control
+   * @param joursAlerte the number of days for alert threshold
+   * @return true if reminder is needed, false otherwise
    */
   private boolean estProchainControleProche(LocalDate dateProchainControle, int joursAlerte) {
     if (dateProchainControle == null) {
@@ -199,20 +208,25 @@ public class ControlTechniqueService {
 
     LocalDate aujourdhui = LocalDate.now();
 
-    // si déjà passé
+    // If already past due
     if (dateProchainControle.isBefore(aujourdhui)) {
       return true;
     }
 
-    // calculer les jours restants
+    // Calculate remaining days
     long joursRestants = ChronoUnit.DAYS.between(aujourdhui, dateProchainControle);
 
     return joursRestants <= joursAlerte;
   }
 
-  // ==================== MÉTHODES D'INFORMATION ====================
+  // ==================== INFORMATION METHODS ====================
 
-
+  /**
+   * Returns the detailed status of a vehicle's technical control.
+   *
+   * @param vehicule the vehicle to check
+   * @return a status string with control details
+   */
   public String getStatutControleDetaille(Vehicule vehicule) {
     if (vehicule == null) {
       return "Véhicule non spécifié";
@@ -230,31 +244,34 @@ public class ControlTechniqueService {
 
     LocalDate aujourdhui = LocalDate.now();
 
-    // si déjà passé
+    // If already past due
     if (dateProchainControle.isBefore(aujourdhui)) {
       long joursDepasses = ChronoUnit.DAYS.between(dateProchainControle, aujourdhui);
-      return String.format("URGENT！controle technique en retard de %d jours", joursDepasses);
+      return String.format("URGENT: technical control overdue by %d days", joursDepasses);
     }
 
-    // calculer les jours restants
+    // Calculate remaining days
     long joursRestants = ChronoUnit.DAYS.between(aujourdhui, dateProchainControle);
 
     if (joursRestants <= 7) {
-      return String.format("🔴 Urgent！controle technique dans %d jours (%s)", joursRestants,
+      return String.format("URGENT: technical control in %d days (%s)", joursRestants,
           dateProchainControle);
     } else if (joursRestants <= 30) {
-      return String.format("🟡 Prévue！controle technique dans %d jours (%s)", joursRestants,
+      return String.format("SCHEDULED: technical control in %d days (%s)", joursRestants,
           dateProchainControle);
     } else if (joursRestants <= 90) {
-      return String.format("🟢 Attention！controle technique dans %d jours (%s)", joursRestants,
+      return String.format("UPCOMING: technical control in %d days (%s)", joursRestants,
           dateProchainControle);
     } else {
-      return String.format("✅ Tout va bien", joursRestants, dateProchainControle);
+      return String.format("OK: technical control in %d days (%s)", joursRestants, dateProchainControle);
     }
   }
 
   /**
-   * obtenir tous les statuts des véhicules
+   * Returns the status of all vehicles.
+   *
+   * @param vehicules the list of vehicles to check
+   * @return a list of status strings
    */
   public List<String> getTousStatutsVehicules(List<Vehicule> vehicules) {
     List<String> statuts = new ArrayList<>();
@@ -262,32 +279,35 @@ public class ControlTechniqueService {
     for (Vehicule vehicule : vehicules) {
       String statut = getStatutControleDetaille(vehicule);
       String ligne =
-          String.format("🚗 %s %s: %s", vehicule.getMarque(), vehicule.getModele(), statut);
+          String.format("%s %s: %s", vehicule.getMarque(), vehicule.getModele(), statut);
       statuts.add(ligne);
     }
 
     return statuts;
   }
 
-  // ==================== MÉTHODES DE RAPPORT ====================
+  // ==================== REPORT METHODS ====================
 
   /**
-   * Rapport détaillé pour un véhicule donné
+   * Generates a detailed report for a given vehicle.
+   *
+   * @param vehicule the vehicle to report on
+   * @return a formatted report string
    */
   public String genererRapportControle(Vehicule vehicule) {
     StringBuilder rapport = new StringBuilder();
 
-    rapport.append("📋 RAPPORT DE CONTRÔLE TECHNIQUE\n");
-    rapport.append("═".repeat(50)).append("\n");
+    rapport.append("TECHNICAL CONTROL REPORT\n");
+    rapport.append("=".repeat(50)).append("\n");
     rapport.append("Véhicule: ").append(vehicule.getMarque()).append(" ")
         .append(vehicule.getModele()).append("\n");
     rapport.append("Immatriculation: ").append(vehicule.getId()).append("\n\n");
 
     ControleTechnique ct = getControleTechniqueByVehiculeId(vehicule.getId());
 
-    // donnees de base
-    rapport.append("📊 INFORMATIONS DE BASE\n");
-    rapport.append("─".repeat(30)).append("\n");
+    // Basic information
+    rapport.append("BASIC INFORMATION\n");
+    rapport.append("-".repeat(30)).append("\n");
     if (ct != null && ct.getDateMiseEnCirculation() != null) {
       rapport.append("Date mise en circulation: ").append(ct.getDateMiseEnCirculation())
           .append("\n");
@@ -299,9 +319,9 @@ public class ControlTechniqueService {
     }
     rapport.append("\n");
 
-    // historique des contrôles
-    rapport.append("📅 HISTORIQUE DES CONTRÔLES\n");
-    rapport.append("─".repeat(30)).append("\n");
+    // Control history
+    rapport.append("CONTROL HISTORY\n");
+    rapport.append("-".repeat(30)).append("\n");
     if (ct != null && ct.getDate() != null) {
       rapport.append("Dernier contrôle: ").append(ct.getDate()).append("\n");
     }
@@ -315,27 +335,30 @@ public class ControlTechniqueService {
     }
     rapport.append("\n");
 
-    // Statut actuel
-    rapport.append("📈 STATUT ACTUEL\n");
-    rapport.append("─".repeat(30)).append("\n");
+    // Current status
+    rapport.append("CURRENT STATUS\n");
+    rapport.append("-".repeat(30)).append("\n");
     rapport.append(getStatutControleDetaille(vehicule)).append("\n\n");
 
-    // Recommandations d'entretien
+    // Maintenance recommendations
     List<String> recommandations = getRecommandationsEntretienParKilometrage(vehicule);
     if (!recommandations.isEmpty()) {
-      rapport.append("🔧 RECOMMANDATIONS D'ENTRETIEN\n");
-      rapport.append("─".repeat(30)).append("\n");
+      rapport.append("MAINTENANCE RECOMMENDATIONS\n");
+      rapport.append("-".repeat(30)).append("\n");
       for (String recommandation : recommandations) {
-        rapport.append("• ").append(recommandation).append("\n");
+        rapport.append("- ").append(recommandation).append("\n");
       }
     }
 
-    rapport.append("═".repeat(50));
+    rapport.append("=".repeat(50));
     return rapport.toString();
   }
 
   /**
-   * Rapport détaillé pour tous les véhicules d'un agent donné
+   * Generates a detailed report for all vehicles of a given agent.
+   *
+   * @param vehicules the list of vehicles to report on
+   * @return a formatted report string
    */
   public String genererRapportPourAgent(List<Vehicule> vehicules) {
     if (vehicules == null || vehicules.isEmpty()) {
@@ -343,8 +366,8 @@ public class ControlTechniqueService {
     }
 
     StringBuilder rapport = new StringBuilder();
-    rapport.append("📊 RAPPORT CONTRÔLE TECHNIQUE - TOUS LES VÉHICULES\n");
-    rapport.append("═".repeat(60)).append("\n");
+    rapport.append("TECHNICAL CONTROL REPORT - ALL VEHICLES\n");
+    rapport.append("=".repeat(60)).append("\n");
     rapport.append("Nombre total de véhicules: ").append(vehicules.size()).append("\n\n");
 
     int urgents = 0;
@@ -355,7 +378,7 @@ public class ControlTechniqueService {
       boolean doitControle = doitFaireControleProchainement(vehicule);
       String statut = getStatutControleDetaille(vehicule);
 
-      if (statut.contains("URGENT") || statut.contains("紧急")) {
+      if (statut.contains("URGENT")) {
         urgents++;
       } else if (doitControle) {
         prochains++;
@@ -363,26 +386,29 @@ public class ControlTechniqueService {
         normaux++;
       }
 
-      rapport.append("▶ ").append(vehicule.getMarque()).append(" ").append(vehicule.getModele())
+      rapport.append("> ").append(vehicule.getMarque()).append(" ").append(vehicule.getModele())
           .append("\n");
       rapport.append("  ").append(statut).append("\n\n");
     }
 
-    // resumé
-    rapport.append("📈 RÉSUMÉ\n");
-    rapport.append("═".repeat(30)).append("\n");
-    rapport.append("🔴 Véhicules nécessitant un contrôle URGENT: ").append(urgents).append("\n");
-    rapport.append("🟡 Véhicules avec contrôle prochain: ").append(prochains).append("\n");
-    rapport.append("✅ Véhicules sans contrôle imminent: ").append(normaux).append("\n");
-    rapport.append("═".repeat(60));
+    // Summary
+    rapport.append("SUMMARY\n");
+    rapport.append("=".repeat(30)).append("\n");
+    rapport.append("Vehicles requiring URGENT control: ").append(urgents).append("\n");
+    rapport.append("Vehicles with upcoming control: ").append(prochains).append("\n");
+    rapport.append("Vehicles without imminent control: ").append(normaux).append("\n");
+    rapport.append("=".repeat(60));
 
     return rapport.toString();
   }
 
-  // ==================== MÉTHODES D'ENTRETIEN ====================
+  // ==================== MAINTENANCE METHODS ====================
 
   /**
-   * pour US.A.11：recommandations d'entretien basées sur le kilométrage
+   * For US.A.11: maintenance recommendations based on mileage.
+   *
+   * @param vehicule the vehicle to check
+   * @return a list of maintenance recommendations
    */
   public List<String> getRecommandationsEntretienParKilometrage(Vehicule vehicule) {
     List<String> recommandations = new ArrayList<>();
@@ -430,14 +456,14 @@ public class ControlTechniqueService {
   }
 
   /**
-   * Enregistrer un nouveau contrôle technique. Appelé lorsque le véhicule termine un contrôle
-   * technique.
+   * Registers a new technical control.
+   * Called when the vehicle completes a technical control.
    *
-   * @param vehiculeId
-   * @param dateControle
-   * @param kilometrage
-   * @param resultat
-   * @param commentaires
+   * @param vehiculeId the vehicle identifier
+   * @param dateControle the control date
+   * @param kilometrage the mileage
+   * @param resultat the control result
+   * @param commentaires additional comments
    */
   public void enregistrerNouveauControle(Long vehiculeId, LocalDate dateControle,
       Integer kilometrage, String resultat, String commentaires) {
@@ -449,23 +475,26 @@ public class ControlTechniqueService {
 
     ControleTechnique ct = getOrCreateControleTechnique(vehiculeId);
 
-    // mise à jour des informations du contrôle
+    // Update control information
     ct.setDate(dateControle);
     ct.setKilometrageDernierControle(kilometrage);
     ct.setResultat(resultat);
 
-    // recalculer la date du prochain contrôle
+    // Recalculate next control date
     LocalDate nouveauProchainControle = calculerDateProchainControle(vehicule);
     ct.setDateLimite(nouveauProchainControle);
 
-    // enregistrer les modifications
+    // Save changes
     controleTechniqueRepository.save(ct);
   }
 
-  // ==================== MÉTHODES UTILITAIRES ====================
+  // ==================== UTILITY METHODS ====================
 
   /**
-   * calculer les jours restants avant le prochain contrôle technique
+   * Calculates the remaining days before the next technical control.
+   *
+   * @param vehicule the vehicle to check
+   * @return the number of days remaining, or -1 if cannot be calculated
    */
   public long calculerJoursRestants(Vehicule vehicule) {
     ControleTechnique ct = getControleTechniqueByVehiculeId(vehicule.getId());
@@ -483,7 +512,10 @@ public class ControlTechniqueService {
   }
 
   /**
-   * verifier si le contrôle technique est dépassé
+   * Checks if the technical control is overdue.
+   *
+   * @param vehicule the vehicle to check
+   * @return true if control is overdue, false otherwise
    */
   public boolean estControleDepasse(Vehicule vehicule) {
     ControleTechnique ct = getControleTechniqueByVehiculeId(vehicule.getId());
