@@ -1,9 +1,5 @@
 package fr.univ.m1.projetagile.core.entity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,7 +7,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -28,9 +23,6 @@ public class Assurance {
   @ManyToOne
   @JoinColumn(name = "grille_tarif_id", nullable = false)
   private GrilleTarif grille;
-
-  @OneToMany(mappedBy = "assurance", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<SouscriptionAssurance> souscriptions = new ArrayList<>();
 
   protected Assurance() {}
 
@@ -57,17 +49,6 @@ public class Assurance {
 
   public void setGrille(GrilleTarif grille) {
     this.grille = grille;
-  }
-
-  public List<SouscriptionAssurance> getSouscriptions() {
-    return Collections.unmodifiableList(souscriptions);
-  }
-
-  public void ajouterSouscription(SouscriptionAssurance s) {
-    if (s != null) {
-      souscriptions.add(s);
-      s.setAssurance(this);
-    }
   }
 
   // Si vous voulez garder la méthode UML, elle doit rester simple

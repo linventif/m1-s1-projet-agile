@@ -9,6 +9,7 @@ import fr.univ.m1.projetagile.VerificationLocation.service.VerificationService;
 import fr.univ.m1.projetagile.core.dto.LocationDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
+import fr.univ.m1.projetagile.core.entity.Assurance;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Options;
@@ -31,6 +32,7 @@ public class LocationService {
   private final LocationRepository locationRepository;
   private final ParrainageService parrainageService;
   private final CreditService creditService;
+  private final AssuranceService assuranceService;
 
   // ==================== #100 : règles commission ====================
   private static final double COMMISSION_NORMALE = 0.10; // 10%
@@ -40,6 +42,7 @@ public class LocationService {
     this.locationRepository = locationRepository;
     this.parrainageService = new ParrainageService();
     this.creditService = new CreditService();
+    this.assuranceService = new AssuranceService();
   }
 
   public LocationService(LocationRepository locationRepository, ParrainageService parrainageService,
@@ -47,6 +50,15 @@ public class LocationService {
     this.locationRepository = locationRepository;
     this.parrainageService = parrainageService;
     this.creditService = creditService;
+    this.assuranceService = new AssuranceService();
+  }
+
+  public LocationService(LocationRepository locationRepository, ParrainageService parrainageService,
+      CreditService creditService, AssuranceService assuranceService) {
+    this.locationRepository = locationRepository;
+    this.parrainageService = parrainageService;
+    this.creditService = creditService;
+    this.assuranceService = assuranceService;
   }
 
   /**
@@ -218,6 +230,38 @@ public class LocationService {
   public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin, Vehicule vehicule,
       Loueur loueur) {
     return creerLocation(dateDebut, dateFin, null, vehicule, loueur);
+  }
+
+  /**
+   * Crée et enregistre une nouvelle location avec souscription d'assurance.
+   * Cette méthode utilise la méthode creerLocation existante et crée également
+   * un objet SouscriptionAssurance lié à la location via AssuranceService.
+   *
+   * @param dateDebut date et heure de début souhaitées
+   * @param dateFin date et heure de fin souhaitées
+   * @param lieuDepot lieu de dépôt du véhicule (facultatif, peut être null)
+   * @param vehicule véhicule concerné (doit être déjà persisté)
+   * @param loueur loueur effectuant la réservation
+   * @param assurance l'assurance à souscrire pour cette location
+   * @param options liste des options d'assurance (peut être null ou vide)
+   * @return la location sauvegardée avec son assurance souscrite
+   * @throws IllegalArgumentException si l'assurance est null
+   */
+  public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin,
+      LieuRestitution lieuDepot, Vehicule vehicule, Loueur loueur, Assurance assurance,
+      List<String> options) {
+    
+    if (assurance == null) {
+      throw new IllegalArgumentException("L'assurance doit être spécifiée.");
+    }
+
+    // Créer la location en utilisant la méthode existante
+    Location location = creerLocation(dateDebut, dateFin, lieuDepot, vehicule, loueur);
+
+    // Créer et persister la souscription d'assurance via AssuranceService
+    assuranceService.souscrire(location, assurance, options);
+
+    return location;
   }
 
   /**

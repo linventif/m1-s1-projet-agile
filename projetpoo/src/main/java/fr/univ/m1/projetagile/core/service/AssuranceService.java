@@ -9,9 +9,26 @@ import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.SouscriptionAssurance;
 import fr.univ.m1.projetagile.core.entity.TarifOptionAssurance;
 import fr.univ.m1.projetagile.core.entity.TarifVehicule;
+import fr.univ.m1.projetagile.core.persistence.SouscriptionAssuranceRepository;
 import fr.univ.m1.projetagile.enums.TypeV;
 
 public class AssuranceService {
+
+  private final SouscriptionAssuranceRepository souscriptionAssuranceRepository;
+
+  /**
+   * Constructeur avec injection du repository.
+   */
+  public AssuranceService(SouscriptionAssuranceRepository souscriptionAssuranceRepository) {
+    this.souscriptionAssuranceRepository = souscriptionAssuranceRepository;
+  }
+
+  /**
+   * Constructeur par défaut qui crée une instance du repository.
+   */
+  public AssuranceService() {
+    this.souscriptionAssuranceRepository = new SouscriptionAssuranceRepository();
+  }
 
   /**
    * Crée une GrilleTarif vide (tu ajoutes ensuite les tarifs).
@@ -75,8 +92,13 @@ public class AssuranceService {
   }
 
   /**
-   * Souscrire une assurance pour une location, avec une liste d'options (noms). Retourne l'objet
-   * SouscriptionAssurance prêt.
+   * Souscrire une assurance pour une location, avec une liste d'options (noms). 
+   * Sauvegarde la souscription en base de données et retourne l'objet SouscriptionAssurance.
+   *
+   * @param location la location pour laquelle souscrire l'assurance
+   * @param assurance l'assurance à souscrire
+   * @param options liste des noms d'options (peut être null ou vide)
+   * @return la souscription d'assurance sauvegardée
    */
   public SouscriptionAssurance souscrire(Location location, Assurance assurance,
       List<String> options) {
@@ -85,12 +107,11 @@ public class AssuranceService {
     if (assurance == null)
       throw new IllegalArgumentException("assurance null");
 
-    SouscriptionAssurance s = SouscriptionAssurance.souscrire(location, assurance, options);
+    // Créer la souscription
+    SouscriptionAssurance souscription = SouscriptionAssurance.souscrire(location, assurance, options);
 
-    // optionnel si tu as Assurance.ajouterSouscription()
-    // assurance.ajouterSouscription(s);
-
-    return s;
+    // Persister en base de données
+    return souscriptionAssuranceRepository.save(souscription);
   }
 
   /**
