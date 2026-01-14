@@ -371,6 +371,51 @@ public class EntretienTechniqueService {
   }
 
   /**
+   * Récupère le dernier entretien technique d'un véhicule (le plus récent).
+   *
+   * @param vehiculeId l'identifiant du véhicule
+   * @return le dernier entretien technique du véhicule, ou null si aucun entretien n'existe
+   * @throws IllegalArgumentException si l'ID est null
+   */
+  public EntretienTechnique getDernierEntretienTechnique(Long vehiculeId) {
+    if (vehiculeId == null) {
+      throw new IllegalArgumentException("L'ID du véhicule ne peut pas être null.");
+    }
+    List<EntretienTechnique> entretiens = entretienTechniqueRepository.findByVehiculeId(vehiculeId);
+    if (entretiens.isEmpty()) {
+      return null;
+    }
+    // Les résultats sont déjà triés par date DESC, donc le premier est le plus récent
+    return entretiens.get(0);
+  }
+
+  /**
+   * Récupère le dernier entretien technique d'un véhicule pour un type technique spécifique.
+   *
+   * @param vehiculeId l'identifiant du véhicule
+   * @param typeTechniqueId l'identifiant du type technique
+   * @return le dernier entretien technique du type spécifié, ou null si aucun entretien n'existe
+   * @throws IllegalArgumentException si les IDs sont null
+   */
+  public EntretienTechnique getDernierEntretienTechniqueByType(Long vehiculeId,
+      Long typeTechniqueId) {
+    if (vehiculeId == null) {
+      throw new IllegalArgumentException("L'ID du véhicule ne peut pas être null.");
+    }
+    if (typeTechniqueId == null) {
+      throw new IllegalArgumentException("L'ID du type technique ne peut pas être null.");
+    }
+    List<EntretienTechnique> entretiens =
+        entretienTechniqueRepository.findByVehiculeIdAndTypeTechniqueId(vehiculeId,
+            typeTechniqueId);
+    if (entretiens.isEmpty()) {
+      return null;
+    }
+    // Les résultats sont déjà triés par date DESC, donc le premier est le plus récent
+    return entretiens.get(0);
+  }
+
+  /**
    * Met à jour un entretien technique existant.
    *
    * @param entretienTechnique l'entretien technique à mettre à jour
