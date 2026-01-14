@@ -19,6 +19,7 @@ import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import fr.univ.m1.projetagile.notes.service.NoteService;
+import fr.univ.m1.projetagile.options.service.SouscriptionOptionService;
 import fr.univ.m1.projetagile.parking.entity.Parking;
 import fr.univ.m1.projetagile.parrainage.entity.Parrainage;
 import fr.univ.m1.projetagile.parrainage.service.CreditService;
@@ -35,6 +36,7 @@ public class LocationService {
   private final CreditService creditService;
   private final AssuranceService assuranceService;
   private final NoteService noteService;
+  private final SouscriptionOptionService souscriptionOptionService;
 
   // ==================== #100 : règles commission ====================
   private static final double COMMISSION_NORMALE = 0.10; // 10%
@@ -46,6 +48,7 @@ public class LocationService {
     this.creditService = new CreditService();
     this.assuranceService = new AssuranceService();
     this.noteService = new NoteService();
+    this.souscriptionOptionService = new SouscriptionOptionService();
   }
 
   public LocationService(LocationRepository locationRepository, ParrainageService parrainageService,
@@ -55,6 +58,7 @@ public class LocationService {
     this.creditService = creditService;
     this.assuranceService = new AssuranceService();
     this.noteService = new NoteService();
+    this.souscriptionOptionService = new SouscriptionOptionService();
   }
 
   public LocationService(LocationRepository locationRepository, ParrainageService parrainageService,
@@ -64,6 +68,7 @@ public class LocationService {
     this.creditService = creditService;
     this.assuranceService = assuranceService;
     this.noteService = new NoteService();
+    this.souscriptionOptionService = new SouscriptionOptionService();
   }
 
   public LocationService(LocationRepository locationRepository, ParrainageService parrainageService,
@@ -73,6 +78,7 @@ public class LocationService {
     this.creditService = creditService;
     this.assuranceService = assuranceService;
     this.noteService = noteService;
+    this.souscriptionOptionService = new SouscriptionOptionService();
   }
 
   /**
@@ -110,7 +116,7 @@ public class LocationService {
       }
 
       // Vérifier si l'agent a une souscription à l'option Parking
-      boolean aOptionParking = agent.getOptionsActives().stream()
+      boolean aOptionParking = souscriptionOptionService.getOptionsActives(agent).stream()
           .anyMatch(so -> so.getOption() != null && so.getOption().getId() != null
               && so.getOption().getId().equals(Parking.PARKING_OPTION_ID));
 
@@ -136,7 +142,7 @@ public class LocationService {
       throw new IllegalStateException("Le véhicule n'a pas de propriétaire associé.");
     }
 
-    boolean acceptationManuelle = proprietaire.getOptionsActives().stream()
+    boolean acceptationManuelle = souscriptionOptionService.getOptionsActives(proprietaire).stream()
         .anyMatch(so -> so.getOption() != null && so.getOption().getNomOption() != null
             && so.getOption().getNomOption().equals("Accepter les contrats manuellement"));
 

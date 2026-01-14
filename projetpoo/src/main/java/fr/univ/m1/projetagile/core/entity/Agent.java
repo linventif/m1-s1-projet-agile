@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import fr.univ.m1.projetagile.enums.TypeAgent;
-import fr.univ.m1.projetagile.options.entity.Options;
-import fr.univ.m1.projetagile.options.entity.SouscriptionOption;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
@@ -90,24 +88,6 @@ public abstract class Agent extends Utilisateur {
 
   public void retirerVehicule(Vehicule v) {
     deleteVehicule(v);
-  }
-
-  public boolean aOption(Options option) {
-    if (option == null) {
-      return false;
-    }
-    // Récupérer les souscriptions via repository
-    fr.univ.m1.projetagile.options.persistence.SouscriptionOptionRepository repo =
-        new fr.univ.m1.projetagile.options.persistence.SouscriptionOptionRepository();
-    return repo.findByUtilisateur(this.getIdU()).stream()
-        .anyMatch(so -> option.equals(so.getOption()));
-  }
-
-  public List<SouscriptionOption> getOptionsActives() {
-    // Récupérer les souscriptions via repository
-    fr.univ.m1.projetagile.options.persistence.SouscriptionOptionRepository repo =
-        new fr.univ.m1.projetagile.options.persistence.SouscriptionOptionRepository();
-    return repo.findByUtilisateur(this.getIdU());
   }
 
   public void accepterLocation(Location location) {

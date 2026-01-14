@@ -77,7 +77,7 @@ public class TestUSA4 {
       }
 
       // Subscribe the agent to the manual acceptance option if not already subscribed
-      boolean hasOption = agent.getOptionsActives().stream().anyMatch(
+      boolean hasOption = souscriptionOptionService.getOptionsActives(agent).stream().anyMatch(
           opt -> opt.getOption().getNomOption().equals("Accepter les contrats manuellement"));
       if (!hasOption) {
         souscriptionOptionService.souscrireOption(agent.getIdU(), optionAcceptationManuelle.getId(),

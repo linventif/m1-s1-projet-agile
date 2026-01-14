@@ -93,4 +93,35 @@ public class SouscriptionOptionService {
     }
     return repository.saveOption(option);
   }
+
+  /**
+   * Vérifie si un utilisateur a souscrit à une option spécifique.
+   *
+   * @param utilisateur l'utilisateur à vérifier
+   * @param option l'option à vérifier
+   * @return true si l'utilisateur a souscrit à cette option, false sinon
+   */
+  public boolean aOption(Utilisateur utilisateur, Options option) {
+    if (utilisateur == null || option == null) {
+      return false;
+    }
+    if (utilisateur.getIdU() == null) {
+      return false;
+    }
+    return repository.findByUtilisateur(utilisateur.getIdU()).stream()
+        .anyMatch(so -> option.equals(so.getOption()));
+  }
+
+  /**
+   * Récupère toutes les options actives d'un utilisateur.
+   *
+   * @param utilisateur l'utilisateur dont on veut récupérer les options
+   * @return la liste des souscriptions d'options actives
+   */
+  public List<SouscriptionOption> getOptionsActives(Utilisateur utilisateur) {
+    if (utilisateur == null || utilisateur.getIdU() == null) {
+      throw new IllegalArgumentException("Utilisateur invalide");
+    }
+    return repository.findByUtilisateur(utilisateur.getIdU());
+  }
 }
