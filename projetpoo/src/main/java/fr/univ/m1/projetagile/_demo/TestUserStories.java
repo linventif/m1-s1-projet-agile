@@ -446,6 +446,10 @@ public class TestUserStories {
       Crédit creditAgent = creditService.getCredit(agentParrainage.getIdU());
       System.out.println("Crédit: " + creditAgent.getCredit());
 
+      // US.A.16 Agent peut ajouter un parking
+
+      // US.L.11 Un loueur peut choisir un parking en tant que lieu de depôt
+
 
     } catch (Exception e) {
       System.err.println("✗ Erreur: " + e.getMessage());
