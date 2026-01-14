@@ -230,11 +230,8 @@ public class ControlTechniqueService {
       return "Véhicule non spécifié";
     }
 
-    ControleTechnique ct = getControleTechniqueByVehiculeId(vehicule.getId());
-    LocalDate dateProchainControle = ct != null ? ct.getDateLimite() : null;
-    if (dateProchainControle == null) {
-      dateProchainControle = calculerDateProchainControle(vehicule);
-    }
+    // Always recalculate to ensure fresh data (don't trust cached dateLimite)
+    LocalDate dateProchainControle = calculerDateProchainControle(vehicule);
 
     if (dateProchainControle == null) {
       return "manque des informations pour calculer la date du prochain contrôle";
@@ -245,23 +242,23 @@ public class ControlTechniqueService {
     // If already past due
     if (dateProchainControle.isBefore(aujourdhui)) {
       long joursDepasses = ChronoUnit.DAYS.between(dateProchainControle, aujourdhui);
-      return String.format("URGENT: technical control overdue by %d days", joursDepasses);
+      return String.format("URGENT : contrôle technique en retard de %d jours", joursDepasses);
     }
 
     // Calculate remaining days
     long joursRestants = ChronoUnit.DAYS.between(aujourdhui, dateProchainControle);
 
     if (joursRestants <= 7) {
-      return String.format("URGENT: technical control in %d days (%s)", joursRestants,
+      return String.format("URGENT : contrôle technique dans %d jours (%s)", joursRestants,
           dateProchainControle);
     } else if (joursRestants <= 30) {
-      return String.format("SCHEDULED: technical control in %d days (%s)", joursRestants,
+      return String.format("PRÉVU : contrôle technique dans %d jours (%s)", joursRestants,
           dateProchainControle);
     } else if (joursRestants <= 90) {
-      return String.format("UPCOMING: technical control in %d days (%s)", joursRestants,
+      return String.format("À VENIR : contrôle technique dans %d jours (%s)", joursRestants,
           dateProchainControle);
     } else {
-      return String.format("OK: technical control in %d days (%s)", joursRestants,
+      return String.format("OK : contrôle technique dans %d jours (%s)", joursRestants,
           dateProchainControle);
     }
   }
