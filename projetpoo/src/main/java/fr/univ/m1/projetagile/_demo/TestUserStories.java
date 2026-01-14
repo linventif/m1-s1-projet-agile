@@ -15,6 +15,7 @@ import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Disponibilite;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
+import fr.univ.m1.projetagile.core.entity.Options;
 import fr.univ.m1.projetagile.core.entity.SouscriptionOption;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
@@ -64,8 +65,7 @@ public class TestUserStories {
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
       LocationService locationService = new LocationService(new LocationRepository());
-      SouscriptionOptionService souscriptionOptionService = new SouscriptionOptionService(
-          new SouscriptionOptionRepository(DatabaseConnection.getEntityManager()));
+      SouscriptionOptionService souscriptionOptionService = new SouscriptionOptionService();
       ParrainageService parrainageService = new ParrainageService(new ParrainageRepository());
       CreditService creditService = new CreditService(new CreditRepository());
       VerificationService verificationService =
@@ -80,6 +80,79 @@ public class TestUserStories {
       //
       //
       NoteService noteService = new NoteService();
+
+      // -- // -- // -- // -- // -- // -- // -- //
+      // CREATION DES DONNEES DE TEST
+      // -- // -- // -- // -- // -- // -- // -- //
+      System.out.println("\n=== Création des données de test ===");
+
+      // Création des Loueurs
+      Long idLoueur1 = loueurService
+          .createLoueur("Martin", "Sophie", "sophie.martin@example.com", "motdepasse123").getIdU();
+      System.out.println("✓ Loueur créé avec ID: " + idLoueur1);
+
+      Long idLoueur2 = loueurService
+          .createLoueur("Bernard", "Luc", "luc.bernard@example.com", "motdepasse123").getIdU();
+      System.out.println("✓ Loueur créé avec ID: " + idLoueur2);
+
+      Long idLoueur4 = loueurService
+          .createLoueur("Dubois", "Marie", "marie.dubois@example.com", "motdepasse123").getIdU();
+      System.out.println("✓ Loueur créé avec ID: " + idLoueur4);
+
+      // Création des Agents
+      Long idAgent1 = agentService
+          .createAgentParticulier("Smith", "Alice", "asmith@example.com", "motdepasse123").getIdU();
+      System.out.println("✓ Agent créé avec ID: " + idAgent1);
+
+      Long idAgent4 = agentService
+          .createAgentParticulier("Bertrand", "Olivier", "obertrand@example.com", "motdepasse123")
+          .getIdU();
+      System.out.println("✓ Agent créé avec ID: " + idAgent4);
+
+      Long idAgent31 = agentService
+          .createAgentParticulier("Leroy", "Thomas", "tleroy@example.com", "motdepasse123")
+          .getIdU();
+      System.out.println("✓ Agent créé avec ID: " + idAgent31);
+
+      // Création des Véhicules
+      Long idVehicule1 = vehiculeService.createVehicule(TypeV.voiture, "Peugeot", "308", "blanche",
+          "Paris", 50.0, agentService.findById(idAgent1)).getId();
+      System.out.println("✓ Véhicule créé avec ID: " + idVehicule1);
+
+      Long idVehicule35 = vehiculeService.createVehicule(TypeV.voiture, "Renault", "Clio", "rouge",
+          "Lyon", 45.0, agentService.findById(idAgent31)).getId();
+      System.out.println("✓ Véhicule créé avec ID: " + idVehicule35);
+
+      Long idVehicule84 = vehiculeService.createVehicule(TypeV.voiture, "Citroën", "C3", "grise",
+          "Marseille", 40.0, agentService.findById(idAgent4)).getId();
+      System.out.println("✓ Véhicule créé avec ID: " + idVehicule84);
+
+      Long idVehicule136 = vehiculeService.createVehicule(TypeV.voiture, "BMW", "Serie 3", "noire",
+          "Nice", 80.0, agentService.findById(idAgent4)).getId();
+      System.out.println("✓ Véhicule créé avec ID: " + idVehicule136);
+
+      // Création des disponibilités pour les véhicules (seulement dans le futur)
+      vehiculeService.createDisponibilite(agentService.findById(idAgent1), idVehicule1,
+          LocalDate.now(), LocalDate.now().plusDays(60));
+      vehiculeService.createDisponibilite(agentService.findById(idAgent31), idVehicule35,
+          LocalDate.now(), LocalDate.now().plusDays(60));
+      vehiculeService.createDisponibilite(agentService.findById(idAgent4), idVehicule84,
+          LocalDate.now(), LocalDate.now().plusDays(60));
+      vehiculeService.createDisponibilite(agentService.findById(idAgent4), idVehicule136,
+          LocalDate.now(), LocalDate.now().plusDays(60));
+      System.out.println("✓ Disponibilités créées pour les véhicules");
+
+      // Création d'une location de test pour les tests de notation
+      // La location est créée maintenant et terminée immédiatement pour permettre la notation
+      Long idLocation66 = locationService
+          .creerLocation(LocalDateTime.now(), LocalDateTime.now().plusDays(5),
+              vehiculeService.findVehiculeById(idVehicule1), loueurService.findById(idLoueur4))
+          .getId();
+      Location location66 = locationService.findLocationById(idLocation66);
+      location66.setStatut(StatutLocation.TERMINE);
+      System.out.println("✓ Location de test créée avec ID: " + idLocation66);
+
+      System.out.println("=== Données de test créées avec succès ===\n");
 
 
       // US.V.1 Je veux pouvoir consulter les véhicules disponibles. J’ai alors accès aux
@@ -106,7 +179,7 @@ public class TestUserStories {
       // US.V.3 Je veux pouvoir consulter le profil des agents de la plateforme, et les véhicules
       // qu’ils louent. (1)
 
-      AgentDTO agent = agentService.getAgentProfile(agentService.findByEmail("asmith@example.com"));
+      AgentDTO agent = agentService.getAgentProfile(agentService.findById(idAgent1));
       System.out.println("Profil de l'agent: ");
       System.out.println(" - " + agent.getNom() + " " + agent.getPrenom() + " " + agent.getEmail()
           + " " + agent.getSiret() + " " + agent.getVehicules());
@@ -141,58 +214,62 @@ public class TestUserStories {
 
       List<Critere> criteresA = Arrays.asList(new Critere("Professionalisme", 5.0));
 
-      Location locationNoteTest = locationService.findLocationById(66L);
-      NoteVehicule noteVehicule = noteService.noterVehicule(loueurService.findById(4L),
+      Location locationNoteTest = locationService.findLocationById(idLocation66);
+      NoteVehicule noteVehicule = noteService.noterVehicule(loueurService.findById(idLoueur4),
           locationNoteTest.getVehicule(), criteresV);
-      NoteAgent noteAgent =
-          noteService.noterAgent(loueurService.findById(4L), agentService.findById(4L), criteresA);
+      NoteAgent noteAgent = noteService.noterAgent(loueurService.findById(idLoueur4),
+          agentService.findById(idAgent4), criteresA);
       System.out.println("Note du véhicule: " + noteVehicule.getNoteMoyenne());
       System.out.println("Note de l'agent: " + noteAgent.getNoteMoyenne());
 
       // US.L.4 Je veux pouvoir contacter un agent, ayant conclu un contrat avec lui ou non, par un
       // service de messagerie interne à la plateforme. (2)
-      messagerieService.envoyerMessage(loueurService.findById(4L), agentService.findById(1L),
-          "Bonjour, je voudrais louer votre véhicule");
-      List<Message> messages = messagerieService.getMessagesUtilisateur(agentService.findById(4L));
+      messagerieService.envoyerMessage(loueurService.findById(idLoueur4),
+          agentService.findById(idAgent1), "Bonjour, je voudrais louer votre véhicule");
+      List<Message> messages =
+          messagerieService.getMessagesUtilisateur(agentService.findById(idAgent4));
       for (Message message : messages) {
         System.out.println("Message: " + message.getContenu() + " " + message.getDateEnvoi());
       }
       // US.L.5 Je veux pouvoir contacter un autre loueur par l’intermédiaire de la plateforme. (1)
-      messagerieService.envoyerMessage(loueurService.findById(4L), loueurService.findById(1L),
+      messagerieService.envoyerMessage(loueurService.findById(idLoueur4),
+          loueurService.findById(idLoueur1),
           "Bonjour, je voudrais savoir si vous avez déjà loué un véhicule chez Olivier Bertrand ?");
       List<Message> messages2 =
-          messagerieService.getMessagesUtilisateur(loueurService.findById(4L));
+          messagerieService.getMessagesUtilisateur(loueurService.findById(idLoueur4));
       for (Message message : messages2) {
         System.out.println("Message: " + message.getContenu() + " " + message.getDateEnvoi());
       }
 
       // US.L.6 Je veux pouvoir consulter mon profil, y changer des informations, voir mes
       // précédentes locations. (1)
-      LoueurDTO loueurProfile = loueurService.getLoueurProfile(loueurService.findById(4L));
+      LoueurDTO loueurProfile = loueurService.getLoueurProfile(loueurService.findById(idLoueur4));
       System.out.println("Profil de l'utilisateur: ");
       System.out.println(" - " + loueurProfile.getNom() + " " + loueurProfile.getPrenom() + " "
           + loueurProfile.getNom() + " " + loueurProfile.getEmail());
 
       System.out.println(" - Locations précédentes: ");
       for (LocationDTO location : loueurService
-          .getOldLocationsForLoueur(loueurService.findById(4L))) {
+          .getOldLocationsForLoueur(loueurService.findById(idLoueur4))) {
         System.out.println("   - " + location.getDateDebut() + " " + location.getDateFin() + " "
             + location.getLieuDepot() + " " + location.getVehicule().getMarque() + " "
             + location.getVehicule().getModele() + " " + location.getVehicule().getCouleur() + " "
             + location.getVehicule().getVille() + " " + location.getVehicule().getPrixJ());
       }
 
-      loueurService.updateLoueurNom(loueurService.findById(4L), "Dupont");
-      loueurService.updateLoueurPrenom(loueurService.findById(4L), "Jean");
+      loueurService.updateLoueurNom(loueurService.findById(idLoueur4), "Dupont");
+      loueurService.updateLoueurPrenom(loueurService.findById(idLoueur4), "Jean");
 
 
       // US.A.1 Je veux pouvoir ajouter, modifier ou supprimer les véhicules mis à disposition. (3)
       Vehicule vehicule = vehiculeService.createVehicule(TypeV.voiture, "Audi", "Q3", "noire",
-          "Toulouse", 100.0, agentService.findById(4L));
+          "Toulouse", 100.0, agentService.findById(idAgent4));
       System.out.println("Véhicule créé: " + vehicule.getModele());
 
-      vehiculeService.updateVehiculeMarque(agentService.findById(4L), vehicule.getId(), "Mercedes");
-      vehiculeService.updateVehiculeModele(agentService.findById(4L), vehicule.getId(), "Classe C");
+      vehiculeService.updateVehiculeMarque(agentService.findById(idAgent4), vehicule.getId(),
+          "Mercedes");
+      vehiculeService.updateVehiculeModele(agentService.findById(idAgent4), vehicule.getId(),
+          "Classe C");
       System.out.println(
           "Véhicule modifié: " + vehiculeService.findVehiculeById(vehicule.getId()).getModele());
 
@@ -202,7 +279,7 @@ public class TestUserStories {
 
 
       // US.A.2 Je veux pouvoir consulter l’historique de chaque véhicule mis à disposition. (1)
-      Vehicule vehiculeHistory = vehiculeService.findVehiculeById(1L);
+      Vehicule vehiculeHistory = vehiculeService.findVehiculeById(idVehicule1);
       List<LocationDTO> locations =
           locationService.getPreviousLocationsForVehicule(vehiculeHistory.getId());
       for (LocationDTO location : locations) {
@@ -213,9 +290,16 @@ public class TestUserStories {
       }
 
       // US.A.3 Je veux pouvoir contracter ou annuler des options payantes. (3)
-      Agent agentContractTest = agentService.findByEmail("asmith@example.com");
-      SouscriptionOption souscriptionOption =
-          souscriptionOptionService.souscrireOption(agentContractTest.getIdU(), 1L, 1, true);
+      Agent agentContractTest = agentService.findById(idAgent1);
+      // Création d'une option pour le test
+      SouscriptionOptionRepository souscriptionOptionRepository =
+          new SouscriptionOptionRepository();
+      Options optionTest = new Options("Option Premium", 29.99);
+      optionTest = souscriptionOptionRepository.saveOption(optionTest);
+      System.out.println("✓ Option créée avec ID: " + optionTest.getId());
+
+      SouscriptionOption souscriptionOption = souscriptionOptionService
+          .souscrireOption(agentContractTest.getIdU(), optionTest.getId(), 1, true);
       souscriptionOptionService.annulerSouscription(souscriptionOption.getId());
       // AJOUTER FONCTIONS POUR GET OPTIONS D'UN UTILISATEUR
 
@@ -225,11 +309,14 @@ public class TestUserStories {
 
       // US.A.5 Je veux pouvoir envoyer un message à un loueur ou à un agent par la messagerie
       // interne (1)
-      messagerieService.envoyerMessage(agentService.findById(4L), agentService.findById(1L),
+      messagerieService.envoyerMessage(agentService.findById(idAgent4),
+          agentService.findById(idAgent1),
           "Bonjour, je voudrais savoir si Bertrand est un loueur fiable");
-      messagerieService.envoyerMessage(agentService.findById(4L), loueurService.findById(1L),
+      messagerieService.envoyerMessage(agentService.findById(idAgent4),
+          loueurService.findById(idLoueur1),
           "Pas de problème pour vous louer du 17 decembre au 20 decembre");
-      List<Message> messages3 = messagerieService.getMessagesUtilisateur(agentService.findById(4L));
+      List<Message> messages3 =
+          messagerieService.getMessagesUtilisateur(agentService.findById(idAgent4));
       for (Message message : messages3) {
         System.out.println("Message: " + message.getContenu() + " " + message.getDateEnvoi());
       }
@@ -241,13 +328,13 @@ public class TestUserStories {
       // US.L.9
       // Gère le parrainage d'un nouveau loueur. Si le filleul effectue au moins une location,
       // le parrain reçoit un crédit utilisable pour ses futures locations.
-      Loueur loueurParrainage = loueurService.findById(1L);
-      Loueur loueurFilleul = loueurService.findById(2L);
+      Loueur loueurParrainage = loueurService.findById(idLoueur1);
+      Loueur loueurFilleul = loueurService.findById(idLoueur2);
       Parrainage parrainage = parrainageService.parrainer(loueurParrainage, loueurFilleul);
       System.out.println("Parrainage créé: " + parrainage.getId());
-      Location location =
-          locationService.creerLocation(LocalDateTime.now(), LocalDateTime.now().plusDays(10), null,
-              vehiculeService.findVehiculeById(1L), loueurFilleul);
+      Location location = locationService.creerLocation(LocalDateTime.now().plusDays(39),
+          LocalDateTime.now().plusDays(45), vehiculeService.findVehiculeById(idVehicule1),
+          loueurFilleul);
 
       Crédit credit = creditService.getCredit(loueurParrainage.getIdU());
       System.out.println("Crédit: " + credit.getCredit());
@@ -268,10 +355,10 @@ public class TestUserStories {
       // lorsque la location dépasse une certaine durée.
       Location locationLLD =
           locationService.creerLocation(LocalDateTime.now(), LocalDateTime.now().plusDays(10),
-              vehiculeService.findVehiculeById(136L), loueurService.findById(4L));
+              vehiculeService.findVehiculeById(idVehicule136), loueurService.findById(idLoueur4));
       Location locationNormale =
           locationService.creerLocation(LocalDateTime.now(), LocalDateTime.now().plusDays(5),
-              vehiculeService.findVehiculeById(84L), loueurService.findById(1L));
+              vehiculeService.findVehiculeById(idVehicule84), loueurService.findById(idLoueur1));
       System.out.println("Prix location LLD: " + locationService.getPrixLocation(locationLLD));
       System.out
           .println("Prix location normale: " + locationService.getPrixLocation(locationNormale));
@@ -279,7 +366,7 @@ public class TestUserStories {
       // US.A.8
       // Permet à l'agent de saisir et mettre à jour la date et le statut
       // du dernier contrôle technique du véhicule.
-      Vehicule vehiculeControlTest = vehiculeService.findVehiculeById(136L);
+      Vehicule vehiculeControlTest = vehiculeService.findVehiculeById(idVehicule136);
       controlTechniqueService.enregistrerNouveauControle(vehiculeControlTest.getId(),
           LocalDate.now(), 10000, "Passé", "Aucun commentaire");
       System.out.println("Date dernier contrôle: "
@@ -344,15 +431,15 @@ public class TestUserStories {
       // US.A.15
       // Gère le parrainage d'un nouvel agent. Le parrain reçoit des crédits pour options payantes
       // si le filleul met un véhicule en ligne et que celui-ci est loué au moins une fois.
-      Agent agentParrainage = agentService.findById(4L);
-      Agent agentFilleul = agentService.findById(31L);
+      Agent agentParrainage = agentService.findById(idAgent4);
+      Agent agentFilleul = agentService.findById(idAgent31);
       Parrainage parrainageAgent = parrainageService.parrainer(agentParrainage, agentFilleul);
       System.out.println("Parrainage agent créé: " + parrainageAgent.getId());
 
-      Vehicule vehiculeFilleul = vehiculeService.findVehiculeById(35L);
+      Vehicule vehiculeFilleul = vehiculeService.findVehiculeById(idVehicule35);
       vehiculeService.createDisponibilite(agentFilleul, vehiculeFilleul.getId(), LocalDate.now(),
           LocalDate.now().plusDays(11));
-      locationService.creerLocation(LocalDateTime.now(), LocalDateTime.now().plusDays(10), null,
+      locationService.creerLocation(LocalDateTime.now(), LocalDateTime.now().plusDays(10),
           vehiculeFilleul, loueurFilleul);
       System.out.println("Location créée: " + location.getId());
 
