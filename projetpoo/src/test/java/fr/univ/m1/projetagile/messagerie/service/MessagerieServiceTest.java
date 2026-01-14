@@ -38,7 +38,7 @@ class MessagerieServiceTest {
     loueur = new Loueur("Doe", "John", "john@example.com", "pass");
     loueur.setIdU(1L);
 
-    agent = new AgentParticulier("Smith", "Alice", "alice@example.com", "pass", "0612345678");
+    agent = new AgentParticulier("Smith", "Alice", "alice@example.com", "pass");
     agent.setIdU(2L);
   }
 
@@ -107,8 +107,7 @@ class MessagerieServiceTest {
     @DisplayName("Should throw exception when destinataire has no ID")
     void shouldThrowExceptionWhenDestinataireHasNoId() {
       // Given
-      AgentParticulier newAgent =
-          new AgentParticulier("New", "Agent", "new@test.com", "pass", "0601");
+      AgentParticulier newAgent = new AgentParticulier("New", "Agent", "new@test.com", "pass");
       // No ID set
 
       // When/Then

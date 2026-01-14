@@ -23,8 +23,7 @@ class MessageTest {
     expediteur = new Loueur("Doe", "John", "john.doe@example.com", "password123");
     expediteur.setIdU(1L);
 
-    destinataire = new AgentParticulier("Smith", "Alice", "alice.smith@example.com", "password456",
-        "0612345678");
+    destinataire = new AgentParticulier("Smith", "Alice", "alice.smith@example.com", "password456");
     destinataire.setIdU(2L);
   }
 
@@ -254,11 +253,9 @@ class MessageTest {
     @DisplayName("Should handle message between two agents")
     void shouldHandleMessageBetweenTwoAgents() {
       // Given
-      AgentParticulier agent1 =
-          new AgentParticulier("Agent1", "Test", "agent1@test.com", "pass", "0601");
+      AgentParticulier agent1 = new AgentParticulier("Agent1", "Test", "agent1@test.com", "pass");
       agent1.setIdU(10L);
-      AgentParticulier agent2 =
-          new AgentParticulier("Agent2", "Test", "agent2@test.com", "pass", "0602");
+      AgentParticulier agent2 = new AgentParticulier("Agent2", "Test", "agent2@test.com", "pass");
       agent2.setIdU(20L);
 
       // When
