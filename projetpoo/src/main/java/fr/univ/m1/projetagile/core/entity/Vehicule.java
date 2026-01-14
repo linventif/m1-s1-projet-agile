@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import fr.univ.m1.projetagile.controleTechnique.entity.ControleTechnique;
-import fr.univ.m1.projetagile.entretienVehicule.entity.EntretienVehicule;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import fr.univ.m1.projetagile.enums.TypeV;
 import jakarta.persistence.CascadeType;
@@ -60,9 +59,6 @@ public class Vehicule {
 
   @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL)
   private List<Location> locations = new ArrayList<>();
-
-  @OneToMany(mappedBy = "vehicule", cascade = CascadeType.ALL)
-  private List<EntretienVehicule> entretienVehicules = new ArrayList<>();
 
   private boolean disponible = true;
 
@@ -189,10 +185,6 @@ public class Vehicule {
     return Collections.unmodifiableList(locations);
   }
 
-  public List<EntretienVehicule> getEntretienVehicules() {
-    return Collections.unmodifiableList(entretienVehicules);
-  }
-
   // Méthodes selon UML
   public List<Disponibilite> calculerDisponibilites() {
     // À implémenter selon la logique métier
@@ -223,12 +215,6 @@ public class Vehicule {
       }
     }
     return true;
-  }
-
-  public Double calculerNote() {
-    // Calcule la note moyenne du véhicule
-    // TODO: Récupérer toutes les NoteV pour ce véhicule et calculer la moyenne
-    return 0.0; // Placeholder
   }
 
   public List<Location> getHistoriqueLocations() {

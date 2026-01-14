@@ -10,6 +10,7 @@ import fr.univ.m1.projetagile.core.entity.Loueur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.LoueurRepository;
 import fr.univ.m1.projetagile.enums.StatutLocation;
+import fr.univ.m1.projetagile.notes.service.NoteService;
 
 /**
  * Service métier pour la gestion des loueurs Fournit des méthodes pour créer, récupérer et gérer
@@ -17,9 +18,16 @@ import fr.univ.m1.projetagile.enums.StatutLocation;
  */
 public class LoueurService extends UtilisateurService<Loueur, LoueurRepository> {
 
+  private final NoteService noteService;
 
   public LoueurService(LoueurRepository loueurRepository) {
     super(loueurRepository);
+    this.noteService = new NoteService();
+  }
+
+  public LoueurService(LoueurRepository loueurRepository, NoteService noteService) {
+    super(loueurRepository);
+    this.noteService = noteService;
   }
 
   /**
@@ -131,7 +139,7 @@ public class LoueurService extends UtilisateurService<Loueur, LoueurRepository> 
     dto.setEmail(loueur.getEmail());
     dto.setNom(loueur.getNom());
     dto.setPrenom(loueur.getPrenom());
-    dto.setNoteMoyenne(loueur.calculerNote());
+    dto.setNoteMoyenne(noteService.getMoyenneLoueur(loueur));
 
     // Récupérer les locations courantes et anciennes en utilisant les méthodes dédiées
     dto.setCurrentLocations(getCurrentLocationsForLoueur(loueur));
@@ -167,7 +175,7 @@ public class LoueurService extends UtilisateurService<Loueur, LoueurRepository> 
       vehiculeDTO.setVille(vehicule.getVille());
       vehiculeDTO.setPrixJ(vehicule.getPrixJ());
       vehiculeDTO.setDisponible(vehicule.isDisponible());
-      vehiculeDTO.setNoteMoyenne(vehicule.calculerNote());
+      vehiculeDTO.setNoteMoyenne(noteService.getMoyenneVehicule(vehicule));
 
       dto.setVehicule(vehiculeDTO);
     }

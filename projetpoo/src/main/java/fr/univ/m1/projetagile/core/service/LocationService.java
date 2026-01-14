@@ -18,6 +18,7 @@ import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
 import fr.univ.m1.projetagile.enums.StatutLocation;
+import fr.univ.m1.projetagile.notes.service.NoteService;
 import fr.univ.m1.projetagile.parking.entity.Parking;
 import fr.univ.m1.projetagile.parrainage.entity.Parrainage;
 import fr.univ.m1.projetagile.parrainage.service.CreditService;
@@ -33,6 +34,7 @@ public class LocationService {
   private final ParrainageService parrainageService;
   private final CreditService creditService;
   private final AssuranceService assuranceService;
+  private final NoteService noteService;
 
   // ==================== #100 : règles commission ====================
   private static final double COMMISSION_NORMALE = 0.10; // 10%
@@ -43,6 +45,7 @@ public class LocationService {
     this.parrainageService = new ParrainageService();
     this.creditService = new CreditService();
     this.assuranceService = new AssuranceService();
+    this.noteService = new NoteService();
   }
 
   public LocationService(LocationRepository locationRepository, ParrainageService parrainageService,
@@ -51,6 +54,7 @@ public class LocationService {
     this.parrainageService = parrainageService;
     this.creditService = creditService;
     this.assuranceService = new AssuranceService();
+    this.noteService = new NoteService();
   }
 
   public LocationService(LocationRepository locationRepository, ParrainageService parrainageService,
@@ -59,6 +63,16 @@ public class LocationService {
     this.parrainageService = parrainageService;
     this.creditService = creditService;
     this.assuranceService = assuranceService;
+    this.noteService = new NoteService();
+  }
+
+  public LocationService(LocationRepository locationRepository, ParrainageService parrainageService,
+      CreditService creditService, AssuranceService assuranceService, NoteService noteService) {
+    this.locationRepository = locationRepository;
+    this.parrainageService = parrainageService;
+    this.creditService = creditService;
+    this.assuranceService = assuranceService;
+    this.noteService = noteService;
   }
 
   /**
@@ -555,7 +569,7 @@ public class LocationService {
       vehiculeDTO.setVille(vehicule.getVille());
       vehiculeDTO.setPrixJ(vehicule.getPrixJ());
       vehiculeDTO.setDisponible(vehicule.isDisponible());
-      vehiculeDTO.setNoteMoyenne(vehicule.calculerNote());
+      vehiculeDTO.setNoteMoyenne(noteService.getMoyenneVehicule(vehicule));
 
       dto.setVehicule(vehiculeDTO);
     }

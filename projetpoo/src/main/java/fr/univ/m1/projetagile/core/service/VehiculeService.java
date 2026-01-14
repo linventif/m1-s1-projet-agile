@@ -13,6 +13,7 @@ import fr.univ.m1.projetagile.core.entity.Ville;
 import fr.univ.m1.projetagile.core.persistence.DisponibiliteRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.enums.TypeV;
+import fr.univ.m1.projetagile.notes.service.NoteService;
 
 /**
  * Service métier responsable de la gestion des véhicules.
@@ -33,16 +34,26 @@ public class VehiculeService {
 
   private VehiculeRepository vehiculeRepository;
   private DisponibiliteRepository disponibiliteRepository;
+  private NoteService noteService;
 
   public VehiculeService(VehiculeRepository vehiculeRepository) {
     this.vehiculeRepository = vehiculeRepository;
     this.disponibiliteRepository = new DisponibiliteRepository();
+    this.noteService = new NoteService();
   }
 
   public VehiculeService(VehiculeRepository vehiculeRepository,
       DisponibiliteRepository disponibiliteRepository) {
     this.vehiculeRepository = vehiculeRepository;
     this.disponibiliteRepository = disponibiliteRepository;
+    this.noteService = new NoteService();
+  }
+
+  public VehiculeService(VehiculeRepository vehiculeRepository,
+      DisponibiliteRepository disponibiliteRepository, NoteService noteService) {
+    this.vehiculeRepository = vehiculeRepository;
+    this.disponibiliteRepository = disponibiliteRepository;
+    this.noteService = noteService;
   }
 
   /**
@@ -406,10 +417,8 @@ public class VehiculeService {
       dto.setDisponible(vehicule.isDisponible());
 
       // Note moyenne calculée
-      // TODO : Récupérer toutes les NoteV pour ce véhicule et calculer la moyenne
-      // A FAIRE DANS UN PACKAGE NOTES
       try {
-        dto.setNoteMoyenne(vehicule.calculerNote());
+        dto.setNoteMoyenne(noteService.getMoyenneVehicule(vehicule));
       } catch (Exception e) {
         dto.setNoteMoyenne(0.0); // Default value if calculation fails
       }

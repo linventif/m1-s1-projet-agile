@@ -3,8 +3,6 @@ package fr.univ.m1.projetagile.core.entity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import fr.univ.m1.projetagile.assurance.entity.Assurance;
-import fr.univ.m1.projetagile.entretienVehicule.entity.Entretien;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import fr.univ.m1.projetagile.enums.TypeAgent;
 import fr.univ.m1.projetagile.options.entity.Options;
@@ -135,37 +133,6 @@ public abstract class Agent extends Utilisateur {
       if (prix != null)
         vehicule.setPrixJ(prix);
     }
-  }
-
-  public void accepterContratManuel(Location location) {
-    // Accepte un contrat de location manuellement
-    if (location != null) {
-      location.setStatut(StatutLocation.ACCEPTE);
-    }
-  }
-
-  public void refuserContratManuel(Location location) {
-    // Refuse un contrat de location manuellement
-    if (location != null) {
-      location.setStatut(StatutLocation.ANNULE);
-    }
-  }
-
-  public void noterLoueur(Loueur loueur, Double note1, Double note2, Double note3) {
-    // Permet à l'agent de noter un loueur
-    // TODO: Créer une NoteL et la persister
-    // NoteL note = new NoteL(note1, note2, note3, this, loueur);
-  }
-
-  public void proposerAssurance(Location location, Assurance assurance) {
-    // Propose une assurance pour une location
-    // TODO: Implémenter la logique de proposition d'assurance
-  }
-
-  public void demanderEntretien(Vehicule vehicule, Entretien entretien) {
-    // Demande un entretien pour un véhicule
-    // TODO: Créer un EntretienVehicule et le persister
-    // EntretienVehicule ev = new EntretienVehicule(false, vehicule, entretien);
   }
 
   public Double calculerNote() {
