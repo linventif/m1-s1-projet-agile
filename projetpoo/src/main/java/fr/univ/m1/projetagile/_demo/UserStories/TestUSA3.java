@@ -2,11 +2,11 @@ package fr.univ.m1.projetagile._demo.UserStories;
 
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.Agent;
-import fr.univ.m1.projetagile.core.entity.Options;
-import fr.univ.m1.projetagile.core.entity.SouscriptionOption;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
 import fr.univ.m1.projetagile.core.service.AgentService;
-import fr.univ.m1.projetagile.core.service.SouscriptionOptionService;
+import fr.univ.m1.projetagile.options.entity.Options;
+import fr.univ.m1.projetagile.options.entity.SouscriptionOption;
+import fr.univ.m1.projetagile.options.service.SouscriptionOptionService;
 
 /**
  * US.A.3 Je veux pouvoir contracter ou annuler des options payantes. (3)
@@ -41,8 +41,8 @@ public class TestUSA3 {
         System.out
             .println("✓ Option créée: " + option.getNomOption() + " - " + option.getPrix() + "€");
       } else {
-        System.out.println(
-            "✓ Option trouvée: " + option.getNomOption() + " - " + option.getPrix() + "€");
+        System.out
+            .println("✓ Option trouvée: " + option.getNomOption() + " - " + option.getPrix() + "€");
       }
 
       // Souscrire à l'option

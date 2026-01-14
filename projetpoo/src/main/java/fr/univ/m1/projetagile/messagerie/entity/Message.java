@@ -238,40 +238,43 @@ public class Message {
   }
 
   /**
-   * Méthode utilitaire pour trouver un utilisateur par son ID.
-   * Recherche parmi tous les types concrets d'utilisateurs.
+   * Méthode utilitaire pour trouver un utilisateur par son ID. Recherche parmi tous les types
+   * concrets d'utilisateurs.
    *
    * @param utilisateurId l'ID de l'utilisateur à rechercher
    * @return l'utilisateur trouvé, ou null si non trouvé
    */
   private Utilisateur findUtilisateurById(Long utilisateurId) {
     jakarta.persistence.EntityManager em = DatabaseConnection.getEntityManager();
-    
+
     // Essayer de trouver parmi les Agents (inclut AgentParticulier et AgentProfessionnel)
     try {
-      Utilisateur user = em.createQuery(
-          "SELECT a FROM Agent a WHERE a.idU = :id", 
-          fr.univ.m1.projetagile.core.entity.Agent.class)
-          .setParameter("id", utilisateurId)
-          .getResultList()
-          .stream()
-          .findFirst()
-          .orElse(null);
-      if (user != null) return user;
-    } catch (Exception ignored) {}
-    
+      Utilisateur user = em
+          .createQuery("SELECT a FROM Agent a WHERE a.idU = :id",
+              fr.univ.m1.projetagile.core.entity.Agent.class)
+          .setParameter("id", utilisateurId).getResultList().stream().findFirst().orElse(null);
+      if (user != null)
+        return user;
+    } catch (Exception ignored) {
+    }
+
     // Essayer de trouver parmi les Loueurs
     try {
       Utilisateur user = em.find(fr.univ.m1.projetagile.core.entity.Loueur.class, utilisateurId);
-      if (user != null) return user;
-    } catch (Exception ignored) {}
-    
+      if (user != null)
+        return user;
+    } catch (Exception ignored) {
+    }
+
     // Essayer de trouver parmi les Entretiens
     try {
-      Utilisateur user = em.find(fr.univ.m1.projetagile.core.entity.Entretien.class, utilisateurId);
-      if (user != null) return user;
-    } catch (Exception ignored) {}
-    
+      Utilisateur user =
+          em.find(fr.univ.m1.projetagile.entretienVehicule.entity.Entretien.class, utilisateurId);
+      if (user != null)
+        return user;
+    } catch (Exception ignored) {
+    }
+
     return null;
   }
 

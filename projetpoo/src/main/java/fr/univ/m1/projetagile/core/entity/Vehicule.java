@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import fr.univ.m1.projetagile.controleTechnique.entity.ControleTechnique;
+import fr.univ.m1.projetagile.entretienVehicule.entity.EntretienVehicule;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import fr.univ.m1.projetagile.enums.TypeV;
 import jakarta.persistence.CascadeType;

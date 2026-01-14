@@ -4,12 +4,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import fr.univ.m1.projetagile.controleTechnique.entity.ControleTechnique;
+import fr.univ.m1.projetagile.controleTechnique.service.ControlTechniqueService;
 import fr.univ.m1.projetagile.core.dto.AgentDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.AgentParticulier;
 import fr.univ.m1.projetagile.core.entity.AgentProfessionnel;
-import fr.univ.m1.projetagile.core.entity.ControleTechnique;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
@@ -225,8 +226,8 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   // ==================== Technical Control Methods ====================
 
   /**
-   * Verifies technical controls for all vehicles belonging to an agent.
-   * Corresponds to US.A.9: reminder for technical control for all agent's vehicles
+   * Verifies technical controls for all vehicles belonging to an agent. Corresponds to US.A.9:
+   * reminder for technical control for all agent's vehicles
    *
    * @param agentId the agent identifier
    * @return a report string with technical control status for all vehicles
@@ -344,8 +345,7 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   }
 
   /**
-   * Registers a technical control for a vehicle.
-   * Corresponds to US.A.8
+   * Registers a technical control for a vehicle. Corresponds to US.A.8
    *
    * @param vehiculeId the vehicle identifier
    * @param dateControle the control date
@@ -394,8 +394,7 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   }
 
   /**
-   * Calculates the date of the next technical control.
-   * Corresponds to US.A.10
+   * Calculates the date of the next technical control. Corresponds to US.A.10
    *
    * @param vehiculeId the vehicle identifier
    * @return the date of the next technical control, or null if cannot be calculated
@@ -427,8 +426,7 @@ public class AgentService extends UtilisateurService<Agent, AgentRepository> {
   }
 
   /**
-   * Retrieves maintenance recommendations for a vehicle based on mileage.
-   * Corresponds to US.A.11
+   * Retrieves maintenance recommendations for a vehicle based on mileage. Corresponds to US.A.11
    *
    * @param vehiculeId the vehicle identifier
    * @return a list of maintenance recommendations

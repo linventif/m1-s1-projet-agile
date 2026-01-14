@@ -6,7 +6,6 @@ import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
-import fr.univ.m1.projetagile.core.entity.Options;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
 import fr.univ.m1.projetagile.core.persistence.LocationRepository;
@@ -15,9 +14,10 @@ import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.core.service.AgentService;
 import fr.univ.m1.projetagile.core.service.LocationService;
 import fr.univ.m1.projetagile.core.service.LoueurService;
-import fr.univ.m1.projetagile.core.service.SouscriptionOptionService;
 import fr.univ.m1.projetagile.core.service.VehiculeService;
 import fr.univ.m1.projetagile.enums.TypeV;
+import fr.univ.m1.projetagile.options.entity.Options;
+import fr.univ.m1.projetagile.options.service.SouscriptionOptionService;
 
 /**
  * US.A.4 Si option, je veux pouvoir accepter manuellement les contrats de location pré signé par un

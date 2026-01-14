@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepository;
 import fr.univ.m1.projetagile.VerificationLocation.service.VerificationService;
+import fr.univ.m1.projetagile.assurance.entity.Assurance;
+import fr.univ.m1.projetagile.assurance.service.AssuranceService;
 import fr.univ.m1.projetagile.core.dto.LocationDTO;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
 import fr.univ.m1.projetagile.core.entity.Agent;
-import fr.univ.m1.projetagile.core.entity.Assurance;
 import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.Loueur;
-import fr.univ.m1.projetagile.core.entity.Options;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.interfaces.LieuRestitution;
@@ -115,22 +115,22 @@ public class LocationService {
     }
 
     Location location = new Location(dateDebut, dateFin, lieuDepot, vehicule, loueur);
-    
+
     // Vérifier si le propriétaire a l'option "Accepter les contrats manuellement"
     Agent proprietaire = vehicule.getProprietaire();
     if (proprietaire == null) {
       throw new IllegalStateException("Le véhicule n'a pas de propriétaire associé.");
     }
-    
+
     boolean acceptationManuelle = proprietaire.getOptionsActives().stream()
         .anyMatch(so -> so.getOption() != null && so.getOption().getNomOption() != null
             && so.getOption().getNomOption().equals("Accepter les contrats manuellement"));
-    
+
     // Si le propriétaire a l'option, le statut reste EN_ATTENTE, sinon on l'accepte automatiquement
     if (!acceptationManuelle) {
       location.setStatut(StatutLocation.ACCEPTE);
     }
-    
+
     Location locationSauvegardee = locationRepository.save(location);
 
     // Vérifier et gérer le parrainage du loueur
@@ -233,9 +233,9 @@ public class LocationService {
   }
 
   /**
-   * Crée et enregistre une nouvelle location avec souscription d'assurance.
-   * Cette méthode utilise la méthode creerLocation existante et crée également
-   * un objet SouscriptionAssurance lié à la location via AssuranceService.
+   * Crée et enregistre une nouvelle location avec souscription d'assurance. Cette méthode utilise
+   * la méthode creerLocation existante et crée également un objet SouscriptionAssurance lié à la
+   * location via AssuranceService.
    *
    * @param dateDebut date et heure de début souhaitées
    * @param dateFin date et heure de fin souhaitées
@@ -250,7 +250,7 @@ public class LocationService {
   public Location creerLocation(LocalDateTime dateDebut, LocalDateTime dateFin,
       LieuRestitution lieuDepot, Vehicule vehicule, Loueur loueur, Assurance assurance,
       List<String> options) {
-    
+
     if (assurance == null) {
       throw new IllegalArgumentException("L'assurance doit être spécifiée.");
     }
@@ -413,7 +413,8 @@ public class LocationService {
               + "Statut actuel : " + location.getStatut());
     }
 
-    // Si le délai a expiré, annuler automatiquement (même comportement que accepterLocationManuellement)
+    // Si le délai a expiré, annuler automatiquement (même comportement que
+    // accepterLocationManuellement)
     if (location.delaiAcceptationExpire()) {
       location.setStatut(StatutLocation.ANNULE);
       locationRepository.save(location);
@@ -614,8 +615,8 @@ public class LocationService {
 
   /**
    * Récupère toutes les locations en attente d'acceptation pour un agent donné. Ces locations
-   * concernent les véhicules dont l'agent est propriétaire. Les locations dont le délai d'acceptation
-   * a expiré sont automatiquement annulées.
+   * concernent les véhicules dont l'agent est propriétaire. Les locations dont le délai
+   * d'acceptation a expiré sont automatiquement annulées.
    *
    * @param agentId l'identifiant de l'agent
    * @return la liste des LocationDTO en attente d'acceptation pour cet agent
@@ -627,8 +628,7 @@ public class LocationService {
     }
 
     // Récupérer les locations en attente depuis le repository
-    List<Location> locations =
-        locationRepository.findPendingLocationsByAgentId(agentId);
+    List<Location> locations = locationRepository.findPendingLocationsByAgentId(agentId);
 
     List<LocationDTO> pendingLocations = new ArrayList<>();
 

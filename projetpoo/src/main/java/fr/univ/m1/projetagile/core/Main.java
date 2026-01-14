@@ -1,9 +1,9 @@
 package fr.univ.m1.projetagile.core;
 
 import java.util.List;
-import fr.univ.m1.projetagile.core.entity.Assurance;
-import fr.univ.m1.projetagile.core.entity.GrilleTarif;
-import fr.univ.m1.projetagile.core.service.AssuranceService;
+import fr.univ.m1.projetagile.assurance.entity.Assurance;
+import fr.univ.m1.projetagile.assurance.entity.GrilleTarif;
+import fr.univ.m1.projetagile.assurance.service.AssuranceService;
 import fr.univ.m1.projetagile.enums.TypeV;
 import jakarta.persistence.EntityManager;
 

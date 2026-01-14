@@ -3,8 +3,12 @@ package fr.univ.m1.projetagile.core.entity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import fr.univ.m1.projetagile.assurance.entity.Assurance;
+import fr.univ.m1.projetagile.entretienVehicule.entity.Entretien;
 import fr.univ.m1.projetagile.enums.StatutLocation;
 import fr.univ.m1.projetagile.enums.TypeAgent;
+import fr.univ.m1.projetagile.options.entity.Options;
+import fr.univ.m1.projetagile.options.entity.SouscriptionOption;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
@@ -95,16 +99,16 @@ public abstract class Agent extends Utilisateur {
       return false;
     }
     // Récupérer les souscriptions via repository
-    fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository repo =
-        new fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository();
+    fr.univ.m1.projetagile.options.persistence.SouscriptionOptionRepository repo =
+        new fr.univ.m1.projetagile.options.persistence.SouscriptionOptionRepository();
     return repo.findByUtilisateur(this.getIdU()).stream()
         .anyMatch(so -> option.equals(so.getOption()));
   }
 
   public List<SouscriptionOption> getOptionsActives() {
     // Récupérer les souscriptions via repository
-    fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository repo =
-        new fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository();
+    fr.univ.m1.projetagile.options.persistence.SouscriptionOptionRepository repo =
+        new fr.univ.m1.projetagile.options.persistence.SouscriptionOptionRepository();
     return repo.findByUtilisateur(this.getIdU());
   }
 

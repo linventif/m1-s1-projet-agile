@@ -3,7 +3,7 @@ package fr.univ.m1.projetagile.commentaire.service;
 import java.util.List;
 import java.util.Optional;
 import fr.univ.m1.projetagile.commentaire.entity.Commentaire;
-import fr.univ.m1.projetagile.commentaire.persistent.CommentaireRepository;
+import fr.univ.m1.projetagile.commentaire.persistence.CommentaireRepository;
 import fr.univ.m1.projetagile.core.entity.Utilisateur;
 import jakarta.persistence.EntityManager;
 

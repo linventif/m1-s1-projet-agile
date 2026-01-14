@@ -1,13 +1,13 @@
 package fr.univ.m1.projetagile._demo.UserStories;
 
 import java.time.LocalDate;
+import fr.univ.m1.projetagile.controleTechnique.service.ControlTechniqueService;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.entity.Agent;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.core.persistence.AgentRepository;
 import fr.univ.m1.projetagile.core.persistence.VehiculeRepository;
 import fr.univ.m1.projetagile.core.service.AgentService;
-import fr.univ.m1.projetagile.core.service.ControlTechniqueService;
 import fr.univ.m1.projetagile.core.service.VehiculeService;
 import fr.univ.m1.projetagile.enums.TypeV;
 
@@ -30,8 +30,7 @@ public class TestUSA11 {
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
-            .createAgentParticulier("Bertrand", "Olivier", "obertrand@example.com",
-                "motdepasse123")
+            .createAgentParticulier("Bertrand", "Olivier", "obertrand@example.com", "motdepasse123")
             .getIdU();
         agent = agentService.findById(idAgent);
         System.out.println("✓ Agent créé avec ID: " + idAgent);
@@ -40,8 +39,7 @@ public class TestUSA11 {
       Vehicule vehicule = vehiculeService.findVehiculeById(1L);
       if (vehicule == null) {
         Long idVehicule = vehiculeService
-            .createVehicule(TypeV.voiture, "BMW", "Serie 3", "noire", "Nice", 80.0, agent)
-            .getId();
+            .createVehicule(TypeV.voiture, "BMW", "Serie 3", "noire", "Nice", 80.0, agent).getId();
         vehicule = vehiculeService.findVehiculeById(idVehicule);
         vehiculeService.createDisponibilite(agent, idVehicule, LocalDate.now(),
             LocalDate.now().plusDays(60));
@@ -49,14 +47,14 @@ public class TestUSA11 {
       }
 
       // Enregistrer un contrôle technique avec kilométrage
-      controlTechniqueService.enregistrerNouveauControle(vehicule.getId(), LocalDate.now(),
-          50000, "Passé", "Véhicule en bon état");
+      controlTechniqueService.enregistrerNouveauControle(vehicule.getId(), LocalDate.now(), 50000,
+          "Passé", "Véhicule en bon état");
 
       // Test US.A.11
       System.out.println("\n=== US.A.11: Recommandations d'entretien préventif ===");
       System.out.println("Recommandations basées sur le kilométrage:");
-      System.out.println(
-          controlTechniqueService.getRecommandationsEntretienParKilometrage(vehicule));
+      System.out
+          .println(controlTechniqueService.getRecommandationsEntretienParKilometrage(vehicule));
 
     } catch (Exception e) {
       System.err.println("✗ Erreur: " + e.getMessage());
