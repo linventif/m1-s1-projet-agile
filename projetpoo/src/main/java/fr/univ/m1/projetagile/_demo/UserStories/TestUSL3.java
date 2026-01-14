@@ -25,8 +25,8 @@ import fr.univ.m1.projetagile.notes.entity.NoteVehicule;
 import fr.univ.m1.projetagile.notes.service.NoteService;
 
 /**
- * US.L.3 Je veux pouvoir noter un véhicule que j'ai loué, selon certains critères, et noter
- * l'agent concerné. (2)
+ * US.L.3 Je veux pouvoir noter un véhicule que j'ai loué, selon certains critères, et noter l'agent
+ * concerné. (2)
  */
 public class TestUSL3 {
   public static void main(String[] args) {
@@ -53,22 +53,18 @@ public class TestUSL3 {
       Loueur loueur = loueurService.findById(1L);
       if (loueur == null) {
         Long idLoueur = loueurService
-            .createLoueur("Dubois", "Marie", "marie.dubois@example.com", "motdepasse123")
-            .getIdU();
+            .createLoueur("Dubois", "Marie", "marie.dubois@example.com", "motdepasse123").getIdU();
         loueur = loueurService.findById(idLoueur);
         System.out.println("✓ Loueur créé avec ID: " + idLoueur);
       }
 
-      Vehicule vehicule = vehiculeService.findVehiculeById(1L);
-      if (vehicule == null) {
-        Long idVehicule = vehiculeService
-            .createVehicule(TypeV.voiture, "Peugeot", "308", "blanche", "Paris", 50.0, agent)
-            .getId();
-        vehicule = vehiculeService.findVehiculeById(idVehicule);
-        vehiculeService.createDisponibilite(agent, idVehicule, LocalDate.now(),
-            LocalDate.now().plusDays(60));
-        System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
-      }
+      Long idVehicule = vehiculeService
+          .createVehicule(TypeV.voiture, "Peugeot", "308", "blanche", "Paris", 50.0, agent).getId();
+      Vehicule vehicule = vehiculeService.findVehiculeById(idVehicule);
+      vehiculeService.createDisponibilite(agent, idVehicule, LocalDate.now(),
+          LocalDate.now().plusDays(60));
+      System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
+
 
       // Create a completed location for testing
       Location location = locationService.creerLocation(LocalDateTime.now(),
@@ -78,17 +74,37 @@ public class TestUSL3 {
 
       // Test US.L.3
       System.out.println("\n=== US.L.3: Notation d'un véhicule et d'un agent ===");
-      List<Critere> criteresVehicule = Arrays.asList(new Critere("Propreté", 5.0),
-          new Critere("Rapidité", 5.0), new Critere("Communication", 5.0));
+      List<Critere> criteresVehicule = Arrays.asList(new Critere("Propreté", 2.0),
+          new Critere("Rapidité", 5.0), new Critere("Communication", 4.0));
 
-      List<Critere> criteresAgent = Arrays.asList(new Critere("Professionalisme", 5.0));
+      List<Critere> criteresAgent = Arrays.asList(new Critere("Professionalisme", 3.5));
 
       NoteVehicule noteVehicule =
           noteService.noterVehicule(loueur, location.getVehicule(), criteresVehicule);
       NoteAgent noteAgent = noteService.noterAgent(loueur, agent, criteresAgent);
 
-      System.out.println("Note du véhicule: " + noteVehicule.getNoteMoyenne());
-      System.out.println("Note de l'agent: " + noteAgent.getNoteMoyenne());
+      System.out
+          .println("✓ Note du véhicule enregistrée: " + noteVehicule.getNoteMoyenne() + "/10");
+      System.out.println("✓ Note de l'agent enregistrée: " + noteAgent.getNoteMoyenne() + "/10");
+
+      // Display average ratings from NoteService
+      System.out.println("\n=== Moyennes globales via NoteService ===");
+      Double moyenneVehicule = noteService.getMoyenneVehicule(vehicule);
+      Double moyenneAgent = noteService.getMoyenneAgent(agent);
+
+      System.out.println("Note moyenne du véhicule: "
+          + (moyenneVehicule != null ? String.format("%.2f", moyenneVehicule) + "/10"
+              : "Aucune note"));
+      System.out.println("Note moyenne de l'agent: "
+          + (moyenneAgent != null ? String.format("%.2f", moyenneAgent) + "/10" : "Aucune note"));
+
+      // // Display all notes for the vehicle and agent
+      // System.out.println("\n=== Historique des notes ===");
+      // List<NoteVehicule> notesVehicule = noteService.getNotesVehicule(vehicule);
+      // System.out.println("Nombre de notes pour le véhicule: " + notesVehicule.size());
+
+      // List<NoteAgent> notesAgent = noteService.getNotesAgent(agent);
+      // System.out.println("Nombre de notes pour l'agent: " + notesAgent.size());
 
     } catch (Exception e) {
       System.err.println("✗ Erreur: " + e.getMessage());

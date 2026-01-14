@@ -48,43 +48,48 @@ public class TestUSL6 {
       Loueur loueur = loueurService.findById(1L);
       if (loueur == null) {
         Long idLoueur = loueurService
-            .createLoueur("Dubois", "Marie", "marie.dubois@example.com", "motdepasse123")
-            .getIdU();
+            .createLoueur("Dubois", "Marie", "marie.dubois@example.com", "motdepasse123").getIdU();
         loueur = loueurService.findById(idLoueur);
         System.out.println("✓ Loueur créé avec ID: " + idLoueur);
       }
 
-      Vehicule vehicule = vehiculeService.findVehiculeById(1L);
-      if (vehicule == null) {
-        Long idVehicule = vehiculeService
-            .createVehicule(TypeV.voiture, "Peugeot", "308", "blanche", "Paris", 50.0, agent)
-            .getId();
-        vehicule = vehiculeService.findVehiculeById(idVehicule);
-        vehiculeService.createDisponibilite(agent, idVehicule, LocalDate.now(),
-            LocalDate.now().plusDays(60));
-        System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
-      }
+      Long idVehicule = vehiculeService
+          .createVehicule(TypeV.voiture, "Peugeot", "308", "blanche", "Paris", 50.0, agent).getId();
+      Vehicule vehicule = vehiculeService.findVehiculeById(idVehicule);
+      vehiculeService.createDisponibilite(agent, idVehicule, LocalDate.now(),
+          LocalDate.now().plusDays(60));
+      System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
+
 
       // Create a completed location for history
       Location location = locationService.creerLocation(LocalDateTime.now(),
           LocalDateTime.now().plusDays(5), vehicule, loueur);
       location.setStatut(StatutLocation.TERMINE);
-      System.out.println("✓ Location de test créée avec ID: " + location.getId());
+      
+      // Save the location with TERMINE status
+      LocationRepository locationRepository = new LocationRepository();
+      locationRepository.save(location);
+      System.out.println("✓ Location de test créée et terminée avec ID: " + location.getId());
 
       // Test US.L.6
       System.out.println("\n=== US.L.6: Consultation et modification du profil loueur ===");
       LoueurDTO loueurProfile = loueurService.getLoueurProfile(loueur);
-      System.out.println("Profil du loueur: ");
+      System.out.println("Profil actuel du loueur: ");
       System.out.println(" - Nom: " + loueurProfile.getNom());
       System.out.println(" - Prénom: " + loueurProfile.getPrenom());
       System.out.println(" - Email: " + loueurProfile.getEmail());
 
       System.out.println("\n - Locations précédentes: ");
-      for (LocationDTO loc : loueurService.getOldLocationsForLoueur(loueur)) {
-        System.out.println("   - Date début: " + loc.getDateDebut());
-        System.out.println("     Date fin: " + loc.getDateFin());
-        System.out.println("     Véhicule: " + loc.getVehicule().getMarque() + " "
-            + loc.getVehicule().getModele());
+      if (loueurService.getOldLocationsForLoueur(loueur).isEmpty()) {
+        System.out.println("   Aucune location terminée trouvée");
+      } else {
+        for (LocationDTO loc : loueurService.getOldLocationsForLoueur(loueur)) {
+          System.out.println("   - Date début: " + loc.getDateDebut());
+          System.out.println("     Date fin: " + loc.getDateFin());
+          System.out.println("     Véhicule: " + loc.getVehicule().getMarque() + " "
+              + loc.getVehicule().getModele());
+          System.out.println("     Statut: " + loc.getStatut());
+        }
       }
 
       // Modify profile

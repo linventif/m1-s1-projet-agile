@@ -1,6 +1,7 @@
 package fr.univ.m1.projetagile._demo.UserStories;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import fr.univ.m1.projetagile.core.DatabaseConnection;
 import fr.univ.m1.projetagile.core.dto.VehiculeDTO;
@@ -49,13 +50,33 @@ public class TestUSV1 {
       // Test US.V.1
       System.out.println("\n=== US.V.1: Consultation des véhicules disponibles ===");
       List<VehiculeDTO> vehicules = vehiculeService.getVehicules();
-      System.out.println("Vehicules disponibles: ");
+      System.out.println("Nombre de véhicules disponibles: " + vehicules.size());
 
       for (VehiculeDTO v : vehicules) {
-        System.out.println(" - " + v.getMarque() + " " + v.getModele() + " " + v.getCouleur() + " "
-            + v.getVille() + " " + v.getPrixJ() + "€/j" + " Note: " + v.getNoteMoyenne()
-            + " Disponibilités: " + v.getDatesDispo());
+        System.out.println("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        System.out.println("  " + v.getMarque() + " " + v.getModele() + " (" + v.getCouleur() + ")");
+        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        System.out.println("Lieu: " + v.getVille());
+        System.out.println("Prix: " + v.getPrixJ() + "€/jour");
+        System.out.println("Note moyenne: " + String.format("%.2f", v.getNoteMoyenne()) + "/10");
+        System.out.println("Disponible: " + (v.isDisponible() ? "✓ Oui" : "✗ Non"));
+        
+        System.out.println("\nPériodes de disponibilité:");
+        if (v.getDatesDispo() != null && !v.getDatesDispo().isEmpty()) {
+          for (int i = 0; i < v.getDatesDispo().size(); i++) {
+            LocalDate[] periode = v.getDatesDispo().get(i);
+            if (periode != null && periode.length == 2) {
+              long jours = ChronoUnit.DAYS.between(periode[0], periode[1]);
+              System.out.println("  " + (i + 1) + ". Du " + periode[0] + " au " + periode[1] 
+                  + " (" + jours + " jours)");
+            }
+          }
+        } else {
+          System.out.println("  Aucune période de disponibilité définie");
+        }
       }
+      
+      System.out.println("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     } catch (Exception e) {
       System.err.println("✗ Erreur: " + e.getMessage());

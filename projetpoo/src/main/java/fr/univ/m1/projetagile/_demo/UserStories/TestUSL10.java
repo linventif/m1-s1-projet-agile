@@ -50,22 +50,17 @@ public class TestUSL10 {
       Loueur loueur = loueurService.findById(1L);
       if (loueur == null) {
         Long idLoueur = loueurService
-            .createLoueur("Dubois", "Marie", "marie.dubois@example.com", "motdepasse123")
-            .getIdU();
+            .createLoueur("Dubois", "Marie", "marie.dubois@example.com", "motdepasse123").getIdU();
         loueur = loueurService.findById(idLoueur);
         System.out.println("✓ Loueur créé avec ID: " + idLoueur);
       }
 
-      Vehicule vehicule = vehiculeService.findVehiculeById(1L);
-      if (vehicule == null) {
-        Long idVehicule = vehiculeService
-            .createVehicule(TypeV.voiture, "Peugeot", "308", "blanche", "Paris", 50.0, agent)
-            .getId();
-        vehicule = vehiculeService.findVehiculeById(idVehicule);
-        vehiculeService.createDisponibilite(agent, idVehicule, LocalDate.now(),
-            LocalDate.now().plusDays(60));
-        System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
-      }
+      Long idVehicule = vehiculeService
+          .createVehicule(TypeV.voiture, "Peugeot", "308", "blanche", "Paris", 50.0, agent).getId();
+      Vehicule vehicule = vehiculeService.findVehiculeById(idVehicule);
+      vehiculeService.createDisponibilite(agent, idVehicule, LocalDate.now(),
+          LocalDate.now().plusDays(60));
+      System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
 
       // Create a location for testing
       Location location = locationService.creerLocation(LocalDateTime.now().plusDays(5),
@@ -79,9 +74,38 @@ public class TestUSL10 {
       verificationService.creerVerification(location.getId(), 1560);
       System.out.println("✓ Vérification au départ enregistrée");
 
-      System.out.println("Kilométrage au retour: 1800 km");
+      System.out.println("\nKilométrage au retour: 1800 km");
       locationService.terminer(location, 1800, "photo_tableau_bord.jpg");
       System.out.println("✓ Kilométrage au retour enregistré avec photo");
+
+      // Fetch verification from database to verify it was saved correctly
+      System.out.println("\n=== Vérification depuis la base de données ===");
+      fr.univ.m1.projetagile.VerificationLocation.entity.Verification verificationFromDB =
+          verificationService.getVerificationByLocationId(location.getId());
+
+      if (verificationFromDB != null) {
+        System.out.println("✓ Vérification récupérée depuis la base de données");
+        System.out.println("ID de la vérification: " + verificationFromDB.getId());
+        System.out.println("ID de la location: " + verificationFromDB.getLocation().getId());
+        System.out
+            .println("Kilométrage au départ: " + verificationFromDB.getKilometrageDebut() + " km");
+        System.out
+            .println("Kilométrage au retour: " + verificationFromDB.getKilometrageFin() + " km");
+        System.out.println("Distance parcourue: "
+            + (verificationFromDB.getKilometrageFin() - verificationFromDB.getKilometrageDebut())
+            + " km");
+        System.out.println("Photo du tableau de bord: " + verificationFromDB.getPhoto());
+
+        // Check if verification is complete
+        if (verificationFromDB.getKilometrageDebut() != null
+            && verificationFromDB.getKilometrageFin() != null) {
+          System.out.println("✓ Vérification complète (départ + retour)");
+        } else {
+          System.out.println("✗ Vérification incomplète");
+        }
+      } else {
+        System.out.println("✗ ERREUR: Aucune vérification trouvée pour cette location");
+      }
 
     } catch (Exception e) {
       System.err.println("✗ Erreur: " + e.getMessage());
