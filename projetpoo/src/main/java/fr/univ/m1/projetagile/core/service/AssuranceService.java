@@ -9,37 +9,66 @@ import fr.univ.m1.projetagile.core.entity.Location;
 import fr.univ.m1.projetagile.core.entity.SouscriptionAssurance;
 import fr.univ.m1.projetagile.core.entity.TarifOptionAssurance;
 import fr.univ.m1.projetagile.core.entity.TarifVehicule;
+import fr.univ.m1.projetagile.core.persistence.AssuranceRepository;
+import fr.univ.m1.projetagile.core.persistence.GrilleTarifRepository;
 import fr.univ.m1.projetagile.core.persistence.SouscriptionAssuranceRepository;
+import fr.univ.m1.projetagile.core.persistence.TarifOptionAssuranceRepository;
+import fr.univ.m1.projetagile.core.persistence.TarifVehiculeRepository;
 import fr.univ.m1.projetagile.enums.TypeV;
 
 public class AssuranceService {
 
   private final SouscriptionAssuranceRepository souscriptionAssuranceRepository;
+  private final GrilleTarifRepository grilleTarifRepository;
+  private final TarifVehiculeRepository tarifVehiculeRepository;
+  private final TarifOptionAssuranceRepository tarifOptionAssuranceRepository;
+  private final AssuranceRepository assuranceRepository;
 
   /**
-   * Constructeur avec injection du repository.
+   * Constructeur avec injection de tous les repositories.
    */
-  public AssuranceService(SouscriptionAssuranceRepository souscriptionAssuranceRepository) {
+  public AssuranceService(SouscriptionAssuranceRepository souscriptionAssuranceRepository,
+      GrilleTarifRepository grilleTarifRepository, TarifVehiculeRepository tarifVehiculeRepository,
+      TarifOptionAssuranceRepository tarifOptionAssuranceRepository,
+      AssuranceRepository assuranceRepository) {
     this.souscriptionAssuranceRepository = souscriptionAssuranceRepository;
+    this.grilleTarifRepository = grilleTarifRepository;
+    this.tarifVehiculeRepository = tarifVehiculeRepository;
+    this.tarifOptionAssuranceRepository = tarifOptionAssuranceRepository;
+    this.assuranceRepository = assuranceRepository;
   }
 
   /**
-   * Constructeur par défaut qui crée une instance du repository.
+   * Constructeur par défaut qui crée des instances de tous les repositories.
    */
   public AssuranceService() {
     this.souscriptionAssuranceRepository = new SouscriptionAssuranceRepository();
+    this.grilleTarifRepository = new GrilleTarifRepository();
+    this.tarifVehiculeRepository = new TarifVehiculeRepository();
+    this.tarifOptionAssuranceRepository = new TarifOptionAssuranceRepository();
+    this.assuranceRepository = new AssuranceRepository();
   }
 
   /**
-   * Crée une GrilleTarif vide (tu ajoutes ensuite les tarifs).
+   * Crée une GrilleTarif vide et la persiste en base de données.
+   * 
+   * @return la grille tarifaire sauvegardée
    */
   public GrilleTarif creerGrille() {
-    return new GrilleTarif();
+    GrilleTarif grille = new GrilleTarif();
+    return grilleTarifRepository.save(grille);
   }
 
   /**
-   * Ajoute un tarif véhicule dans la grille. IMPORTANT: TarifVehicule a un @ManyToOne grilleTarif
-   * nullable=false donc on crée le TarifVehicule avec la grille.
+   * Ajoute un tarif véhicule dans la grille et persiste les modifications.
+   * IMPORTANT: TarifVehicule a un @ManyToOne grilleTarif nullable=false 
+   * donc on crée le TarifVehicule avec la grille.
+   * 
+   * @param grille la grille tarifaire à laquelle ajouter le tarif
+   * @param type le type de véhicule
+   * @param modele le modèle de véhicule
+   * @param prixParJour le prix par jour
+   * @return le tarif véhicule sauvegardé
    */
   public TarifVehicule ajouterTarifVehicule(GrilleTarif grille, TypeV type, String modele,
       double prixParJour) {
@@ -54,11 +83,22 @@ public class AssuranceService {
 
     TarifVehicule tv = new TarifVehicule(type, modele, prixParJour, grille);
     grille.ajouterTarifVehicule(tv);
-    return tv;
+    
+    // Persister le tarif véhicule et mettre à jour la grille
+    TarifVehicule tarifSauvegarde = tarifVehiculeRepository.save(tv);
+    grilleTarifRepository.save(grille);
+    
+    return tarifSauvegarde;
   }
 
   /**
-   * Ajoute un tarif option dans la grille.
+   * Ajoute un tarif option dans la grille et persiste les modifications.
+   * 
+   * @param grille la grille tarifaire à laquelle ajouter l'option
+   * @param nomOption le nom de l'option
+   * @param description la description de l'option
+   * @param prixParJour le prix par jour
+   * @return le tarif d'option sauvegardé
    */
   public TarifOptionAssurance ajouterTarifOption(GrilleTarif grille, String nomOption, String description,
       double prixParJour) {
@@ -71,11 +111,20 @@ public class AssuranceService {
 
     TarifOptionAssurance to = new TarifOptionAssurance(nomOption, description, prixParJour, grille);
     grille.ajouterTarifOption(to);
-    return to;
+    
+    // Persister le tarif option et mettre à jour la grille
+    TarifOptionAssurance tarifSauvegarde = tarifOptionAssuranceRepository.save(to);
+    grilleTarifRepository.save(grille);
+    
+    return tarifSauvegarde;
   }
 
   /**
-   * Crée une assurance liée à une grille.
+   * Crée une assurance liée à une grille et la persiste en base de données.
+   * 
+   * @param nom le nom de l'assurance
+   * @param grille la grille tarifaire associée
+   * @return l'assurance sauvegardée
    */
   public Assurance creerAssurance(String nom, GrilleTarif grille) {
     if (nom == null || nom.isBlank())
@@ -84,11 +133,15 @@ public class AssuranceService {
       throw new IllegalArgumentException("grille null");
 
     Assurance assurance = new Assurance(nom, grille);
-
-    // optionnel mais cohérent si tu as GrilleTarif.ajouterAssurance()
-    // grille.ajouterAssurance(assurance);
-
-    return assurance;
+    
+    // Ajouter l'assurance à la grille pour maintenir la cohérence bidirectionnelle
+    grille.ajouterAssurance(assurance);
+    
+    // Persister l'assurance et mettre à jour la grille
+    Assurance assuranceSauvegardee = assuranceRepository.save(assurance);
+    grilleTarifRepository.save(grille);
+    
+    return assuranceSauvegardee;
   }
 
   /**
