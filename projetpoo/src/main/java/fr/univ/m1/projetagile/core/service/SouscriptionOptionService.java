@@ -14,8 +14,8 @@ public class SouscriptionOptionService {
     this.repository = repository;
   }
 
-  public SouscriptionOptionService(jakarta.persistence.EntityManager em) {
-    this(new SouscriptionOptionRepository(em));
+  public SouscriptionOptionService() {
+    this(new SouscriptionOptionRepository());
   }
 
   /**

@@ -15,7 +15,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 
 @Entity
@@ -97,8 +96,7 @@ public abstract class Agent extends Utilisateur {
     }
     // Récupérer les souscriptions via repository
     fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository repo =
-        new fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository(
-            fr.univ.m1.projetagile.core.DatabaseConnection.getEntityManager());
+        new fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository();
     return repo.findByUtilisateur(this.getIdU()).stream()
         .anyMatch(so -> option.equals(so.getOption()));
   }
@@ -106,8 +104,7 @@ public abstract class Agent extends Utilisateur {
   public List<SouscriptionOption> getOptionsActives() {
     // Récupérer les souscriptions via repository
     fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository repo =
-        new fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository(
-            fr.univ.m1.projetagile.core.DatabaseConnection.getEntityManager());
+        new fr.univ.m1.projetagile.core.persistence.SouscriptionOptionRepository();
     return repo.findByUtilisateur(this.getIdU());
   }
 
