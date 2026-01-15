@@ -21,7 +21,7 @@ public class TestUSL5 {
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       MessagerieService messagerieService = new MessagerieService(new MessageRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Loueur loueur1 = loueurService.findById(1L);
       if (loueur1 == null) {
         Long idLoueur1 = loueurService
@@ -34,8 +34,7 @@ public class TestUSL5 {
       Loueur loueur2 = loueurService.findById(2L);
       if (loueur2 == null) {
         Long idLoueur2 = loueurService
-            .createLoueur("Dubois", "Marie", "marie.dubois@example.com", "motdepasse123")
-            .getIdU();
+            .createLoueur("Dubois", "Marie", "marie.dubois@example.com", "motdepasse123").getIdU();
         loueur2 = loueurService.findById(idLoueur2);
         System.out.println("✓ Loueur 2 créé avec ID: " + idLoueur2);
       }
