@@ -32,7 +32,7 @@ public class TestUSA7 {
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       LocationService locationService = new LocationService(new LocationRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -67,10 +67,10 @@ public class TestUSA7 {
       System.out.println("✓ Véhicule 2 créé avec ID: " + idVehicule2);
 
 
-      // Test US.A.7
+      // Tester US.A.7
       System.out.println("\n=== US.A.7: Réduction de commission pour location longue durée ===");
 
-      // Commission constants (from LocationService)
+      // Constantes de commission (depuis LocationService)
       final double COMMISSION_NORMALE = 0.10; // 10%
       final double COMMISSION_LLD = 0.05; // 5%
       final double FRAIS_FIXES_PAR_JOUR = 2.0;

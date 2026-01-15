@@ -40,7 +40,7 @@ public class TestUSL9 {
       ParrainageService parrainageService = new ParrainageService(new ParrainageRepository());
       CreditService creditService = new CreditService(new CreditRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -83,12 +83,12 @@ public class TestUSL9 {
       Parrainage parrainage = parrainageService.parrainer(loueurParrain, loueurFilleul);
       System.out.println("✓ Parrainage créé avec ID: " + parrainage.getId());
 
-      // Filleul effectue une location
+      // Le filleul effectue une location
       Location location = locationService.creerLocation(LocalDateTime.now().plusDays(10),
           LocalDateTime.now().plusDays(15), vehicule, loueurFilleul);
       System.out.println("✓ Location du filleul créée avec ID: " + location.getId());
 
-      // Vérifier le crédit du parrain
+      // Vérifier le crédit du parrain par le biais du service de crédit
       Crédit credit = creditService.getCredit(loueurParrain.getIdU());
       System.out.println("Crédit du parrain: " + credit.getCredit() + "€");
 

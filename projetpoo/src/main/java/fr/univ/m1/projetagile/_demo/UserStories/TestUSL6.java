@@ -35,7 +35,7 @@ public class TestUSL6 {
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       LocationService locationService = new LocationService(new LocationRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -61,12 +61,12 @@ public class TestUSL6 {
       System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
 
 
-      // Create a completed location for history
+      // Créer une location terminée pour l'historique
       Location location = locationService.creerLocation(LocalDateTime.now(),
           LocalDateTime.now().plusDays(5), vehicule, loueur);
       location.setStatut(StatutLocation.TERMINE);
-      
-      // Save the location with TERMINE status
+
+      // Enregistrer la location avec le statut TERMINE
       LocationRepository locationRepository = new LocationRepository();
       locationRepository.save(location);
       System.out.println("✓ Location de test créée et terminée avec ID: " + location.getId());
@@ -92,7 +92,7 @@ public class TestUSL6 {
         }
       }
 
-      // Modify profile
+      // Modifier le profil
       System.out.println("\n=== Modification du profil ===");
       loueurService.updateLoueurNom(loueur, "Dupont");
       loueurService.updateLoueurPrenom(loueur, "Jean");

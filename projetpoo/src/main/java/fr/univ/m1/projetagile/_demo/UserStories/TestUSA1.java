@@ -22,7 +22,7 @@ public class TestUSA1 {
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
       AgentService agentService = new AgentService(new AgentRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -33,7 +33,7 @@ public class TestUSA1 {
         System.out.println("✓ Agent créé avec ID: " + idAgent);
       }
 
-      // Test US.A.1
+      // Tester US.A.1
       System.out.println("\n=== US.A.1: Ajout, modification et suppression de véhicules ===");
 
       // Ajouter un véhicule

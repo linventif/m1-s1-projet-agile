@@ -21,7 +21,7 @@ public class TestUSV3 {
 
       AgentService agentService = new AgentService(new AgentRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService

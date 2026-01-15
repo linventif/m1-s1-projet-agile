@@ -26,7 +26,7 @@ public class TestUSA9 {
       ControlTechniqueService controlTechniqueService =
           new ControlTechniqueService(new VehiculeRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -46,11 +46,11 @@ public class TestUSA9 {
         System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
       }
 
-      // Test US.A.9
+      // Tester US.A.9
       System.out.println("\n=== US.A.9: Vérification et notifications de contrôle technique ===");
 
-      // Set vehicle registration date (required for control calculations)
-      // Let's say the vehicle was first registered 6 years ago
+      // Définir la date de mise en circulation du véhicule (requis pour les calculs de contrôle)
+      // Disons que le véhicule a été mis en circulation il y a 6 ans
       LocalDate dateMiseEnCirculation = LocalDate.now().minusYears(6);
       controlTechniqueService.updateControleTechnique(vehicule.getId(), dateMiseEnCirculation,
           null, null, null, null, null, null);
@@ -59,8 +59,8 @@ public class TestUSA9 {
       System.out.println(
           "Note: Chaque scénario met à jour le même véhicule pour démontrer différentes situations.\n");
 
-      // Scenario 1: Control date in the far future - OK status
-      // Last control was 1 year ago, so next control is in 1 year
+      // Scénario 1: Date de contrôle dans un futur lointain - statut OK
+      // Le dernier contrôle date d'1 an, donc le prochain contrôle est dans 1 an
       System.out.println("--- Scénario 1: Contrôle technique OK (dans 365 jours) ---");
       LocalDate lastControl1 = LocalDate.now().minusYears(1);
       controlTechniqueService.enregistrerNouveauControle(vehicule.getId(), lastControl1, 10000,
@@ -73,8 +73,8 @@ public class TestUSA9 {
       System.out.println("Jours restants: " + joursRestants1);
       System.out.println("Statut: " + controlTechniqueService.getStatutControleDetaille(vehicule));
 
-      // Scenario 2: Control approaching in ~25 days - SCHEDULED alert
-      // Last control was ~23 months ago (2 years - 25 days)
+      // Scénario 2: Contrôle approchant dans ~25 jours - alerte PLANIFIÉ
+      // Le dernier contrôle date d'environ 23 mois (2 ans - 25 jours)
       System.out.println("\n--- Scénario 2: Contrôle technique approchant (dans 25 jours) ---");
       LocalDate lastControl2 = LocalDate.now().minusYears(2).plusDays(25);
       controlTechniqueService.enregistrerNouveauControle(vehicule.getId(), lastControl2, 15000,
@@ -88,8 +88,8 @@ public class TestUSA9 {
       System.out.println("Statut: " + controlTechniqueService.getStatutControleDetaille(vehicule));
       System.out.println("⚠️  NOTIFICATION: Pensez à programmer votre contrôle technique!");
 
-      // Scenario 3: Control in 5 days - URGENT alert
-      // Last control was almost exactly 2 years ago (2 years - 5 days)
+      // Scénario 3: Contrôle dans 5 jours - alerte URGENTE
+      // Le dernier contrôle date d'environ 2 ans (2 ans - 5 jours)
       System.out.println("\n--- Scénario 3: Contrôle technique imminent (dans 5 jours) ---");
       LocalDate lastControl3 = LocalDate.now().minusYears(2).plusDays(5);
       controlTechniqueService.enregistrerNouveauControle(vehicule.getId(), lastControl3, 20000,
@@ -103,8 +103,8 @@ public class TestUSA9 {
       System.out.println("Statut: " + controlTechniqueService.getStatutControleDetaille(vehicule));
       System.out.println("🚨 NOTIFICATION URGENTE: Votre contrôle technique arrive bientôt!");
 
-      // Scenario 4: Control overdue - URGENT past due
-      // Last control was over 2 years ago (2 years + 15 days)
+      // Scénario 4: Contrôle dépassé - URGENT en retard
+      // Le dernier contrôle date de plus de 2 ans (2 ans + 15 jours)
       System.out.println("\n--- Scénario 4: Contrôle technique dépassé (en retard de 15 jours) ---");
       LocalDate lastControl4 = LocalDate.now().minusYears(2).minusDays(15);
       controlTechniqueService.enregistrerNouveauControle(vehicule.getId(), lastControl4, 25000,

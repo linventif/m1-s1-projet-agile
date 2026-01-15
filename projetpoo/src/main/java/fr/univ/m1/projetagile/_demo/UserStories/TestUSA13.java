@@ -25,7 +25,7 @@ public class TestUSA13 {
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
       AgentService agentService = new AgentService(new AgentRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -45,7 +45,7 @@ public class TestUSA13 {
         System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
       }
 
-      // Test US.A.13
+      // Tester US.A.13
       System.out.println("\n=== US.A.13: Gestion du calendrier de disponibilité ===");
 
       vehiculeService.createDisponibilite(agent, vehicule.getId(), LocalDate.of(2026, 10, 10),

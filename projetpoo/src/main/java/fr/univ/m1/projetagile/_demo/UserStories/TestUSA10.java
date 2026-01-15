@@ -30,7 +30,7 @@ public class TestUSA10 {
           new EntretienTechniqueService(new TypeTechniqueRepository(),
               new EntretienTechniqueRepository(), new VehiculeRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -52,10 +52,10 @@ public class TestUSA10 {
         System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
       }
 
-      // Test US.A.10
+      // Tester US.A.10
       System.out.println("\n=== US.A.10: Journalisation des opérations de maintenance ===");
 
-      // Fetch or create TypeTechnique entities
+      // Récupérer ou créer les entités TypeTechnique
       TypeTechnique typeCourroie = entretienService.getTypeTechniqueByNom("Courroie");
       if (typeCourroie == null) {
         typeCourroie = entretienService.creerTypeTechnique("Courroie", 15000);
@@ -96,7 +96,7 @@ public class TestUSA10 {
           LocalDate.now());
       System.out.println("✓ Entretien freins enregistré");
 
-      // Display latest entretien technique for the vehicle
+      // Afficher le dernier entretien technique du véhicule
       System.out.println("\n=== Dernier entretien technique du véhicule ===");
       fr.univ.m1.projetagile.entretienTechnique.entity.EntretienTechnique dernierEntretien =
           entretienService.getDernierEntretienTechnique(vehicule.getId());
@@ -107,7 +107,7 @@ public class TestUSA10 {
             + dernierEntretien.getVehicule().getModele());
       }
 
-      // Display latest entretien for each type
+      // Afficher le dernier entretien par type
       System.out.println("\n=== Dernier entretien par type technique ===");
       fr.univ.m1.projetagile.entretienTechnique.entity.EntretienTechnique dernierCourroie =
           entretienService.getDernierEntretienTechniqueByType(vehicule.getId(),

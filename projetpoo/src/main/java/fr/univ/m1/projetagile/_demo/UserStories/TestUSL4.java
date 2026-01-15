@@ -26,7 +26,7 @@ public class TestUSL4 {
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       MessagerieService messagerieService = new MessagerieService(new MessageRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -39,16 +39,14 @@ public class TestUSL4 {
       Loueur loueur = loueurService.findById(1L);
       if (loueur == null) {
         Long idLoueur = loueurService
-            .createLoueur("Dubois", "Marie", "marie.dubois@example.com", "motdepasse123")
-            .getIdU();
+            .createLoueur("Dubois", "Marie", "marie.dubois@example.com", "motdepasse123").getIdU();
         loueur = loueurService.findById(idLoueur);
         System.out.println("✓ Loueur créé avec ID: " + idLoueur);
       }
 
       // Test US.L.4
       System.out.println("\n=== US.L.4: Contact d'un agent par messagerie ===");
-      messagerieService.envoyerMessage(loueur, agent,
-          "Bonjour, je voudrais louer votre véhicule");
+      messagerieService.envoyerMessage(loueur, agent, "Bonjour, je voudrais louer votre véhicule");
 
       List<Message> messages = messagerieService.getMessagesUtilisateur(agent);
       for (Message message : messages) {

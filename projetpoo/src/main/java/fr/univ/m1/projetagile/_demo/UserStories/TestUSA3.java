@@ -20,7 +20,7 @@ public class TestUSA3 {
       AgentService agentService = new AgentService(new AgentRepository());
       SouscriptionOptionService souscriptionOptionService = new SouscriptionOptionService();
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -30,7 +30,7 @@ public class TestUSA3 {
         System.out.println("✓ Agent créé avec ID: " + idAgent);
       }
 
-      // Test US.A.3
+      // Tester US.A.3
       System.out.println("\n=== US.A.3: Souscription et annulation d'options payantes ===");
 
       // Rechercher ou créer une option pour le test

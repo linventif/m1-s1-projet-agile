@@ -40,7 +40,7 @@ public class TestUSL11 {
       SouscriptionOptionService souscriptionOptionService = new SouscriptionOptionService();
       ParkingService parkingService = new ParkingService(new ParkingRepository());
 
-      // Ensure we have test data - Agent with parking option
+      // S'assurer que nous avons des données de test - Agent avec l'option Parking
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -50,7 +50,7 @@ public class TestUSL11 {
         System.out.println("✓ Agent créé avec ID: " + idAgent);
       }
 
-      // Ensure agent has the parking option
+      // S'assurer que l'agent a l'option Parking
       Options optionParking = souscriptionOptionService.findOptionByNom("Option Parking");
       if (optionParking == null) {
         optionParking = new Options("Option Parking", 15.0);
@@ -67,7 +67,7 @@ public class TestUSL11 {
         System.out.println("✓ Agent souscrit à l'option Parking");
       }
 
-      // Create a vehicle with availability
+      // Créer un véhicule avec la disponibilité
       Long idVehicule = vehiculeService
           .createVehicule(TypeV.voiture, "Renault", "Megane", "grise", "Paris", 45.0, agent)
           .getId();
@@ -77,7 +77,7 @@ public class TestUSL11 {
       System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
 
 
-      // Ensure we have test data - Loueur
+      // S'assurer que nous avons des données de test - Loueur
       Loueur loueur = loueurService.findById(1L);
       if (loueur == null) {
         Long idLoueur = loueurService
@@ -87,7 +87,7 @@ public class TestUSL11 {
         System.out.println("✓ Loueur créé avec ID: " + idLoueur);
       }
 
-      // Create or find a parking
+      // Créer ou trouver un parking
       List<Parking> parkings = parkingService.getParkingsByVille("Paris");
       Parking parking;
       if (parkings.isEmpty()) {
@@ -102,7 +102,7 @@ public class TestUSL11 {
       // Test US.L.11
       System.out.println("\n=== US.L.11: Recherche de véhicules avec option Parking ===");
 
-      // Search for vehicles with parking option available
+      // Rechercher les véhicules avec l'option Parking disponible
       LocalDate dateDebut = LocalDate.now().plusDays(5);
       LocalDate dateFin = LocalDate.now().plusDays(10);
 
@@ -122,7 +122,7 @@ public class TestUSL11 {
         }
       }
 
-      // Create a location with parking as lieu de dépôt
+      // Créer une location avec Parking comme lieu de dépôt
       System.out.println("\n=== Création d'une location avec Parking comme lieu de dépôt ===");
 
       Location location = locationService.creerLocation(LocalDateTime.now().plusDays(5),

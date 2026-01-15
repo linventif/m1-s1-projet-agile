@@ -33,14 +33,14 @@ public class TestUSL2 {
       DatabaseConnection.init();
       System.out.println("✓ DB connectée");
 
-      // Initialize services
+      // Initialiser les services
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
       AgentService agentService = new AgentService(new AgentRepository());
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       LocationService locationService = new LocationService(new LocationRepository());
       AssuranceService assuranceService = new AssuranceService();
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -65,22 +65,22 @@ public class TestUSL2 {
       Vehicule vehicule = vehiculeService.findVehiculeById(idVehicule);
       System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
 
-      // Create availability for the vehicle
+      // Créer la disponibilité pour le véhicule
       vehiculeService.createDisponibilite(agent, vehicule.getId(), LocalDate.now(),
           LocalDate.now().plusDays(30));
       System.out.println("✓ Disponibilité créée pour le véhicule");
 
-      // Create insurance with pricing grid
+      // Créer une assurance avec une grille tarifaire
       GrilleTarif grille = assuranceService.creerGrille();
       System.out.println("✓ Grille tarifaire créée avec ID: " + grille.getId());
 
-      // Add vehicle pricing to grid
+      // Ajouter le prix du véhicule à la grille
       assuranceService.ajouterTarifVehicule(grille, TypeV.voiture, "Renault", 5.0);
       assuranceService.ajouterTarifVehicule(grille, TypeV.voiture, "Peugeot", 5.0);
       assuranceService.ajouterTarifVehicule(grille, TypeV.voiture, "Clio", 10.0);
       System.out.println("✓ Tarifs véhicules ajoutés à la grille");
 
-      // Add insurance options to grid
+      // Ajouter les options d'assurance à la grille
       assuranceService.ajouterTarifOption(grille, "Protection vol",
           "Protection contre le vol du véhicule", 3.0);
       assuranceService.ajouterTarifOption(grille, "Protection bris de glace",
@@ -89,7 +89,7 @@ public class TestUSL2 {
           "Assistance routière disponible 24h/24", 4.0);
       System.out.println("✓ Options d'assurance ajoutées à la grille");
 
-      // Create insurance
+      // Créer une assurance
       Assurance assurance = assuranceService.creerAssurance("Assurance Tous Risques", grille);
       System.out
           .println("✓ Assurance créée: " + assurance.getNom() + " (ID: " + assurance.getId() + ")");
@@ -97,7 +97,7 @@ public class TestUSL2 {
       // Test US.L.2
       System.out.println("\n=== US.L.2: Création d'une location avec assurance ===");
 
-      // Create location with insurance and options
+      // Créer une location avec une assurance et des options
       LocalDateTime dateDebut = LocalDateTime.now();
       LocalDateTime dateFin = LocalDateTime.now().plusDays(10);
 
@@ -106,7 +106,7 @@ public class TestUSL2 {
 
       System.out.println("✓ Location créée avec ID: " + location.getId());
 
-      // Display location details
+      // Afficher les détails de la location
       System.out.println("\n=== Détails de la location ===");
       System.out.println("Date de début: " + location.getDateDebut());
       System.out.println("Date de fin: " + location.getDateFin());
@@ -121,14 +121,13 @@ public class TestUSL2 {
       System.out.println(
           "Loueur: " + location.getLoueur().getNom() + " " + location.getLoueur().getPrenom());
 
-      // Retrieve and display insurance information
+      // Récupérer et afficher les informations de l'assurance
       SouscriptionAssurance souscription =
           assuranceService.getSouscriptionParLocation(location.getId());
       if (souscription != null) {
         System.out.println("Assurance: " + souscription.getAssurance().getNom());
         if (!souscription.getOptions().isEmpty()) {
-          System.out
-              .println("Options souscrites: " + String.join(", ", souscription.getOptions()));
+          System.out.println("Options souscrites: " + String.join(", ", souscription.getOptions()));
         } else {
           System.out.println("Options souscrites: Aucune");
         }
@@ -138,7 +137,7 @@ public class TestUSL2 {
 
       System.out.println("Statut: " + location.getStatut());
 
-      // Calculate and display total price
+      // Calculer et afficher le prix total
       double prixLocation = locationService.getPrixLocation(location);
       System.out
           .println("\n✓ Prix total de la location: " + String.format("%.2f", prixLocation) + " €");

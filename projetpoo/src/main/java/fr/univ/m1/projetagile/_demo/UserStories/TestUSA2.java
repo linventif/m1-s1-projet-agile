@@ -26,7 +26,7 @@ public class TestUSA2 {
       AgentService agentService = new AgentService(new AgentRepository());
       LocationService locationService = new LocationService(new LocationRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -47,7 +47,7 @@ public class TestUSA2 {
         System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
       }
 
-      // Test US.A.2
+      // Tester US.A.2
       System.out.println("\n=== US.A.2: Consultation de l'historique d'un véhicule ===");
       System.out.println("Historique du véhicule " + vehicule.getMarque() + " "
           + vehicule.getModele() + " (ID: " + vehicule.getId() + "):");

@@ -21,7 +21,7 @@ public class TestUSA16 {
       AgentService agentService = new AgentService(new AgentRepository());
       SouscriptionOptionService souscriptionOptionService = new SouscriptionOptionService();
 
-      // Ensure we have test data - Agent
+      // S'assurer que nous avons des données de test - Agent
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -31,7 +31,7 @@ public class TestUSA16 {
         System.out.println("✓ Agent créé avec ID: " + idAgent);
       }
 
-      // Test US.A.16
+      // Tester US.A.16
       System.out.println("\n=== US.A.16: Souscription à l'option Parking ===");
 
       // Rechercher ou créer l'option Parking

@@ -31,7 +31,7 @@ public class TestUSA12 {
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       LocationService locationService = new LocationService(new LocationRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -48,7 +48,7 @@ public class TestUSA12 {
           LocalDate.now().plusDays(60));
       System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
 
-      // Test US.A.12
+      // Tester US.A.12
       System.out.println("\n=== US.A.12: Mise en pause d'un véhicule ===");
       System.out.println("Disponibilité actuelle: " + vehicule.isDisponible());
 
@@ -58,7 +58,7 @@ public class TestUSA12 {
       vehicule = vehiculeService.findVehiculeById(vehicule.getId());
       System.out.println("Nouvelle disponibilité: " + vehicule.isDisponible());
 
-      // Test: Try to create a location when vehicle is paused
+      // Test: Essayer de créer une location quand le véhicule est en pause
       System.out
           .println("\n=== Test: Tentative de création de location avec véhicule en pause ===");
 
@@ -78,7 +78,7 @@ public class TestUSA12 {
         System.out.println("✓ Location refusée comme attendu: " + e.getMessage());
       }
 
-      // Reactivate vehicle and try again
+      // Réactiver le véhicule et réessayer
       System.out.println("\n=== Réactivation du véhicule ===");
       vehiculeService.updateVehiculeDisponibilite(agent, vehicule.getId(), true);
       vehicule = vehiculeService.findVehiculeById(vehicule.getId());

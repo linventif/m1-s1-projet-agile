@@ -26,7 +26,7 @@ public class TestUSA5 {
       LoueurService loueurService = new LoueurService(new LoueurRepository());
       MessagerieService messagerieService = new MessagerieService(new MessageRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent1 = agentService.findById(1L);
       if (agent1 == null) {
         Long idAgent1 = agentService
@@ -55,7 +55,7 @@ public class TestUSA5 {
         System.out.println("✓ Loueur créé avec ID: " + idLoueur);
       }
 
-      // Test US.A.5
+      // Tester US.A.5
       System.out.println("\n=== US.A.5: Envoi de messages par un agent ===");
 
       // Message à un autre agent

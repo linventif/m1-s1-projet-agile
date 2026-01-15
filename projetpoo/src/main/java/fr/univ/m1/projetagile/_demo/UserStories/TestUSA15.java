@@ -40,7 +40,7 @@ public class TestUSA15 {
       ParrainageService parrainageService = new ParrainageService(new ParrainageRepository());
       CreditService creditService = new CreditService(new CreditRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agentParrain = agentService.findById(1L);
       if (agentParrain == null) {
         Long idParrain = agentService
@@ -68,7 +68,7 @@ public class TestUSA15 {
         System.out.println("✓ Loueur créé avec ID: " + idLoueur);
       }
 
-      // Test US.A.15
+      // Tester US.A.15
       System.out.println("\n=== US.A.15: Parrainage d'un nouvel agent ===");
 
       Parrainage parrainage = parrainageService.parrainer(agentParrain, agentFilleul);

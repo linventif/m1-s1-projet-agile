@@ -26,7 +26,7 @@ public class TestUSA8 {
       ControlTechniqueService controlTechniqueService =
           new ControlTechniqueService(new VehiculeRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -46,7 +46,7 @@ public class TestUSA8 {
         System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
       }
 
-      // Test US.A.8
+      // Tester US.A.8
       System.out.println("\n=== US.A.8: Enregistrement du contrôle technique ===");
       controlTechniqueService.enregistrerNouveauControle(vehicule.getId(), LocalDate.now(), 10000,
           "Passé", "Aucun commentaire");

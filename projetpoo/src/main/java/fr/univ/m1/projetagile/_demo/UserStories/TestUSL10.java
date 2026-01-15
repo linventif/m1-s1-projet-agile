@@ -37,7 +37,7 @@ public class TestUSL10 {
       VerificationService verificationService =
           new VerificationService(new VerificationRepository(), new LocationRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -62,7 +62,7 @@ public class TestUSL10 {
           LocalDate.now().plusDays(60));
       System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
 
-      // Create a location for testing
+      // Créer une location pour les tests
       Location location = locationService.creerLocation(LocalDateTime.now().plusDays(5),
           LocalDateTime.now().plusDays(10), vehicule, loueur);
       location.setStatut(StatutLocation.ACCEPTE);
@@ -78,7 +78,8 @@ public class TestUSL10 {
       locationService.terminer(location, 1800, "photo_tableau_bord.jpg");
       System.out.println("✓ Kilométrage au retour enregistré avec photo");
 
-      // Fetch verification from database to verify it was saved correctly
+      // Récupérer la vérification depuis la base de données pour vérifier qu'elle a été enregistrée
+      // correctement
       System.out.println("\n=== Vérification depuis la base de données ===");
       fr.univ.m1.projetagile.VerificationLocation.entity.Verification verificationFromDB =
           verificationService.getVerificationByLocationId(location.getId());
@@ -96,7 +97,7 @@ public class TestUSL10 {
             + " km");
         System.out.println("Photo du tableau de bord: " + verificationFromDB.getPhoto());
 
-        // Check if verification is complete
+        // Vérifier si la vérification est complète
         if (verificationFromDB.getKilometrageDebut() != null
             && verificationFromDB.getKilometrageFin() != null) {
           System.out.println("✓ Vérification complète (départ + retour)");

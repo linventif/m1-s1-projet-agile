@@ -40,7 +40,7 @@ public class TestUSL3 {
       LocationService locationService = new LocationService(new LocationRepository());
       NoteService noteService = new NoteService();
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -66,7 +66,7 @@ public class TestUSL3 {
       System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
 
 
-      // Create a completed location for testing
+      // Créer une location terminée pour les tests
       Location location = locationService.creerLocation(LocalDateTime.now(),
           LocalDateTime.now().plusDays(5), vehicule, loueur);
       location.setStatut(StatutLocation.TERMINE);
@@ -87,7 +87,7 @@ public class TestUSL3 {
           .println("✓ Note du véhicule enregistrée: " + noteVehicule.getNoteMoyenne() + "/10");
       System.out.println("✓ Note de l'agent enregistrée: " + noteAgent.getNoteMoyenne() + "/10");
 
-      // Display average ratings from NoteService
+      // Afficher les moyennes globales via NoteService
       System.out.println("\n=== Moyennes globales via NoteService ===");
       Double moyenneVehicule = noteService.getMoyenneVehicule(vehicule);
       Double moyenneAgent = noteService.getMoyenneAgent(agent);
@@ -98,7 +98,7 @@ public class TestUSL3 {
       System.out.println("Note moyenne de l'agent: "
           + (moyenneAgent != null ? String.format("%.2f", moyenneAgent) + "/10" : "Aucune note"));
 
-      // // Display all notes for the vehicle and agent
+      // // Afficher toutes les notes pour le véhicule et l'agent
       // System.out.println("\n=== Historique des notes ===");
       // List<NoteVehicule> notesVehicule = noteService.getNotesVehicule(vehicule);
       // System.out.println("Nombre de notes pour le véhicule: " + notesVehicule.size());

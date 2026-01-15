@@ -25,7 +25,7 @@ public class TestUSV2 {
       VehiculeService vehiculeService = new VehiculeService(new VehiculeRepository());
       AgentService agentService = new AgentService(new AgentRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -48,39 +48,41 @@ public class TestUSV2 {
 
       // Test US.V.2
       System.out.println("\n=== US.V.2: Application de filtres sur les véhicules ===");
-      System.out.println("Filtres appliqués: Ville=Paris, Marque=Peugeot, Modèle=308, Type=voiture");
+      System.out
+          .println("Filtres appliqués: Ville=Paris, Marque=Peugeot, Modèle=308, Type=voiture");
       System.out.println();
-      
+
       List<VehiculeDTO> vehiculesFiltres = vehiculeService.searchVehiculesWithFilters(null, null,
           "Paris", "Peugeot", "308", null, null, null, TypeV.voiture, null);
-      
+
       System.out.println("Nombre de véhicules trouvés: " + vehiculesFiltres.size());
 
       for (VehiculeDTO v : vehiculesFiltres) {
         System.out.println("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        System.out.println("  " + v.getMarque() + " " + v.getModele() + " (" + v.getCouleur() + ")");
+        System.out
+            .println("  " + v.getMarque() + " " + v.getModele() + " (" + v.getCouleur() + ")");
         System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         System.out.println("Lieu: " + v.getVille());
         System.out.println("Type: " + v.getType());
         System.out.println("Prix: " + v.getPrixJ() + "€/jour");
         System.out.println("Note moyenne: " + String.format("%.2f", v.getNoteMoyenne()) + "/10");
         System.out.println("Disponible: " + (v.isDisponible() ? "✓ Oui" : "✗ Non"));
-        
+
         System.out.println("\nPériodes de disponibilité:");
         if (v.getDatesDispo() != null && !v.getDatesDispo().isEmpty()) {
           for (int i = 0; i < v.getDatesDispo().size(); i++) {
             LocalDate[] periode = v.getDatesDispo().get(i);
             if (periode != null && periode.length == 2) {
               long jours = ChronoUnit.DAYS.between(periode[0], periode[1]);
-              System.out.println("  " + (i + 1) + ". Du " + periode[0] + " au " + periode[1] 
-                  + " (" + jours + " jours)");
+              System.out.println("  " + (i + 1) + ". Du " + periode[0] + " au " + periode[1] + " ("
+                  + jours + " jours)");
             }
           }
         } else {
           System.out.println("  Aucune période de disponibilité définie");
         }
       }
-      
+
       System.out.println("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
     } catch (Exception e) {

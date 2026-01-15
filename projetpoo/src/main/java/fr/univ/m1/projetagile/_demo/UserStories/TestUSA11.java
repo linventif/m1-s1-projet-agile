@@ -26,7 +26,7 @@ public class TestUSA11 {
       ControlTechniqueService controlTechniqueService =
           new ControlTechniqueService(new VehiculeRepository());
 
-      // Ensure we have test data
+      // S'assurer que nous avons des données de test
       Agent agent = agentService.findById(1L);
       if (agent == null) {
         Long idAgent = agentService
@@ -46,10 +46,10 @@ public class TestUSA11 {
         System.out.println("✓ Véhicule créé avec ID: " + idVehicule);
       }
 
-      // Test US.A.11
+      // Tester US.A.11
       System.out.println("\n=== US.A.11: Recommandations d'entretien préventif ===");
 
-      // Scenario 1: Vehicle with low mileage - no recommendations
+      // Scénario 1: Véhicule avec faible kilométrage - pas de recommandations
       System.out.println("\n--- Scénario 1: Véhicule avec faible kilométrage ---");
       controlTechniqueService.enregistrerNouveauControle(vehicule.getId(),
           LocalDate.now().minusMonths(6), 10000, "Passé", "Véhicule en bon état");
@@ -61,7 +61,7 @@ public class TestUSA11 {
       System.out.println("Recommandations: "
           + controlTechniqueService.getRecommandationsEntretienParKilometrage(vehicule));
 
-      // Scenario 2: Vehicle needs oil change (15,000+ km)
+      // Scénario 2: Véhicule nécessitant vidange (15,000+ km)
       System.out.println("\n--- Scénario 2: Véhicule nécessitant vidange (15000 km) ---");
       controlTechniqueService.enregistrerNouveauControle(vehicule.getId(),
           LocalDate.now().minusMonths(12), 30000, "Passé", "Véhicule en bon état");
@@ -74,7 +74,7 @@ public class TestUSA11 {
       controlTechniqueService.getRecommandationsEntretienParKilometrage(vehicule)
           .forEach(r -> System.out.println("  - " + r));
 
-      // Scenario 3: Vehicle needs major maintenance (60,000+ km)
+      // Scénario 3: Véhicule nécessitant entretien majeur (60,000+ km)
       System.out.println("\n--- Scénario 3: Véhicule nécessitant entretien majeur (60000+ km) ---");
       controlTechniqueService.enregistrerNouveauControle(vehicule.getId(),
           LocalDate.now().minusYears(2), 50000, "Passé", "Véhicule en bon état");
@@ -87,7 +87,7 @@ public class TestUSA11 {
       controlTechniqueService.getRecommandationsEntretienParKilometrage(vehicule)
           .forEach(r -> System.out.println("  - " + r));
 
-      // Scenario 4: Very high mileage vehicle (100,000+ km)
+      // Scénario 4: Véhicule avec kilométrage très élevé (100,000+ km)
       System.out.println(
           "\n--- Scénario 4: Véhicule avec kilométrage très élevé (100000+ km) ---");
       controlTechniqueService.enregistrerNouveauControle(vehicule.getId(),
