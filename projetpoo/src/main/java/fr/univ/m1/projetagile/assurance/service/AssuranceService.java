@@ -1,8 +1,13 @@
 package fr.univ.m1.projetagile.assurance.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import fr.univ.m1.projetagile.assurance.entity.Assurance;
 import fr.univ.m1.projetagile.assurance.entity.GrilleTarif;
 import fr.univ.m1.projetagile.assurance.entity.SouscriptionAssurance;
@@ -116,6 +121,111 @@ public class AssuranceService {
     grilleTarifRepository.save(grille);
 
     return tarifSauvegarde;
+  }
+
+  /**
+   * Importe des tarifs véhicules depuis un fichier CSV et les ajoute à la grille. Le format CSV
+   * attendu est : type,modele,prix (avec ou sans ligne d'entête).
+   *
+   * @param grille la grille tarifaire à laquelle ajouter les tarifs
+   * @param cheminFichier le chemin vers le fichier CSV
+   * @throws IOException si une erreur se produit lors de la lecture du fichier
+   * @throws IllegalArgumentException si le format du CSV est invalide ou si les données sont
+   *         incorrectes
+   */
+  public void ajouterTarifVehiculeDepuisCSV(GrilleTarif grille, String cheminFichier)
+      throws IOException {
+    if (grille == null) {
+      throw new IllegalArgumentException("grille null");
+    }
+    if (cheminFichier == null || cheminFichier.isBlank()) {
+      throw new IllegalArgumentException("cheminFichier vide");
+    }
+
+    try (Stream<String> lignes = Files.lines(Paths.get(cheminFichier))) {
+      // On saute la première ligne si c'est une entête (header)
+      List<String[]> donnees =
+          lignes.skip(1).map(ligne -> ligne.split(",")).collect(Collectors.toList());
+
+      for (String[] colonnes : donnees) {
+        if (colonnes.length < 3) {
+          throw new IllegalArgumentException(
+              "Format CSV invalide: au moins 3 colonnes requises (type,modele,prix)");
+        }
+
+        String typeStr = colonnes[0].trim();
+        String modele = colonnes[1].trim();
+        String prixStr = colonnes[2].trim();
+
+        // Convertir le type en enum TypeV
+        TypeV type;
+        try {
+          type = TypeV.valueOf(typeStr);
+        } catch (IllegalArgumentException e) {
+          throw new IllegalArgumentException("Type de véhicule invalide: " + typeStr
+              + ". Les valeurs acceptées sont: voiture, camion, moto");
+        }
+
+        // Convertir le prix en double
+        double prix;
+        try {
+          prix = Double.parseDouble(prixStr);
+        } catch (NumberFormatException e) {
+          throw new IllegalArgumentException("Prix invalide: " + prixStr);
+        }
+
+        // Ajouter le tarif véhicule à la grille
+        ajouterTarifVehicule(grille, type, modele, prix);
+      }
+    }
+  }
+
+  /**
+   * Importe des tarifs d'options depuis un fichier CSV et les ajoute à la grille. Le format CSV
+   * attendu est : nom,description,prix (avec ou sans ligne d'entête).
+   *
+   * @param grille la grille tarifaire à laquelle ajouter les tarifs
+   * @param cheminFichier le chemin vers le fichier CSV
+   * @throws IOException si une erreur se produit lors de la lecture du fichier
+   * @throws IllegalArgumentException si le format du CSV est invalide ou si les données sont
+   *         incorrectes
+   */
+  public void ajouterTarifOptionDepuisCSV(GrilleTarif grille, String cheminFichier)
+      throws IOException {
+    if (grille == null) {
+      throw new IllegalArgumentException("grille null");
+    }
+    if (cheminFichier == null || cheminFichier.isBlank()) {
+      throw new IllegalArgumentException("cheminFichier vide");
+    }
+
+    try (Stream<String> lignes = Files.lines(Paths.get(cheminFichier))) {
+      // On saute la première ligne si c'est une entête (header)
+      List<String[]> donnees =
+          lignes.skip(1).map(ligne -> ligne.split(",")).collect(Collectors.toList());
+
+      for (String[] colonnes : donnees) {
+        if (colonnes.length < 3) {
+          throw new IllegalArgumentException(
+              "Format CSV invalide: au moins 3 colonnes requises (nom,description,prix)");
+        }
+
+        String nom = colonnes[0].trim();
+        String description = colonnes[1].trim();
+        String prixStr = colonnes[2].trim();
+
+        // Convertir le prix en double
+        double prix;
+        try {
+          prix = Double.parseDouble(prixStr);
+        } catch (NumberFormatException e) {
+          throw new IllegalArgumentException("Prix invalide: " + prixStr);
+        }
+
+        // Ajouter le tarif option à la grille
+        ajouterTarifOption(grille, nom, description, prix);
+      }
+    }
   }
 
   /**

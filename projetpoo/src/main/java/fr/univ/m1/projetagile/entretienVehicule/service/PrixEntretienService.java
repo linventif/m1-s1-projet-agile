@@ -1,6 +1,11 @@
 package fr.univ.m1.projetagile.entretienVehicule.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import fr.univ.m1.projetagile.core.entity.Vehicule;
 import fr.univ.m1.projetagile.entretienVehicule.entity.Entretien;
 import fr.univ.m1.projetagile.entretienVehicule.entity.PrixEntretien;
@@ -59,6 +64,63 @@ public class PrixEntretienService {
     // Create and save the price
     PrixEntretien prixEntretien = new PrixEntretien(typeVehi, modeleVehi, prix, entretien);
     return repository.save(prixEntretien);
+  }
+
+  /**
+   * Importe des prix d'entretien depuis un fichier CSV et les ajoute pour une société d'entretien.
+   * Le format CSV attendu est : type,modele,prix (avec ou sans ligne d'entête).
+   *
+   * @param entretien la société d'entretien pour laquelle ajouter les prix
+   * @param cheminFichier le chemin vers le fichier CSV
+   * @throws IOException si une erreur se produit lors de la lecture du fichier
+   * @throws IllegalArgumentException si le format du CSV est invalide ou si les données sont
+   *         incorrectes
+   */
+  public void createPrixEntretienDepuisCSV(Entretien entretien, String cheminFichier)
+      throws IOException {
+    if (entretien == null) {
+      throw new IllegalArgumentException("L'entretien ne peut pas être null");
+    }
+    if (cheminFichier == null || cheminFichier.isBlank()) {
+      throw new IllegalArgumentException("cheminFichier vide");
+    }
+
+    try (Stream<String> lignes = Files.lines(Paths.get(cheminFichier))) {
+      // On saute la première ligne si c'est une entête (header)
+      List<String[]> donnees =
+          lignes.skip(1).map(ligne -> ligne.split(",")).collect(Collectors.toList());
+
+      for (String[] colonnes : donnees) {
+        if (colonnes.length < 3) {
+          throw new IllegalArgumentException(
+              "Format CSV invalide: au moins 3 colonnes requises (type,modele,prix)");
+        }
+
+        String typeStr = colonnes[0].trim();
+        String modele = colonnes[1].trim();
+        String prixStr = colonnes[2].trim();
+
+        // Convertir le type en enum TypeV
+        TypeV type;
+        try {
+          type = TypeV.valueOf(typeStr);
+        } catch (IllegalArgumentException e) {
+          throw new IllegalArgumentException("Type de véhicule invalide: " + typeStr
+              + ". Les valeurs acceptées sont: voiture, camion, moto");
+        }
+
+        // Convertir le prix en double
+        double prix;
+        try {
+          prix = Double.parseDouble(prixStr);
+        } catch (NumberFormatException e) {
+          throw new IllegalArgumentException("Prix invalide: " + prixStr);
+        }
+
+        // Ajouter le prix d'entretien
+        createPrixEntretien(entretien, type, modele, prix);
+      }
+    }
   }
 
   /**
