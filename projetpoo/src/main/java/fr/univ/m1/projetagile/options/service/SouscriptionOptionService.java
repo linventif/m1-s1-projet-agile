@@ -35,6 +35,10 @@ public class SouscriptionOptionService {
       throw new IllegalArgumentException("Utilisateur ou option introuvable");
     }
 
+    if (aOption(utilisateur, option)) {
+      throw new IllegalArgumentException("Souscription déjà existante pour cette option");
+    }
+
     return repository.saveTransactional(
         new SouscriptionOption(utilisateur, option, periodicite, renouvellement));
   }
