@@ -63,6 +63,19 @@ public class TestUSA2 {
         System.out.println("   Statut: " + location.getStatut());
       }
 
+      System.out.println("Locations à venir ou en cours pour le véhicule " + vehicule.getMarque()
+          + " " + vehicule.getModele() + " (ID: " + vehicule.getId() + "):");
+      for (LocationDTO location : locationService
+          .getCurrentLocationsForVehicule(vehicule.getId())) {
+        System.out.println(" - Location:");
+        System.out.println("   Date début: " + location.getDateDebut());
+        System.out.println("   Date fin: " + location.getDateFin());
+        System.out.println("   Lieu dépôt: " + location.getLieuDepot());
+        System.out.println("   Véhicule: " + location.getVehicule().getMarque() + " "
+            + location.getVehicule().getModele());
+        System.out.println("   Statut: " + location.getStatut());
+      }
+
     } catch (Exception e) {
       System.err.println("✗ Erreur: " + e.getMessage());
       e.printStackTrace();
