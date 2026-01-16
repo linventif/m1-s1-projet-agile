@@ -1,9 +1,18 @@
 package fr.univ.m1.projetagile.core.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import fr.univ.m1.projetagile.VerificationLocation.persistence.VerificationRepository;
 import fr.univ.m1.projetagile.VerificationLocation.service.VerificationService;
 import fr.univ.m1.projetagile.assurance.entity.Assurance;
@@ -734,5 +743,284 @@ public class LocationService {
     }
 
     return false;
+  }
+
+  /**
+   * Génère un contrat de location au format PDF et le sauvegarde dans le répertoire pdf/.
+   * 
+   * @param location la location pour laquelle générer le contrat PDF
+   * @return le chemin du fichier PDF généré
+   * @throws IllegalArgumentException si la location est null ou n'a pas d'identifiant
+   * @throws IOException si une erreur survient lors de la génération du PDF
+   */
+  public String generatePDF(Location location) throws IOException {
+    if (location == null) {
+      throw new IllegalArgumentException("La location ne peut pas être nulle.");
+    }
+    if (location.getId() == null) {
+      throw new IllegalArgumentException("La location doit avoir un identifiant.");
+    }
+
+    // Créer le répertoire pdf s'il n'existe pas
+    File pdfDir = new File("pdf");
+    if (!pdfDir.exists()) {
+      pdfDir.mkdirs();
+    }
+
+    // Nom du fichier PDF basé sur l'ID de la location
+    String fileName = "contrat_location_" + location.getId() + ".pdf";
+    String filePath = "pdf/" + fileName;
+
+    // Créer un nouveau document PDF
+    try (PDDocument document = new PDDocument()) {
+      PDPage page = new PDPage(PDRectangle.A4);
+      document.addPage(page);
+
+      try (PDPageContentStream contentStream =
+          new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, true,
+              true)) {
+
+        // Formatter pour les dates
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        // Configuration de la police et de la taille
+        float fontSize = 12;
+        float titleFontSize = 18;
+        float headerFontSize = 14;
+        float leading = 1.5f * fontSize;
+        float margin = 50;
+        float yPosition = page.getMediaBox().getHeight() - margin;
+
+        // Titre du document
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
+            titleFontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("CONTRAT DE LOCATION DE VEHICULE");
+        contentStream.endText();
+
+        yPosition -= leading * 2;
+
+        // Informations générales
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), fontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Contrat N° : " + location.getId());
+        contentStream.endText();
+
+        yPosition -= leading;
+        contentStream.beginText();
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText(
+            "Date de création : " + location.getDateCreation().format(dateTimeFormatter));
+        contentStream.endText();
+
+        yPosition -= leading;
+        contentStream.beginText();
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Statut : " + location.getStatut());
+        contentStream.endText();
+
+        yPosition -= leading * 2;
+
+        // Section Loueur
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
+            headerFontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("INFORMATIONS LOUEUR");
+        contentStream.endText();
+
+        yPosition -= leading * 1.5f;
+
+        Loueur loueur = location.getLoueur();
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), fontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Nom : " + loueur.getNom() + " " + loueur.getPrenom());
+        contentStream.endText();
+
+        yPosition -= leading;
+        contentStream.beginText();
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Email : " + loueur.getEmail());
+        contentStream.endText();
+
+        if (loueur.getAdresse() != null && !loueur.getAdresse().isEmpty()) {
+          yPosition -= leading;
+          contentStream.beginText();
+          contentStream.newLineAtOffset(margin, yPosition);
+          contentStream.showText("Adresse : " + loueur.getAdresse());
+          contentStream.endText();
+        }
+
+        yPosition -= leading * 2;
+
+        // Section Véhicule
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
+            headerFontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("INFORMATIONS VEHICULE");
+        contentStream.endText();
+
+        yPosition -= leading * 1.5f;
+
+        Vehicule vehicule = location.getVehicule();
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), fontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Véhicule : " + vehicule.getMarque() + " " + vehicule.getModele());
+        contentStream.endText();
+
+        yPosition -= leading;
+        contentStream.beginText();
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Type : " + vehicule.getType());
+        contentStream.endText();
+
+        yPosition -= leading;
+        contentStream.beginText();
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Couleur : " + vehicule.getCouleur());
+        contentStream.endText();
+
+        yPosition -= leading;
+        contentStream.beginText();
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Ville : " + vehicule.getVille());
+        contentStream.endText();
+
+        if (vehicule.getProprietaire() != null) {
+          Agent agent = vehicule.getProprietaire();
+          yPosition -= leading;
+          contentStream.beginText();
+          contentStream.newLineAtOffset(margin, yPosition);
+          contentStream.showText(
+              "Propriétaire : " + agent.getNom() + " " + agent.getPrenom());
+          contentStream.endText();
+        }
+
+        yPosition -= leading * 2;
+
+        // Section Période de location
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
+            headerFontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("PERIODE DE LOCATION");
+        contentStream.endText();
+
+        yPosition -= leading * 1.5f;
+
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), fontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Date de début : " + location.getDateDebut().format(dateTimeFormatter));
+        contentStream.endText();
+
+        yPosition -= leading;
+        contentStream.beginText();
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Date de fin : " + location.getDateFin().format(dateTimeFormatter));
+        contentStream.endText();
+
+        yPosition -= leading;
+        contentStream.beginText();
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Durée : " + location.getNombreJours() + " jour(s)");
+        contentStream.endText();
+
+        if (location.estLongueDuree()) {
+          yPosition -= leading;
+          contentStream.beginText();
+          contentStream.newLineAtOffset(margin, yPosition);
+          contentStream.showText("Type : Location Longue Durée (LLD)");
+          contentStream.endText();
+        }
+
+        // Lieu de dépôt
+        if (location.getLieuDepot() != null) {
+          yPosition -= leading;
+          contentStream.beginText();
+          contentStream.newLineAtOffset(margin, yPosition);
+          contentStream.showText("Lieu de dépôt : " + location.getLieuDepot().toString());
+          contentStream.endText();
+        }
+
+        yPosition -= leading * 2;
+
+        // Section Tarification
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
+            headerFontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("TARIFICATION");
+        contentStream.endText();
+
+        yPosition -= leading * 1.5f;
+
+        double prixJour = vehicule.getPrixJ();
+        int nombreJours = location.getNombreJours();
+        double prixBase = prixJour * nombreJours;
+        double prixTotal = getPrixLocation(location);
+
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), fontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText(
+            String.format("Prix par jour : %.2f EUR", prixJour));
+        contentStream.endText();
+
+        yPosition -= leading;
+        contentStream.beginText();
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText(
+            String.format("Prix de base (%d jours) : %.2f EUR", nombreJours, prixBase));
+        contentStream.endText();
+
+        yPosition -= leading;
+        contentStream.beginText();
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText(String.format("Commission et frais : %.2f EUR",
+            prixTotal - prixBase));
+        contentStream.endText();
+
+        yPosition -= leading * 1.5f;
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD),
+            headerFontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText(String.format("PRIX TOTAL : %.2f EUR", prixTotal));
+        contentStream.endText();
+
+        yPosition -= leading * 3;
+
+        // Signatures
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA), fontSize);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("Signature du loueur :                    Signature du propriétaire :");
+        contentStream.endText();
+
+        yPosition -= leading * 4;
+
+        // Footer
+        contentStream.beginText();
+        contentStream.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE),
+            fontSize - 2);
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText(
+            "Document généré le " + LocalDateTime.now().format(dateTimeFormatter));
+        contentStream.endText();
+      }
+
+      // Sauvegarder le document
+      document.save(filePath);
+    }
+
+    System.out.println("Contrat de location généré : " + filePath);
+    return filePath;
   }
 }
